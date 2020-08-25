@@ -88,11 +88,11 @@ pip install Red-Discordbot[postgres]
 
   -- Then add the cog you want: --
   - `[p]cog install Kable-Kogs <name_of_cog>`
-    -- *redeact all formatting caveats, and [p]=prefix* --
+    -- *redact all formatting caveats, and [p]=prefix* --
 
 ## Cog Menu
 
-- These are "*here, will be here, or are listed* ***with the intent*** to place them here but otherwise I was lazy, forgot, or was loking to get one over on the niche community that would find themselves in this repo", but I digress....
+- These are "*here, will be here, or are listed* ***with the intent*** to place them here but otherwise I was lazy, forgot, or was looking to get one over on the niche community that would find themselves in this repo", but I digress....
 
 ---
 | Name | Description |
