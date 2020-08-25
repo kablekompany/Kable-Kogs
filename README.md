@@ -1,4 +1,8 @@
-<!-- PROJECT LOGO -->
+<!-- Let's throw a row of badges cause never enough of those LOL --->
+[![Contributors][contributors-shield]][contributors-url] [![Forks][forks-shield]][forks-url] [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url] [![MIT License][license-shield]][license-url]
+<br/>
+
+<!-- PROJECT INIT -->
 <br />
 <p align="center">
   <a href="https://github.com/kablekompany/Kable-Kogs">
@@ -22,8 +26,6 @@
     <a href="https://github.com/kablekompany/Kable-Kogs/issues">Report Bugs</a>
     ·
     <a href="https://github.com/kablekompany/Kable-Kogs/issues">Request Features</a>
-
-[![Contributors][contributors-shield]][contributors-url] [![Forks][forks-shield]][forks-url] [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url] [![MIT License][license-shield]][license-url]
 </p>
 
 <!-- TABLE OF CONTENTS -->
