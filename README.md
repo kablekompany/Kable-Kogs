@@ -22,11 +22,9 @@
     <a href="https://github.com/kablekompany/Kable-Kogs/issues">Report Bugs</a>
     ·
     <a href="https://github.com/kablekompany/Kable-Kogs/issues">Request Features</a>
-  </p>
-</p>
 
 [![Contributors][contributors-shield]][contributors-url] [![Forks][forks-shield]][forks-url] [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url] [![MIT License][license-shield]][license-url]
-
+</p>
 
 <!-- TABLE OF CONTENTS -->
 ## Table of Contents
@@ -107,7 +105,7 @@ See the [open issues](https://github.com/kablekompany/Kable-Kogs/issues) for a l
 <!-- CONTRIBUTING -->
 ## Contributing
 
-Contributions make my Levis Rise; The comunity surround this BotBase is full of Big Brain and overall just cool as fuck people. Learn the code, PR, yell at crayons, and learn some programming!
+Contributions make my Levis Rise; The community surround this BotBase is full of Big Brain and overall just cool as fuck people. Learn the code, PR, yell at crayons, and learn some programming!
 
 1. Fork the Project
 2. Create your `Feature` Branch (`git checkout -b feature/omegalulCoolAsfFeature`)
@@ -146,16 +144,16 @@ Join [The Kompound](https://kable.lol/discord) to get insulted, and ask for assi
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/kablekompany/repo.svg?style=flat-square
-[contributors-url]: https://github.com/kablekompany/repo/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/kablekompany/repo.svg?style=flat-square
-[forks-url]: https://github.com/kablekompany/repo/network/members
-[stars-shield]: https://img.shields.io/github/stars/kablekompany/repo.svg?style=flat-square
-[stars-url]: https://github.com/kablekompany/repo/stargazers
-[issues-shield]: https://img.shields.io/github/issues/kablekompany/repo.svg?style=flat-square
-[issues-url]: https://github.com/kablekompany/repo/issues
-[license-shield]: https://img.shields.io/github/license/kablekompany/repo.svg?style=flat-square
-[license-url]: https://github.com/kablekompany/repo/blob/master/LICENSE.txt
+[contributors-shield]: https://img.shields.io/github/contributors/kablekompany/kable-kogs.svg?style=flat-square
+[contributors-url]: https://github.com/kablekompany/kable-kogs/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/kablekompany/kable-kogs.svg?style=flat-square
+[forks-url]: https://github.com/kablekompany/kable-kogs/network/members
+[stars-shield]: https://img.shields.io/github/stars/kablekompany/kable-kogs.svg?style=flat-square
+[stars-url]: https://github.com/kablekompany/kable-kogs/stargazers
+[issues-shield]: https://img.shields.io/github/issues/kablekompany/kable-kogs.svg?style=flat-square
+[issues-url]: https://github.com/kablekompany/kable-kogs/issues
+[license-shield]: https://img.shields.io/github/license/kablekompany/kable-kogs.svg?style=flat-square
+[license-url]: https://github.com/kablekompany/kable-kogs/blob/master/LICENSE.txt
 [KableKompany#0001]: https://img.shields.io/badge/-Discord-black.svg?style=flat-square&logo=discord&colorB=555
 [discord-server]: https://kable.lol/discord
 [product-screenshot]: images/screenshot.png
