@@ -1,0 +1,11 @@
+{
+    "author": ["Kable", "SharkyTheKing"],
+    "install_msg": "Bauce AF",
+    "name": "LockItUp",
+    "disabled": false,
+    "short": "`[p]lds` to get started",
+    "description": "Lockdown channels in server turning off perms for everyone role to send messages",
+    "tags": ["utility", "lockdown"],
+    "requirements": [],
+    "hidden": true
+}
