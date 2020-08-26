@@ -2,7 +2,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/kablekompany/Kable-Kogs">
-    <img src="images/logo.png" alt="Logo" width="100" height="100">
+    <img src="images/logo.png" alt="Logo" width="300" height="300">
   </a>
   <br/>
       <a href="https://kable.lol/discord">
