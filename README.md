@@ -1,4 +1,8 @@
-<!-- PROJECT LOGO -->
+<!-- Let's throw a row of badges cause never enough of those LOL --->
+[![Contributors][contributors-shield]][contributors-url] [![Forks][forks-shield]][forks-url] [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url] [![MIT License][license-shield]][license-url]
+<br/>
+
+<!-- PROJECT INIT -->
 <br />
 <p align="center">
   <a href="https://github.com/kablekompany/Kable-Kogs">
@@ -22,8 +26,6 @@
     <a href="https://github.com/kablekompany/Kable-Kogs/issues">Report Bugs</a>
     ·
     <a href="https://github.com/kablekompany/Kable-Kogs/issues">Request Features</a>
-
-[![Contributors][contributors-shield]][contributors-url] [![Forks][forks-shield]][forks-url] [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url] [![MIT License][license-shield]][license-url]
 </p>
 
 <!-- TABLE OF CONTENTS -->
@@ -86,11 +88,11 @@ pip install Red-Discordbot[postgres]
 
   -- Then add the cog you want: --
   - `[p]cog install Kable-Kogs <name_of_cog>`
-    -- *redeact all formatting caveats, and [p]=prefix* --
+    -- *redact all formatting caveats, and [p]=prefix* --
 
 ## Cog Menu
 
-- These are "*here, will be here, or are listed* ***with the intent*** to place them here but otherwise I was lazy, forgot, or was loking to get one over on the niche community that would find themselves in this repo", but I digress....
+- These are "*here, will be here, or are listed* ***with the intent*** to place them here but otherwise I was lazy, forgot, or was looking to get one over on the niche community that would find themselves in this repo", but I digress....
 
 ---
 | Name | Description |
@@ -105,7 +107,7 @@ See the [open issues](https://github.com/kablekompany/Kable-Kogs/issues) for a l
 <!-- CONTRIBUTING -->
 ## Contributing
 
-Contributions make my Levis Rise; The community surround this BotBase is full of Big Brain and overall just cool as fuck people. Learn the code, PR, yell at crayons, and learn some programming!
+Contributions make my Levis Rise; The community surrounding this BotBase is full of Big Brain and overall just cool as fuck people. Learn the code, PR, yell at crayons, and learn some programming!
 
 1. Fork the Project
 2. Create your `Feature` Branch (`git checkout -b feature/omegalulCoolAsfFeature`)
