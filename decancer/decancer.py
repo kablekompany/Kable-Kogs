@@ -59,6 +59,7 @@ class Decancer(BaseCog):
                 pass
             await asyncio.sleep(2)
         else:
+            channel = await self.config.guild(ctx.guild).modlogchannel()
             value_change = "**Modlog Destination:** <#{}>\n**Default Name:** ".format(channel)
 
         e = discord.Embed()
