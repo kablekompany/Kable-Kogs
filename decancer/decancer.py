@@ -18,7 +18,11 @@ class Decancer(BaseCog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.config = Config.get_conf(self, identifier=7778847744, force_registration=True,)
+        self.config = Config.get_conf(
+            self,
+            identifier=7778847744,
+            force_registration=True,
+        )
         default_guild = {"modlogchannel": None, "new_custom_nick": "simp name", "auto": False}
         default_global = {"auto": True}
         self.config.register_guild(**default_guild)
@@ -63,7 +67,8 @@ class Decancer(BaseCog):
 
         e = discord.Embed()
         e.add_field(
-            name=f"{ctx.guild.name} Settings", value="{} `{}`\n**Auto-Decancer:** `{}`".format(value_change, name, auto),
+            name=f"{ctx.guild.name} Settings",
+            value="{} `{}`\n**Auto-Decancer:** `{}`".format(value_change, name, auto),
         )
         e.set_footer(text="To change these, pass [p]decancerset modlog|defaultname")
         e.colour = discord.Colour.blue()
@@ -112,11 +117,11 @@ class Decancer(BaseCog):
         await ctx.send(
             f"Your fallback name, should the cancer be too gd high for me to fix, is `{name}`"
         )
-    
+
     @decancerset.command()
-    async def auto(self, ctx, true_or_false: bool=None):
+    async def auto(self, ctx, true_or_false: bool = None):
         """Toggle automatically decancering new users."""
-        
+
         target_state = (
             true_or_false
             if true_or_false is not None
@@ -130,13 +135,11 @@ class Decancer(BaseCog):
 
     @checks.is_owner()
     @decancerset.command(name="autoglobal")
-    async def global_auto(self, ctx, true_or_false: bool=None):
+    async def global_auto(self, ctx, true_or_false: bool = None):
         """Enable/disable auto-decancering globally."""
-        
+
         target_state = (
-            true_or_false
-            if true_or_false is not None
-            else not (await self.config.auto())
+            true_or_false if true_or_false is not None else not (await self.config.auto())
         )
         await self.config.auto.set(target_state)
         if target_state:
@@ -212,17 +215,23 @@ class Decancer(BaseCog):
         if member.bot:
             return
         guild = member.guild
-        if not(await self.config.auto() and await self.config.guild(guild).auto() and await self.config.guild(guild).modlogchannel()):
+        if not (
+            await self.config.auto()
+            and await self.config.guild(guild).auto()
+            and await self.config.guild(guild).modlogchannel()
+        ):
             return
         if not guild.me.guild_permissions.manage_nicknames:
             await self.config.guild(guild).auto.set(False)
             return
-        
+
         old_nick = member.display_name
         if old_nick.isascii() and old_nick.isalnum():
-            return # even though decancer output may be different than their current name, there aren't any actual cancerous characters
+            return  # even though decancer output may be different than their current name, there aren't any actual cancerous characters
 
-        await asyncio.sleep(5) # waiting for auto mod actions to take place to prevent discord from fucking up the nickname edit
+        await asyncio.sleep(
+            5
+        )  # waiting for auto mod actions to take place to prevent discord from fucking up the nickname edit
         new_cool_nick = self.nick_maker(old_nick)
         if old_nick != new_cool_nick:
             if new_cool_nick == "name_block":
@@ -233,13 +242,19 @@ class Decancer(BaseCog):
                 else:
                     new_cool_nick = default_nick
             try:
-                await member.edit(reason=f"Auto Decancer | Old name ({old_nick}): contained special characters", nick=new_cool_nick)
+                await member.edit(
+                    reason=f"Auto Decancer | Old name ({old_nick}): contained special characters",
+                    nick=new_cool_nick,
+                )
             except discord.errors.Forbidden:
                 await self.config.guild(guild).auto.set(False)
             except discord.errors.NotFound:
                 pass
             channel = guild.get_channel(await self.config.guild(guild).modlogchannel())
-            if not channel or not(channel.permissions_for(guild.me).send_messages and channel.permissions_for(guild.me).embed_links):
+            if not channel or not (
+                channel.permissions_for(guild.me).send_messages
+                and channel.permissions_for(guild.me).embed_links
+            ):
                 await self.config.guild(guild).modlogchannel.clear()
                 return
             color = 0x2FFFFF
