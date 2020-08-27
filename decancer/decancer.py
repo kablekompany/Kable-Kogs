@@ -19,11 +19,7 @@ class Decancer(BaseCog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.config = Config.get_conf(
-            self,
-            identifier=7778847744,
-            force_registration=True,
-        )
+        self.config = Config.get_conf(self, identifier=7778847744, force_registration=True,)
         default_guild = {"modlogchannel": None, "new_custom_nick": "simp name", "auto": False}
         default_global = {"auto": True}
         self.config.register_guild(**default_guild)
