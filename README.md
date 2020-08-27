@@ -21,7 +21,7 @@
         <img align="center" src="https://img.shields.io/badge/trent%40kablekompany.com-blue?style=for-the-badge&logo=gmail" />
     </a>
     <br/>
-    <a href="https://github.com/kablekompany/Kable-Kogs">Contributors</a>
+    <a href="https://github.com/kablekompany/Kable-Kogs/.github/CONTRIBUTORS">View Contributors</a>
     ·
     <a href="https://github.com/kablekompany/Kable-Kogs/issues">Report Bugs</a>
     ·
@@ -51,7 +51,7 @@
 <!-- GETTING STARTED -->
 ## Getting Started
 
-Reference and Install from the sources above
+Reference and Install from the sources above. Please don't judge the code within these cogs too harshly. Learning and growth expands daily, and these should show that overtime too!
 
 ### Prerequisites
 
@@ -98,10 +98,11 @@ pip install Red-Discordbot[postgres]
 | Name | Description |
 | --- | --- |
 | CustomApps | Core'd from [sauri-cogs](https://github.com/elijabesu/SauriCogs) Application Cog, with expanded customization, and application retrieval. Useful for multi stage vetting process ~~*thanks DMO*~~ |
-| Dekancer | Hoisters, cancer'r's, or overall nuisance named users hate this cog. Moniker sanitizing from zalgo to char characters I can't even pronounce. Idea from nicknamechanger on [PumCogs Repo](https://github.com/PumPum7/PumCogs). Is a "by user" decancer sanitizing, with custom setups allowing defaulting name, and modlog channel output. |
+| Decancer | Hoisters, cancer'r's, or overall nuisance named users hate this cog. Moniker sanitizing from zalgo to char characters I can't even pronounce. Idea from nicknamechanger on [PumCogs Repo](https://github.com/PumPum7/PumCogs). Is a "by user" decancer sanitizing, with custom setups allowing defaulting name, and modlog channel output. |
 | KekIDs | Simple cog to 'mass kick' a list of IDs from your server *punts* |
 | Sniping | Snipe messages that were deleted in chat. Show your accuracy by passing channel, user, and even a word in the string of the sentence you want to snipe. `sniper` or `sniper list`. Pretty intuitive, with long lasting snipe dict. Catch those shady hoes. `[p]sniper list #general @KableKompany gooch` would return a deleted message stating something about goochal stimulation (Don't Ask)|
-
+| LockItUp | Lockdown cog based off of [SharkyTheKing's](https://github.com/SharkyTheKing/Sharky) `Lockdown`. Allows custom channel lib, config clearing, embed outputs on lock for each channel, and clean text or embed option output on unlock with custom messages, and optional silencer. *Pushing to this repository as the pre-PR write up*
+<!--TODO: Add applications, and sniping to repo -->
 See the [open issues](https://github.com/kablekompany/Kable-Kogs/issues) for a list of proposed features (and known issues).
 
 <!-- CONTRIBUTING -->
@@ -115,19 +116,22 @@ Contributions make my Levis Rise; The community surrounding this BotBase is full
 4. Push to the Branch (`git push origin feature/AmazingFeature`) *followed by a stanky leg*
 5. Open a Pull Request (bop it)
 
+**All PRs Welcome — big part of why i decided to publically host some of these**
+
 <!-- LICENSE -->
 ## License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the MIT License. See [LICENSE](https://github.com/kablekompany/kable-kogs/blob/master/LICENSE.txt) for more information.
 
 <!-- CONTACT -->
 ## Contact
+
 > Trent Kable
 [@kablekompany](https://twitter.com/kablekompany) - trent@kablekompany.com
 >Project Link:
 [https://github.com/kablekompany/Kable-Kogs](https://github.com/kablekompany/Kable-Kogs)
 
-         - *click the cool badge things at the top to join my discord server and shit* -
+      *click the cool badge things at the top to join my discord server and shit*
 
 ## Acknowledgements
 
