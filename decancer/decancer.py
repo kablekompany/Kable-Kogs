@@ -38,7 +38,7 @@ class Decancer(BaseCog):
         and set your default name if decancer is unsucessful.
         """
         if ctx.invoked_subcommand is not None:
-            return
+            pass
         channel = await self.config.guild(ctx.guild).modlogchannel()
         name = await self.config.guild(ctx.guild).new_custom_nick()
         if channel is None:
