@@ -133,3 +133,9 @@ lockitup/sharkylock.py
 .venv/
 .vscode
 httpkount/
+webserver/data/message.txt
+webserver/data/default.html
+webserver/data/COSMO_SMASH.jpg
+webserver/data/image0.gif
+webserver/data/Anna_Mollyfinal.jpg
+webserver/data/CleanShot_2019-11-27_at_22.16.26.png
