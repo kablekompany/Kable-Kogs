@@ -13,7 +13,7 @@ jobs:
           python-version: "3.8"
       - run: "python -m pip install black==19.10b0 isort==5.2.2"
         name: Install dependencies
-      - run: "make stylediff"
+      - run: "make stylecheck"
         name: Run Style Checks
 
   lint_python:

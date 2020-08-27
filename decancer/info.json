@@ -9,8 +9,6 @@
     ],
     "required_cogs": {},
     "requirements": [
-        "codecs",
-        "unicodedata",
         "stringcase",
         "unidecode"
     ],
