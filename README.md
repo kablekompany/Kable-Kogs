@@ -1,5 +1,5 @@
 <!-- Let's throw a row of badges cause never enough of those LOL --->
-[![Contributors][contributors-shield]][contributors-url] [![Forks][forks-shield]][forks-url] [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url] [![MIT License][license-shield]][license-url]
+[![Contributors][contributors-shield]][contributors-url] [![Forks][forks-shield]][forks-url] [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url] [![MIT License][license-shield]][license-url] [![Kable-Kogs](https://github.com/kablekompany/Kable-Kogs/workflows/Style%20formatting/badge.svg)]
 <br/>
 
 <!-- PROJECT INIT -->
@@ -160,7 +160,6 @@ Join [The Kompound](https://kable.lol/discord) to get insulted, and ask for assi
 [license-url]: https://github.com/kablekompany/kable-kogs/blob/master/LICENSE.txt
 [KableKompany#0001]: https://img.shields.io/badge/-Discord-black.svg?style=flat-square&logo=discord&colorB=555
 [discord-server]: https://kable.lol/discord
-[product-screenshot]: images/screenshot.png
 <!-- Mark down build up inspired by https://github.com/othneildrew/Best-README-Template ---->
 
 <p align="center">
