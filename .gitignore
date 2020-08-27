@@ -133,13 +133,6 @@ lockitup/sharkylock.py
 .venv/
 .vscode
 httpkount/
-.tools/generate_info.py
 info.yaml
-.ci/py38
-.ci/py38/black_file_list.txt
-.ci/py38/compileall_file_list.txt
-.ci/py38/requirements
-.ci/py38/requirements/all_cogs.txt
-.ci/requirements
-.ci/requirements/all_cogs.txt
 .ci/
+.tools
