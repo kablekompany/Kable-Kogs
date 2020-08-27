@@ -14,9 +14,7 @@ BaseCog = getattr(commands, "Cog", object)
 
 # originally from https://github.com/PumPum7/PumCogs repo which has a en masse version of this
 class Decancer(BaseCog):
-    """
-    Let's get rid of those hoisted, and distracting, hard af to ping names
-    """
+    """Decancer users' names removing special and accented chars. `[p]decancerset` to get started if you're already using redbot core modlog"""
 
     def __init__(self, bot):
         self.bot = bot

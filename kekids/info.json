@@ -1,24 +1,19 @@
 {
     "name": "KekIDs",
     "short": "Kick a list of IDs from your server",
-    "description": "Provide the list of IDs non-comma seperated and each will take a kick *kek*",
-    "install_msg": "Yeet the user!",
+    "description": "Kick a list of IDs from your server",
+    "end_user_data_statement": "This cog does not persistently store data or metadata about users.",
+    "install_msg": "Hey, thanks for trying this dress on, hope it fits.",
     "author": [
         "kablekompany (KableKompany#0001)"
     ],
     "required_cogs": {},
-        "min_bot_version": "3.3.10",
-    "requirements": [
-        "codecs",
-        "unicodedata",
-        "stringcase",
-        "unidecode"
-    ],
+    "requirements": [],
     "tags": [
         "utility",
-        "moderation",
-        "dehoist"
+        "moderation"
     ],
+    "min_bot_version": "3.3.10",
     "hidden": false,
     "disabled": false,
     "type": "COG"

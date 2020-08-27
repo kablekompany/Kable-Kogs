@@ -33,9 +33,7 @@ class RawUserIds(Converter):
 
 
 class KekIDs(commands.Cog):
-    """
-    Kick a list of IDs from server.
-    """
+    """Kick a list of IDs from your server"""
 
     def __init__(self, bot):
         self.bot = bot

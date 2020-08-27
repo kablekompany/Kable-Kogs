@@ -11,9 +11,7 @@ BaseCog = getattr(commands, "Cog", object)
 
 # core functioning from Sharky-Cogs @https://github.com/SharkyTheKing/Sharky
 class LockItUp(BaseCog):
-    """
-    Lockdown the entire server 
-    """
+    """`[p]lds` to get started on configuration"""
 
     def __init__(self, bot):
         self.bot = bot
