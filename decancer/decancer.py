@@ -39,8 +39,8 @@ class Decancer(BaseCog):
         Set up the modlog channel for decancer'd users,
         and set your default name if decancer is unsucessful.
         """
-        if ctx.invoked_subcommand is not None:
-            pass
+        if ctx.invoked_subcommand:
+            return
         channel = await self.config.guild(ctx.guild).modlogchannel()
         name = await self.config.guild(ctx.guild).new_custom_nick()
         auto = await self.config.guild(ctx.guild).auto()
