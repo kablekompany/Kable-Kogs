@@ -6,9 +6,10 @@ from datetime import datetime
 
 import discord
 import stringcase
-import unidecode
 from redbot.core import Config, checks, commands, modlog
 from redbot.core.commands import errors
+
+import unidecode
 
 BaseCog = getattr(commands, "Cog", object)
 
@@ -167,9 +168,9 @@ class Decancer(BaseCog):
                 new_cool_nick = self.nick_maker(m_nick)
                 if m_nick != new_cool_nick:
                     if new_cool_nick == "name_block":
-                        default_nick = await self.config.guild(guild).new_custom_nick()
+                        default_nick = await self.config.guild(ctx.guild).new_custom_nick()
                         if not default_nick:
-                            await self.config.guild(guild).new_custom_nick.set("simp name")
+                            await self.config.guild(ctx.guild).new_custom_nick.set("simp name")
                             new_cool_nick = "simp name"
                         else:
                             new_cool_nick = default_nick
