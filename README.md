@@ -21,7 +21,7 @@
         <img align="center" src="https://img.shields.io/badge/trent%40kablekompany.com-blue?style=for-the-badge&logo=gmail" />
     </a>
     <br/>
-    <a href="https://github.com/kablekompany/Kable-Kogs/.github/CONTRIBUTORS">View Contributors</a>
+    <a href="https://github.com/kablekompany/Kable-Kogs/blob/master/.github/CONTRIBUTORS.md">View Contributors</a>
     ·
     <a href="https://github.com/kablekompany/Kable-Kogs/issues">Report Bugs</a>
     ·
