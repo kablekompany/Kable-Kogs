@@ -1,3 +1,8 @@
+### DISCLAIMER
+
+:warning: This repo is not an approved plugin-repo from [CogBoard](cogboard.red/ "Click me BRO!") at this time
+> *Install at your own risk, and you assume any liability*
+
 <!-- Let's throw a row of badges cause never enough of those LOL --->
 [![Contributors][contributors-shield]][contributors-url] [![Forks][forks-shield]][forks-url] [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url] [![MIT License][license-shield]][license-url]
 ![Kable-Kogs](https://github.com/kablekompany/Kable-Kogs/workflows/Style%20formatting/badge.svg)
@@ -116,7 +121,7 @@ Contributions make my Levis Rise; The community surrounding this BotBase is full
 4. Push to the Branch (`git push origin feature/AmazingFeature`) *followed by a stanky leg*
 5. Open a Pull Request (bop it)
 
-**All PRs Welcome — big part of why i decided to publically host some of these**
+**All PRs Welcome — big part of why I decided to publically host some of these**
 
 <!-- LICENSE -->
 ## License
