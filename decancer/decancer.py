@@ -167,7 +167,12 @@ class Decancer(BaseCog):
                 new_cool_nick = self.nick_maker(m_nick)
                 if m_nick != new_cool_nick:
                     if new_cool_nick == "name_block":
-                        new_cool_nick = await self.config.guild(ctx.guild).new_custom_nick()
+                        default_nick = await self.config.guild(guild).new_custom_nick()
+                        if not default_nick:
+                            await self.config.guild(guild).new_custom_nick.set("simp name")
+                            new_cool_nick = "simp name"
+                        else:
+                            new_cool_nick = default_nick
                     try:
                         await user.edit(
                             reason=f"Old name ({m_nick}): contained special characters",
@@ -221,7 +226,12 @@ class Decancer(BaseCog):
         new_cool_nick = self.nick_maker(old_nick)
         if old_nick != new_cool_nick:
             if new_cool_nick == "name_block":
-                new_cool_nick = await self.config.guild(guild).new_custom_nick()
+                default_nick = await self.config.guild(guild).new_custom_nick()
+                if not default_nick:
+                    await self.config.guild(guild).new_custom_nick.set("simp name")
+                    new_cool_nick = "simp name"
+                else:
+                    new_cool_nick = default_nick
             try:
                 await member.edit(reason=f"Auto Decancer | Old name ({old_nick}): contained special characters", nick=new_cool_nick)
             except discord.errors.Forbidden:
