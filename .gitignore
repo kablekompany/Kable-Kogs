@@ -133,3 +133,4 @@ lockitup/sharkylock.py
 .venv/
 .vscode
 httpkount/
+.tools/generate_info.py
