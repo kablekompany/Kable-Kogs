@@ -8,7 +8,12 @@
         "kablekompany (KableKompany#0001)"
     ],
     "required_cogs": {},
-    "requirements": [],
+    "requirements": [
+        "codecs",
+        "unicodedata",
+        "stringcase",
+        "unidecode"
+    ],
     "tags": [
         "utility",
         "moderation",
