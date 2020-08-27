@@ -6,16 +6,14 @@
 <br />
 <p align="center">
   <a href="https://github.com/kablekompany/Kable-Kogs">
-    <img src="images/logo.png" alt="Logo" width="300" height="300">
+    <img src=".github/images/logo.png" alt="Logo" width="300" height="300">
   </a>
   <br/>
       <a href="https://kable.lol/discord">
         <img align="center" src="https://img.shields.io/badge/Discord-KableKompany%230001-7289DA?logo=discord&style=for-the-badgel" />
     </a>
-  <h3 align="center">Kable Kogs</h3>
-  <p align="center">
-    Red DiscordBot V3 Cogs
-    <br />
+  <h2 align="center">Kable-Kogs</h2>
+  <h4><p align="center"> Red DiscordBot V3 Cogs</h2>
       <p align="center">
         <a href="mailto:trent@kablekompany.com">
         <img align="center" src="https://img.shields.io/badge/trent%40kablekompany.com-blue?style=for-the-badge&logo=gmail" />
