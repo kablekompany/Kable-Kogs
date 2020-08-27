@@ -6,10 +6,9 @@ from datetime import datetime
 
 import discord
 import stringcase
+import unidecode
 from redbot.core import Config, checks, commands, modlog
 from redbot.core.commands import errors
-
-import unidecode
 
 BaseCog = getattr(commands, "Cog", object)
 
