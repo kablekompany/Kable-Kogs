@@ -186,20 +186,7 @@ class Decancer(BaseCog):
                     await ctx.send(f"{user.name}: ({m_nick}) was changed to {new_cool_nick}")
                     await ctx.tick()
                     guild = ctx.guild
-                    channel = guild.get_channel(await self.config.guild(guild).modlogchannel())
-                    color = 0x2FFFFF
-                    embed = discord.Embed(
-                        color=discord.Color(color),
-                        title=f"decancer",
-                        description=f"**Offender:** {user.name}#{user.discriminator} <@{user.id}> \n**Reason:** Remove cancerous characters from previous name\n**New Nickname:** {new_cool_nick}\n**Responsible Moderator:** {ctx.author.name}#{ctx.author.discriminator} <@{ctx.author.id}>",
-                        timestamp=datetime.utcnow(),
-                    )
-                    embed.set_footer(text=f"ID: {user.id}")
-                    try:
-                        await channel.send(embed=embed)
-                    except Exception as e:
-                        await ctx.send("Hit a snag! Error: {}".format(e.args[0]))
-                        return
+                    await self.decancer_log(guild, user, ctx.author, m_nick, new_cool_nick, "decancer")
                 else:
                     await ctx.send(f"{user.display_name} was already decancer'd")
                     try:
@@ -247,22 +234,7 @@ class Decancer(BaseCog):
                 await self.config.guild(guild).auto.set(False)
             except discord.errors.NotFound:
                 pass
-            channel = guild.get_channel(await self.config.guild(guild).modlogchannel())
-            if not channel or not (
-                channel.permissions_for(guild.me).send_messages
-                and channel.permissions_for(guild.me).embed_links
-            ):
-                await self.config.guild(guild).modlogchannel.clear()
-                return
-            color = 0x2FFFFF
-            embed = discord.Embed(
-                color=discord.Color(color),
-                title=f"auto-decancer",
-                description=f"**Offender:** {member.name}#{member.discriminator} <@{member.id}> \n**Reason:** Remove cancerous characters from previous name\n**New Nickname:** {new_cool_nick}\n**Responsible Moderator:** {self.bot.user.name}#{self.bot.user.discriminator} <@{self.bot.user.id}>",
-                timestamp=datetime.utcnow(),
-            )
-            embed.set_footer(text=f"ID: {member.id}")
-            await channel.send(embed=embed)
+            await self.decancer_log(guild, member, guild.me, old_nick, new_cool_nick, "auto-decancer")
 
     # the magic
     @staticmethod
@@ -289,6 +261,24 @@ class Decancer(BaseCog):
         elif len(new_cool_nick.replace(" ", "")) >= 31:
             new_cool_nick = "name_block"
         return new_cool_nick
+
+    async def decancer_log(self, guild: discord.Guild, member: discord.Member, moderator: discord.Member, old_nick: str, new_nick: str, dc_type: str):
+            channel = guild.get_channel(await self.config.guild(guild).modlogchannel())
+            if not channel or not (
+                channel.permissions_for(guild.me).send_messages
+                and channel.permissions_for(guild.me).embed_links
+            ):
+                await self.config.guild(guild).modlogchannel.clear()
+                return
+            color = 0x2FFFFF
+            embed = discord.Embed(
+                color=discord.Color(color),
+                title=dc_type,
+                description=f"**Offender:** {str(member)} {member.mention} \n**Reason:** Remove cancerous characters from previous name\n**New Nickname:** {new_nick}\n**Responsible Moderator:** {str(moderator)} {moderator.mention}",
+                timestamp=datetime.utcnow(),
+            )
+            embed.set_footer(text=f"ID: {member.id}")
+            await channel.send(embed=embed)
 
     # async def nick_error(self, ctx, error):
     #     # error handler
