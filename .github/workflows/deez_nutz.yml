@@ -1,20 +1,22 @@
-name: Style formatting
+
+name: black
 
 on: [push, pull_request]
 
+
 jobs:
-  mypy:
-    name: Style check with Black and iSort
+  black:
+    name: Style Check with Black
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-python@v1
         with:
-          python-version: "3.8"
-      - run: "python -m pip install black==19.10b0 isort==5.2.2"
-        name: Install dependencies
-      - run: "make stylecheck"
-        name: Run Style Checks
+          python_version: "3.8"
+      - run: "python -m pip install black"
+        name: Install black
+      - run: "python -m black --check -l 99"
+        name: Style checking with black
 
   lint_python:
     name: Lint Python
