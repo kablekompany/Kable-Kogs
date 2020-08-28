@@ -1,5 +1,6 @@
 import asyncio
 import codecs as c
+import random
 import re
 import unicodedata
 from datetime import datetime
@@ -10,6 +11,8 @@ import unidecode
 from redbot.core import Config, checks, commands, modlog
 from redbot.core.commands import errors
 
+from .randomnames import adjectives, nouns, properNouns
+
 BaseCog = getattr(commands, "Cog", object)
 
 # originally from https://github.com/PumPum7/PumCogs repo which has a en masse version of this
@@ -18,7 +21,11 @@ class Decancer(BaseCog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.config = Config.get_conf(self, identifier=7778847744, force_registration=True,)
+        self.config = Config.get_conf(
+            self,
+            identifier=7778847744,
+            force_registration=True,
+        )
         default_guild = {"modlogchannel": None, "new_custom_nick": "simp name", "auto": False}
         default_global = {"auto": True}
         self.config.register_guild(**default_guild)
@@ -39,8 +46,8 @@ class Decancer(BaseCog):
         Set up the modlog channel for decancer'd users,
         and set your default name if decancer is unsucessful.
         """
-        if ctx.invoked_subcommand is not None:
-            pass
+        if ctx.invoked_subcommand:
+            return
         channel = await self.config.guild(ctx.guild).modlogchannel()
         name = await self.config.guild(ctx.guild).new_custom_nick()
         auto = await self.config.guild(ctx.guild).auto()
@@ -90,7 +97,10 @@ class Decancer(BaseCog):
             )
             return
 
-        if not channel.permissions_for(ctx.guild.me).send_messages:
+        if not (
+            channel.permissions_for(ctx.guild.me).send_messages
+            and channel.permissions_for(ctx.guild.me).embed_links
+        ):
             await ctx.send("Kind of need permissions to post in that channel LMFAO")
             return
 
@@ -102,12 +112,14 @@ class Decancer(BaseCog):
     async def defaultname(self, ctx, *, name):
         """
         If you don't want a server of simps, change this
-        to whatever you'd like, simp. Wrap in quotes if
-        it's more than one word
-            `Example: [p]decancerset name "kable is coolaf"`
+        to whatever you'd like, simp.
+
+
+            Example: `[p]decancerset name kable is coolaf`
+        Changing the default to "random" might do something cool..
         """
-        if len(name) > 32:
-            await ctx.send("Let's keep that nickname under 32 characters, scrub")
+        if len(name) > 32 or len(name) < 3:
+            await ctx.send("Let's keep that nickname within reasonable range, scrub")
             return
 
         await self.config.guild(ctx.guild).new_custom_nick.set(name)
@@ -162,50 +174,30 @@ class Decancer(BaseCog):
         if not user:
             await ctx.send_help()
         if ctx.message.guild.me.guild_permissions.manage_nicknames:
-            async with ctx.typing():
-                m_nick = user.display_name
-                new_cool_nick = self.nick_maker(m_nick)
-                if m_nick != new_cool_nick:
-                    if new_cool_nick == "name_block":
-                        default_nick = await self.config.guild(ctx.guild).new_custom_nick()
-                        if not default_nick:
-                            await self.config.guild(ctx.guild).new_custom_nick.set("simp name")
-                            new_cool_nick = "simp name"
-                        else:
-                            new_cool_nick = default_nick
-                    try:
-                        await user.edit(
-                            reason=f"Old name ({m_nick}): contained special characters",
-                            nick=new_cool_nick,
-                        )
-                    except Exception as e:
-                        await ctx.send(
-                            f"Double check my permsissions buddy, got an error\n```diff\n- {e}\n```"
-                        )
-                        return
-                    await ctx.send(f"{user.name}: ({m_nick}) was changed to {new_cool_nick}")
-                    await ctx.tick()
-                    guild = ctx.guild
-                    channel = guild.get_channel(await self.config.guild(guild).modlogchannel())
-                    color = 0x2FFFFF
-                    embed = discord.Embed(
-                        color=discord.Color(color),
-                        title=f"decancer",
-                        description=f"**Offender:** {user.name}#{user.discriminator} <@{user.id}> \n**Reason:** Remove cancerous characters from previous name\n**New Nickname:** {new_cool_nick}\n**Responsible Moderator:** {ctx.author.name}#{ctx.author.discriminator} <@{ctx.author.id}>",
-                        timestamp=datetime.utcnow(),
+            await ctx.trigger_typing()
+            m_nick = user.display_name
+            new_cool_nick = await self.nick_maker(ctx.guild, m_nick)
+            if m_nick != new_cool_nick:
+                try:
+                    await user.edit(
+                        reason=f"Old name ({m_nick}): contained special characters",
+                        nick=new_cool_nick,
                     )
-                    embed.set_footer(text=f"ID: {user.id}")
-                    try:
-                        await channel.send(embed=embed)
-                    except Exception as e:
-                        await ctx.send("Hit a snag! Error: {}".format(e.args[0]))
-                        return
-                else:
-                    await ctx.send(f"{user.display_name} was already decancer'd")
-                    try:
-                        await ctx.message.add_reaction("<a:Hazard_kko:695200496939565076>")
-                    except Exception:
-                        return
+                except Exception as e:
+                    await ctx.send(
+                        f"Double check my order in heirarchy buddy, got an error\n```diff\n- {e}\n```"
+                    )
+                    return
+                await ctx.send(f"{user.name}: ({m_nick}) was changed to {new_cool_nick}")
+                await ctx.tick()
+                guild = ctx.guild
+                await self.decancer_log(guild, user, ctx.author, m_nick, new_cool_nick, "decancer")
+            else:
+                await ctx.send(f"{user.display_name} was already decancer'd")
+                try:
+                    await ctx.message.add_reaction("<a:Hazard_kko:695200496939565076>")
+                except Exception:
+                    return
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -229,15 +221,8 @@ class Decancer(BaseCog):
         await asyncio.sleep(
             5
         )  # waiting for auto mod actions to take place to prevent discord from fucking up the nickname edit
-        new_cool_nick = self.nick_maker(old_nick)
+        new_cool_nick = await self.nick_maker(guild, old_nick)
         if old_nick != new_cool_nick:
-            if new_cool_nick == "name_block":
-                default_nick = await self.config.guild(guild).new_custom_nick()
-                if not default_nick:
-                    await self.config.guild(guild).new_custom_nick.set("simp name")
-                    new_cool_nick = "simp name"
-                else:
-                    new_cool_nick = default_nick
             try:
                 await member.edit(
                     reason=f"Auto Decancer | Old name ({old_nick}): contained special characters",
@@ -247,22 +232,9 @@ class Decancer(BaseCog):
                 await self.config.guild(guild).auto.set(False)
             except discord.errors.NotFound:
                 pass
-            channel = guild.get_channel(await self.config.guild(guild).modlogchannel())
-            if not channel or not (
-                channel.permissions_for(guild.me).send_messages
-                and channel.permissions_for(guild.me).embed_links
-            ):
-                await self.config.guild(guild).modlogchannel.clear()
-                return
-            color = 0x2FFFFF
-            embed = discord.Embed(
-                color=discord.Color(color),
-                title=f"auto-decancer",
-                description=f"**Offender:** {member.name}#{member.discriminator} <@{member.id}> \n**Reason:** Remove cancerous characters from previous name\n**New Nickname:** {new_cool_nick}\n**Responsible Moderator:** {self.bot.user.name}#{self.bot.user.discriminator} <@{self.bot.user.id}>",
-                timestamp=datetime.utcnow(),
+            await self.decancer_log(
+                guild, member, guild.me, old_nick, new_cool_nick, "auto-decancer"
             )
-            embed.set_footer(text=f"ID: {member.id}")
-            await channel.send(embed=embed)
 
     # the magic
     @staticmethod
@@ -279,16 +251,63 @@ class Decancer(BaseCog):
         return str(text)
 
     # the magician
-    def nick_maker(self, old_shit_nick):
+    async def nick_maker(self, guild: discord.Guild, old_shit_nick):
         old_shit_nick = self.strip_accs(old_shit_nick)
         new_cool_nick = re.sub("[^a-zA-Z0-9 \n.]", "", old_shit_nick)
+        new_cool_nick = new_cool_nick.split()
+        new_cool_nick = " ".join(new_cool_nick)
         new_cool_nick = stringcase.lowercase(new_cool_nick)
         new_cool_nick = stringcase.titlecase(new_cool_nick)
-        if len(new_cool_nick.replace(" ", "")) <= 1:
-            new_cool_nick = "name_block"
-        elif len(new_cool_nick.replace(" ", "")) >= 31:
-            new_cool_nick = "name_block"
+        default_name = await self.config.guild(guild).new_custom_nick()
+        if len(new_cool_nick.replace(" ", "")) <= 1 or len(new_cool_nick) > 32:
+            if default_name == "random":
+                new_cool_nick = await self.get_random_nick(2)
+            elif default_name:
+                new_cool_nick = default_name
+            else:
+                new_cool_nick = "simp name"
         return new_cool_nick
+
+    async def decancer_log(
+        self,
+        guild: discord.Guild,
+        member: discord.Member,
+        moderator: discord.Member,
+        old_nick: str,
+        new_nick: str,
+        dc_type: str,
+    ):
+        channel = guild.get_channel(await self.config.guild(guild).modlogchannel())
+        if not channel or not (
+            channel.permissions_for(guild.me).send_messages
+            and channel.permissions_for(guild.me).embed_links
+        ):
+            await self.config.guild(guild).modlogchannel.clear()
+            return
+        color = 0x2FFFFF
+        embed = discord.Embed(
+            color=discord.Color(color),
+            title=dc_type,
+            description=f"**Offender:** {str(member)} {member.mention} \n**Reason:** Remove cancerous characters from previous name\n**New Nickname:** {new_nick}\n**Responsible Moderator:** {str(moderator)} {moderator.mention}",
+            timestamp=datetime.utcnow(),
+        )
+        embed.set_footer(text=f"ID: {member.id}")
+        await channel.send(embed=embed)
+
+    async def get_random_nick(self, nickType: int):
+        if nickType == 1:
+            new_nick = random.choice(properNouns)
+        elif nickType == 2:
+            adjective = random.choice(adjectives)
+            noun = random.choice(nouns)
+            new_nick = adjective + noun
+        elif nickType == 3:
+            adjective = random.choice(adjectives)
+            new_nick = adjective.lower()
+        if nickType == 4:
+            nounNicks = nouns, properNouns
+            new_nick = random.choice(random.choices(nounNicks, weights=map(len, nounNicks))[0])
+        return new_nick
 
     # async def nick_error(self, ctx, error):
     #     # error handler
