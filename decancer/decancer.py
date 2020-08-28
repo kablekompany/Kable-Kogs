@@ -254,10 +254,12 @@ class Decancer(BaseCog):
     async def nick_maker(self, guild: discord.Guild, old_shit_nick):
         old_shit_nick = self.strip_accs(old_shit_nick)
         new_cool_nick = re.sub("[^a-zA-Z0-9 \n.]", "", old_shit_nick)
+        new_cool_nick = new_cool_nick.split()
+        new_cool_nick = " ".join(new_cool_nick)
         new_cool_nick = stringcase.lowercase(new_cool_nick)
         new_cool_nick = stringcase.titlecase(new_cool_nick)
         default_name = await self.config.guild(guild).new_custom_nick()
-        if len(new_cool_nick.replace(" ", "")) <= 1 or len(new_cool_nick.replace(" ", "")) >= 31:
+        if len(new_cool_nick.replace(" ", "")) <= 1 or len(new_cool_nick) > 32:
             if default_name == "random":
                 new_cool_nick = await self.get_random_nick(2)
             elif default_name:
