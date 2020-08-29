@@ -6,6 +6,7 @@ properNouns = [
     "Proton Bomb",
     "He Who Shall Not Be Named",
     "Definitely Phen's Alt",
+    "Cable Company without K"
 ]
 
 nouns = [
