@@ -214,9 +214,15 @@ class Decancer(BaseCog):
             await self.config.guild(guild).auto.set(False)
             return
 
+        cancerous = 0
         old_nick = member.display_name
-        if old_nick.isascii() and old_nick.isalnum():
-            return  # even though decancer output may be different than their current name, there aren't any actual cancerous characters
+        for segment in old_nick.split():
+            for char in segment:
+                if not (char.isascii() and char.isalnum()):
+                    cancerous += 1
+
+        if cancerous / len(old_nick) <= 1 / 10:
+            return  # even though decancer output may be different than their current name, there isnt much reason to decancer
 
         await asyncio.sleep(
             5
