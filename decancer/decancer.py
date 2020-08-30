@@ -227,8 +227,10 @@ class Decancer(BaseCog):
         await asyncio.sleep(
             5
         )  # waiting for auto mod actions to take place to prevent discord from fucking up the nickname edit
+        if member not in guild.members:
+            return
         new_cool_nick = await self.nick_maker(guild, old_nick)
-        if old_nick != new_cool_nick:
+        if old_nick.lower() != new_cool_nick.lower():
             try:
                 await member.edit(
                     reason=f"Auto Decancer | Old name ({old_nick}): contained special characters",
@@ -236,8 +238,6 @@ class Decancer(BaseCog):
                 )
             except discord.errors.Forbidden:
                 await self.config.guild(guild).auto.set(False)
-            except discord.errors.NotFound:
-                pass
             await self.decancer_log(
                 guild, member, guild.me, old_nick, new_cool_nick, "auto-decancer"
             )
