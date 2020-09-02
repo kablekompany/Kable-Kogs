@@ -1,5 +1,5 @@
 # These are supported funding model platforms
 
-github: [kablekompany]
-patreon: kablekompany
-custom: [https://paypal.me/KableKo]
+github: ['kablekompany']
+patreon: 'kablekompany'
+custom: ['https://paypal.me/KableKo']
