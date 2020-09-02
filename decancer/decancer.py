@@ -3,7 +3,7 @@ import random
 import re
 import unicodedata
 from datetime import datetime
-
+import unidecode
 import discord
 import stringcase
 from redbot.core import Config, checks, commands, modlog
