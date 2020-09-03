@@ -37,7 +37,7 @@ class Decancer(BaseCog):
         """This cog does not store user data"""
         return
 
-    @commands.group(invoke_without_subcommand=True)
+    @commands.group()
     @checks.mod_or_permissions(manage_channels=True)
     @commands.guild_only()
     async def decancerset(self, ctx):
@@ -47,9 +47,10 @@ class Decancer(BaseCog):
         """
         if ctx.invoked_subcommand:
             return
-        channel = await self.config.guild(ctx.guild).modlogchannel()
-        name = await self.config.guild(ctx.guild).new_custom_nick()
-        auto = await self.config.guild(ctx.guild).auto()
+        data = await self.config.guild(ctx.guild).all()
+        channel = data["modlogchannel"]
+        name = data["new_custom_nick"]
+        auto = data["auto"]
         if channel is None:
             try:
                 check_modlog_exists = await modlog.get_modlog_channel(ctx.guild)
@@ -62,8 +63,6 @@ class Decancer(BaseCog):
             except RuntimeError:
                 channel = "**NOT SET**"
                 value_change = "**Modlog Destination:** {}\n**Default Name:** ".format(channel)
-                pass
-            await asyncio.sleep(2)
         else:
             channel = await self.config.guild(ctx.guild).modlogchannel()
             value_change = "**Modlog Destination:** <#{}>\n**Default Name:** ".format(channel)
@@ -226,7 +225,7 @@ class Decancer(BaseCog):
         await asyncio.sleep(
             5
         )  # waiting for auto mod actions to take place to prevent discord from fucking up the nickname edit
-        if member not in guild.members:
+        if not guild.get_member(member.id):
             return
         new_cool_nick = await self.nick_maker(guild, old_nick)
         if old_nick.lower() != new_cool_nick.lower():
