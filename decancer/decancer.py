@@ -43,12 +43,12 @@ class Decancer(BaseCog):
     async def decancerset(self, ctx):
         """
         Set up the modlog channel for decancer'd users,
-        and set your default name if decancer is unsucessful.
+        and set your default name if decancer is unsuccessful.
         """
         if ctx.invoked_subcommand:
             return
         data = await self.config.guild(ctx.guild).all()
-        channel = data["modlogchannel"]
+        channel = ctx.guild.get_channel(data["modlogchannel"])
         name = data["new_custom_nick"]
         auto = data["auto"]
         if channel is None:
@@ -56,21 +56,20 @@ class Decancer(BaseCog):
                 check_modlog_exists = await modlog.get_modlog_channel(ctx.guild)
                 await self.config.guild(ctx.guild).modlogchannel.set(check_modlog_exists.id)
                 await ctx.send(
-                    "You've got a modlog channel setup here already. You can change this by running `[p]decancer modlog <channel> [--override]`"
+                    f"I set {check_modlog_exists.mention} as the decancer log channel. You can change this by running `[p]decancer modlog <channel> [--override]`"
                 )
-                channel = await self.config.guild(ctx.guild).modlogchannel()
-                value_change = "**Modlog Destination:** <#{}>\n**Default Name:** ".format(channel)
+                channel = check_modlog_exists.mention
             except RuntimeError:
                 channel = "**NOT SET**"
-                value_change = "**Modlog Destination:** {}\n**Default Name:** ".format(channel)
         else:
-            channel = await self.config.guild(ctx.guild).modlogchannel()
-            value_change = "**Modlog Destination:** <#{}>\n**Default Name:** ".format(channel)
-
+            channel = channel.mention
+        values = [f"**Modlog Destination:** {channel}", f"**Default Name:** `{name}`"]
+        if await self.config.auto():
+            values.append(f"**Auto-Decancer:** `{auto}`")
         e = discord.Embed()
         e.add_field(
             name=f"{ctx.guild.name} Settings",
-            value="{} `{}`\n**Auto-Decancer:** `{}`".format(value_change, name, auto),
+            value="\n".join(values),
         )
         e.set_footer(text="To change these, pass [p]decancerset modlog|defaultname")
         e.colour = discord.Colour.blue()
@@ -125,10 +124,17 @@ class Decancer(BaseCog):
             f"Your fallback name, should the cancer be too gd high for me to fix, is `{name}`"
         )
 
+    async def enabled_global(ctx):
+        return await ctx.cog.config.auto()
+
+    @commands.check(enabled_global)
     @decancerset.command()
     async def auto(self, ctx, true_or_false: bool = None):
         """Toggle automatically decancering new users."""
-
+        if not await self.config.guild(ctx.guild).modlogchannel():
+            return await ctx.send(
+                f"Set up a modlog for this server using `{ctx.prefix}decancerset modlog #channel`"
+            )
         target_state = (
             true_or_false
             if true_or_false is not None
