@@ -24,13 +24,14 @@
 - **[PCXCogs](https://github.com/PhasecoreX/PCXCogs)**: PhasecoreX (PhasecoreX#0635)
 - **[SauriCogs](https://github.com/elijabesu/SauriCogs/)**: saurichable
 - **[Sentinel](https://github.com/Kowlin/Sentinel)**: Kowlin
+- **[SharkyTheKing](https://github.com/SharkyTheKing/Sharky)**: Sharky The King#0001
 - **[SinbadCogs](https://github.com/mikeshardmind/SinbadCogs)**: mikeshardmind (Sinbad), DiscordLiz
 - **[Squid-Plugins](https://github.com/tekulvw/Squid-Plugins)**: Will (tekulvw)
 - **[Stone-Cogs](https://github.com/Stonedestroyer/Stone-Cogs)**: Stonedestroyer
 - **[Tobo-Cogs](https://github.com/PredaaA/Tobo-Cogs)**: Tobotimus
 - **[Trusty-cogs](https://github.com/TrustyJAID/Trusty-cogs/)**: TrustyJAID
 - **[Wyn-RedV3Cogs](https://github.com/Wyn10/Wyn-RedV3Cogs)**: Wyn10
-- **[Red-DiscordBot Contributors](https://github.com/Cog-Creators/Red-DiscordBot/graphs/contributors)***: Contributor List for Red by twentysix
+- **[Red-DiscordBot Contributors](https://github.com/Cog-Creators/Red-DiscordBot/graphs/contributors)***: Contributor List for Red by TwentySix
 
 <!-- END LIST ]-->
 

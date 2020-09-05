@@ -20,11 +20,7 @@ class Decancer(BaseCog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.config = Config.get_conf(
-            self,
-            identifier=7778847744,
-            force_registration=True,
-        )
+        self.config = Config.get_conf(self, identifier=7778847744, force_registration=True,)
         default_guild = {"modlogchannel": None, "new_custom_nick": "simp name", "auto": False}
         default_global = {"auto": True}
         self.config.register_guild(**default_guild)
@@ -66,13 +62,11 @@ class Decancer(BaseCog):
         values = [f"**Modlog Destination:** {channel}", f"**Default Name:** `{name}`"]
         if await self.config.auto():
             values.append(f"**Auto-Decancer:** `{auto}`")
-        e = discord.Embed()
+        e = discord.Embed(colour=await ctx.embed_colour())
         e.add_field(
-            name=f"{ctx.guild.name} Settings",
-            value="\n".join(values),
+            name=f"{ctx.guild.name} Settings", value="\n".join(values),
         )
         e.set_footer(text="To change these, pass [p]decancerset modlog|defaultname")
-        e.colour = discord.Colour.blue()
         e.set_image(url=ctx.guild.icon_url)
         try:
             await ctx.send(embed=e)

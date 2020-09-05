@@ -210,9 +210,7 @@ class LockItUp(BaseCog):
             #     role += "`{}` - <@&{}>\n".format(r, r)
 
             e = discord.Embed(
-                color=await ctx.embed_color(),
-                title="Lockdown Config:",
-                description=chan,
+                color=await ctx.embed_color(), title="Lockdown Config:", description=chan,
             )
 
             # e.add_field(name="Channels", value=chan, inline=False)
@@ -350,10 +348,7 @@ class LockItUp(BaseCog):
 
     @lockdownset.command(name="setvc")
     async def vc_setter(
-        self,
-        ctx: commands.Context,
-        *,
-        vc_channel: Optional[discord.VoiceChannel] = None,
+        self, ctx: commands.Context, *, vc_channel: Optional[discord.VoiceChannel] = None,
     ):
         """
         Adds channel to list of voice chats to lock/unlock
