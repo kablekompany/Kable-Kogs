@@ -56,7 +56,7 @@ class Decancer(BaseCog):
                 check_modlog_exists = await modlog.get_modlog_channel(ctx.guild)
                 await self.config.guild(ctx.guild).modlogchannel.set(check_modlog_exists.id)
                 await ctx.send(
-                    f"I set {check_modlog_exists.mention} as the decancer log channel. You can change this by running `[p]decancer modlog <channel> [--override]`"
+                    f"I set {check_modlog_exists.mention} as the decancer log channel. You can change this by running `[p]decancerset modlog <channel> [--override]`"
                 )
                 channel = check_modlog_exists.mention
             except RuntimeError:
