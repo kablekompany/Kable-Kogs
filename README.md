@@ -6,6 +6,7 @@
 <!-- Let's throw a row of badges cause never enough of those LOL --->
 [![Contributors][contributors-shield]][contributors-url] [![Forks][forks-shield]][forks-url] [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url] [![MIT License][license-shield]][license-url]
 ![Kable-Kogs](https://github.com/kablekompany/Kable-Kogs/workflows/Style%20formatting/badge.svg)
+![CodeQL](https://github.com/kablekompany/Kable-Kogs/workflows/CodeQL/badge.svg)
 
 <br/>
 
