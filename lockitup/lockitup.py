@@ -49,7 +49,7 @@ class LockItUp(BaseCog):
 
         lock_check = await self.config.guild(ctx.guild).locked()
         if lock_check is True:
-            return await ctx.send("You're already locked, stupid")
+            return await ctx.send("You're already locked")
         guild = ctx.guild
         channel_ids = await self.config.guild(guild).channels()
         if not channel_ids:
@@ -57,7 +57,7 @@ class LockItUp(BaseCog):
             return
 
         if await self.config.guild(guild).confirmation_message() is True:
-            await ctx.send("Oh shit oh fuck are you certain? `[yes|no]`")
+            await ctx.send("You sure you wanna lock up? `[yes|no]`")
 
         try:
             confirm_lockdown = await ctx.bot.wait_for("message", check=check, timeout=30)
@@ -79,9 +79,23 @@ class LockItUp(BaseCog):
             timestamp=ctx.message.created_at,
         )
         e.set_footer(text=f"{guild.name}")
+        bot_override = ctx.bot.user
 
         for guild_channel in guild.channels:
             if guild_channel.id in channel_ids:
+                overwrite1 = guild_channel.overwrites_for(bot_override)
+                overwrite1.update(send_messages=True, embed_links=True)
+                try:
+                    await guild_channel.set_permissions(
+                        bot_override,
+                        overwrite=overwrite1,
+                        reason="Securing bot overrides for lockdown",
+                    )
+                except Exception:
+                    return await ctx.send(
+                        "You'll need to raise my role, or make sure I can manage those channels. I failed trying to secure my own overrides. This lockdown will not resume"
+                    )
+
                 overwrite = guild_channel.overwrites_for(role)
                 overwrite.update(send_messages=False)
                 try:
@@ -121,7 +135,7 @@ class LockItUp(BaseCog):
 
         lock_check = await self.config.guild(ctx.guild).locked()
         if lock_check is False:
-            return await ctx.send("You're not locked, stupid")
+            return await ctx.send("You're not locked")
         guild = ctx.guild
         channel_ids = await self.config.guild(guild).channels()
         if not channel_ids:
@@ -253,7 +267,7 @@ class LockItUp(BaseCog):
         IDs are also accepted.
         """
         if not channel:
-            await ctx.send("Give me a channel idiot")
+            await ctx.send_help()
             return
         guild = ctx.guild
         chans = await self.config.guild(guild).channels()
@@ -273,10 +287,9 @@ class LockItUp(BaseCog):
     async def rmchan(self, ctx: commands.Context, *, channel: discord.TextChannel = None):
         """
         Remove a channel to list of channels to lock/unlock
-        You can only remove one at a time otherwise run `;;lds reset`
         """
         if channel is None:
-            await ctx.send("Give me a channel idiot")
+            await ctx.send_help()
             return
         guild = ctx.guild
         chans = await self.config.guild(guild).channels()
@@ -294,18 +307,16 @@ class LockItUp(BaseCog):
             return m.author == ctx.author and m.channel == ctx.channel
 
         await ctx.send(
-            "Are you certain about this? This will wipe all settings/messages/channels in your servers configuration Type:`RESET THIS GUILD` to continue (must be typed exact)"
+            "Are you certain about this? This will wipe all settings/messages/channels in your servers configuration Type: `RESET THIS GUILD` to continue (must be typed exact)"
         )
         try:
             confirm_reset = await ctx.bot.wait_for("message", check=check, timeout=30)
             if confirm_reset.content != "RESET THIS GUILD":
-                return await ctx.send("Okay, not resetting today so like fuck off this command")
+                return await ctx.send("Okay, not resetting today")
         except asyncio.TimeoutError:
-            return await ctx.send(
-                "You took too long to reply, it's only your server configuration at steak!"
-            )
+            return await ctx.send("You took too long to reply")
         await self.config.guild(ctx.guild).clear_raw()
-        await ctx.send("Guild Reset, goodluck lmfao")
+        await ctx.send("Guild Reset, goodluck")
 
     @lockdownset.command()
     async def lockmsg(self, ctx: commands.Context, *, str=None):
@@ -331,20 +342,20 @@ class LockItUp(BaseCog):
         await self.config.guild(guild).unlockdown_message.set(value=str)
         await ctx.send(f"Your unlock message has been changed to:\n `{str}`")
 
-    @lockdownset.command(name="confirmtoggle")
-    async def confirmation_toggle(self, ctx, toggle: bool = False):
-        """
-        Sets if the bot requires a confirmation before locking/unlocking
+    # @lockdownset.command(name="confirmtoggle")
+    # async def confirmation_toggle(self, ctx, toggle: bool = False):
+    #     """
+    #     Sets if the bot requires a confirmation before locking/unlocking
 
-        If no option is given, it'll default to False
-        """
-        if toggle is True:
-            await self.config.guild(ctx.guild).confirmation_message.set(True)
-            return await ctx.send("Done. Confirmation is now required.")
+    #     If no option is given, it'll default to False
+    #     """
+    #     if toggle is True:
+    #         await self.config.guild(ctx.guild).confirmation_message.set(True)
+    #         return await ctx.send("Done. Confirmation is now required.")
 
-        if toggle is False:
-            await self.config.guild(ctx.guild).confirmation_message.set(False)
-            return await ctx.send("Done. Confirmation is not required.")
+    #     if toggle is False:
+    #         await self.config.guild(ctx.guild).confirmation_message.set(False)
+    #         return await ctx.send("Done. Confirmation is not required.")
 
     @lockdownset.command(name="setvc")
     async def vc_setter(
