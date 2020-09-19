@@ -33,6 +33,79 @@ class Decancer(BaseCog):
         """This cog does not store user data"""
         return
 
+    # the magic
+    @staticmethod
+    def strip_accs(text):
+        try:
+            text = unicodedata.normalize("NFKC", text)
+            text = unicodedata.normalize("NFD", text)
+            text = unidecode.unidecode(text)
+            text = text.encode("ascii", "ignore")
+            text = text.decode("utf-8")
+        except Exception as e:
+            print(e)
+            pass
+        return str(text)
+
+    # the magician
+    async def nick_maker(self, guild: discord.Guild, old_shit_nick):
+        old_shit_nick = self.strip_accs(old_shit_nick)
+        new_cool_nick = re.sub("[^a-zA-Z0-9 \n.]", "", old_shit_nick)
+        new_cool_nick = new_cool_nick.split()
+        new_cool_nick = " ".join(new_cool_nick)
+        new_cool_nick = stringcase.lowercase(new_cool_nick)
+        new_cool_nick = stringcase.titlecase(new_cool_nick)
+        default_name = await self.config.guild(guild).new_custom_nick()
+        if len(new_cool_nick.replace(" ", "")) <= 1 or len(new_cool_nick) > 32:
+            if default_name == "random":
+                new_cool_nick = await self.get_random_nick(2)
+            elif default_name:
+                new_cool_nick = default_name
+            else:
+                new_cool_nick = "simp name"
+        return new_cool_nick
+
+    async def decancer_log(
+        self,
+        guild: discord.Guild,
+        member: discord.Member,
+        moderator: discord.Member,
+        old_nick: str,
+        new_nick: str,
+        dc_type: str,
+    ):
+        channel = guild.get_channel(await self.config.guild(guild).modlogchannel())
+        if not channel or not (
+            channel.permissions_for(guild.me).send_messages
+            and channel.permissions_for(guild.me).embed_links
+        ):
+            await self.config.guild(guild).modlogchannel.clear()
+            return
+        color = 0x2FFFFF
+        embed = discord.Embed(
+            color=discord.Color(color),
+            title=dc_type,
+            description=f"**Offender:** {str(member)} {member.mention} \n**Reason:** Remove cancerous characters from previous name\n**New Nickname:** {new_nick}\n**Responsible Moderator:** {str(moderator)} {moderator.mention}",
+            timestamp=datetime.utcnow(),
+        )
+        embed.set_footer(text=f"ID: {member.id}")
+        await channel.send(embed=embed)
+
+    async def get_random_nick(self, nickType: int):
+        if nickType == 1:
+            new_nick = random.choice(properNouns)
+        elif nickType == 2:
+            adjective = random.choice(adjectives)
+            noun = random.choice(nouns)
+            new_nick = adjective + noun
+        elif nickType == 3:
+            adjective = random.choice(adjectives)
+            new_nick = adjective.lower()
+        if nickType == 4:
+            nounNicks = nouns, properNouns
+            new_nick = random.choice(random.choices(nounNicks, weights=map(len, nounNicks))[0])
+        return new_nick
+
     @commands.group()
     @checks.mod_or_permissions(manage_channels=True)
     @commands.guild_only()
@@ -242,76 +315,3 @@ class Decancer(BaseCog):
             await self.decancer_log(
                 guild, member, guild.me, old_nick, new_cool_nick, "auto-decancer"
             )
-
-    # the magic
-    @staticmethod
-    def strip_accs(text):
-        try:
-            text = unicodedata.normalize("NFKC", text)
-            text = unicodedata.normalize("NFD", text)
-            text = unidecode.unidecode(text)
-            text = text.encode("ascii", "ignore")
-            text = text.decode("utf-8")
-        except Exception as e:
-            print(e)
-            pass
-        return str(text)
-
-    # the magician
-    async def nick_maker(self, guild: discord.Guild, old_shit_nick):
-        old_shit_nick = self.strip_accs(old_shit_nick)
-        new_cool_nick = re.sub("[^a-zA-Z0-9 \n.]", "", old_shit_nick)
-        new_cool_nick = new_cool_nick.split()
-        new_cool_nick = " ".join(new_cool_nick)
-        new_cool_nick = stringcase.lowercase(new_cool_nick)
-        new_cool_nick = stringcase.titlecase(new_cool_nick)
-        default_name = await self.config.guild(guild).new_custom_nick()
-        if len(new_cool_nick.replace(" ", "")) <= 1 or len(new_cool_nick) > 32:
-            if default_name == "random":
-                new_cool_nick = await self.get_random_nick(2)
-            elif default_name:
-                new_cool_nick = default_name
-            else:
-                new_cool_nick = "simp name"
-        return new_cool_nick
-
-    async def decancer_log(
-        self,
-        guild: discord.Guild,
-        member: discord.Member,
-        moderator: discord.Member,
-        old_nick: str,
-        new_nick: str,
-        dc_type: str,
-    ):
-        channel = guild.get_channel(await self.config.guild(guild).modlogchannel())
-        if not channel or not (
-            channel.permissions_for(guild.me).send_messages
-            and channel.permissions_for(guild.me).embed_links
-        ):
-            await self.config.guild(guild).modlogchannel.clear()
-            return
-        color = 0x2FFFFF
-        embed = discord.Embed(
-            color=discord.Color(color),
-            title=dc_type,
-            description=f"**Offender:** {str(member)} {member.mention} \n**Reason:** Remove cancerous characters from previous name\n**New Nickname:** {new_nick}\n**Responsible Moderator:** {str(moderator)} {moderator.mention}",
-            timestamp=datetime.utcnow(),
-        )
-        embed.set_footer(text=f"ID: {member.id}")
-        await channel.send(embed=embed)
-
-    async def get_random_nick(self, nickType: int):
-        if nickType == 1:
-            new_nick = random.choice(properNouns)
-        elif nickType == 2:
-            adjective = random.choice(adjectives)
-            noun = random.choice(nouns)
-            new_nick = adjective + noun
-        elif nickType == 3:
-            adjective = random.choice(adjectives)
-            new_nick = adjective.lower()
-        if nickType == 4:
-            nounNicks = nouns, properNouns
-            new_nick = random.choice(random.choices(nounNicks, weights=map(len, nounNicks))[0])
-        return new_nick
