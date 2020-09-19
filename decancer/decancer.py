@@ -27,7 +27,7 @@ class Decancer(BaseCog):
         self.config.register_global(**default_global)
 
     __author__ = "KableKompany#0001"
-    __version__ = "1.5.1"
+    __version__ = "1.6.1"
 
     async def red_delete_data_for_user(self, **kwargs):
         """This cog does not store user data"""
@@ -52,7 +52,7 @@ class Decancer(BaseCog):
                 check_modlog_exists = await modlog.get_modlog_channel(ctx.guild)
                 await self.config.guild(ctx.guild).modlogchannel.set(check_modlog_exists.id)
                 await ctx.send(
-                    f"I set {check_modlog_exists.mention} as the decancer log channel. You can change this by running `[p]decancerset modlog <channel> [--override]`"
+                    f"I set {check_modlog_exists.mention} as the decancer log channel. You can change this by running ``{ctx.prefix}decancerset modlog <channel> [--override]`"
                 )
                 channel = check_modlog_exists.mention
             except RuntimeError:
@@ -160,8 +160,8 @@ class Decancer(BaseCog):
     @commands.guild_only()
     async def nick_checker(self, ctx: commands.Context, *, user: discord.Member):
         """
-        This command will change username glyphs (i.e 乇乂, 黑, etc)
-        and special font chars (zalgo, latin letters, accents, etc)
+        Change username glyphs (i.e 乇乂, 黑, etc)
+        special font chars (zalgo, latin letters, accents, etc)
         to their unicode counterpart. If the former, expect the "english"
         equivalent to other language based glyphs.
         """
@@ -172,30 +172,33 @@ class Decancer(BaseCog):
         if not user:
             await ctx.send_help()
         if ctx.message.guild.me.guild_permissions.manage_nicknames:
-            await ctx.trigger_typing()
-            m_nick = user.display_name
-            new_cool_nick = await self.nick_maker(ctx.guild, m_nick)
-            if m_nick != new_cool_nick:
-                try:
-                    await user.edit(
-                        reason=f"Old name ({m_nick}): contained special characters",
-                        nick=new_cool_nick,
+            async with ctx.typing():
+                m_nick = user.display_name
+                new_cool_nick = await self.nick_maker(ctx.guild, m_nick)
+                if m_nick != new_cool_nick:
+                    try:
+                        await user.edit(
+                            reason=f"Old name ({m_nick}): contained special characters",
+                            nick=new_cool_nick,
+                        )
+                    except Exception as e:
+                        await ctx.send(
+                            f"Double check my order in heirarchy buddy, got an error\n```diff\n- {e}\n```"
+                        )
+                        return
+                    await ctx.send(f"{user.name}: ({m_nick}) was changed to {new_cool_nick}")
+
+                    guild = ctx.guild
+                    await self.decancer_log(
+                        guild, user, ctx.author, m_nick, new_cool_nick, "decancer"
                     )
-                except Exception as e:
-                    await ctx.send(
-                        f"Double check my order in heirarchy buddy, got an error\n```diff\n- {e}\n```"
-                    )
-                    return
-                await ctx.send(f"{user.name}: ({m_nick}) was changed to {new_cool_nick}")
-                await ctx.tick()
-                guild = ctx.guild
-                await self.decancer_log(guild, user, ctx.author, m_nick, new_cool_nick, "decancer")
-            else:
-                await ctx.send(f"{user.display_name} was already decancer'd")
-                try:
-                    await ctx.message.add_reaction("<a:Hazard_kko:695200496939565076>")
-                except Exception:
-                    return
+                    await ctx.tick()
+                else:
+                    await ctx.send(f"{user.display_name} was already decancer'd")
+                    try:
+                        await ctx.message.add_reaction("\N{CROSS MARK}")
+                    except Exception:
+                        return
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -312,13 +315,3 @@ class Decancer(BaseCog):
             nounNicks = nouns, properNouns
             new_nick = random.choice(random.choices(nounNicks, weights=map(len, nounNicks))[0])
         return new_nick
-
-    # async def nick_error(self, ctx, error):
-    #     # error handler
-    #     if isinstance(error, commands.MissingPermissions):
-    #         await ctx.send("Missing nickname perms, fam")
-    #     elif isinstance(error, commands.NoPrivateMessage):
-    #         await ctx.send("Ummm I don't think that user is here")
-    #     elif isinstance(error, commands.CommandError):
-    #         await ctx.send(f"{error}")
-    #         print(error)

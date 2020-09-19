@@ -27,7 +27,6 @@ class LockItUp(BaseCog):
             "embed_set": False,
             "send_alert": True,
             "nondefault": False,
-            "confirmation_message": True,
         }
 
         self.config.register_guild(**default_guild)
@@ -86,11 +85,12 @@ class LockItUp(BaseCog):
                 overwrite1 = guild_channel.overwrites_for(bot_override)
                 overwrite1.update(send_messages=True, embed_links=True)
                 try:
-                    await guild_channel.set_permissions(
-                        bot_override,
-                        overwrite=overwrite1,
-                        reason="Securing bot overrides for lockdown",
-                    )
+                    if not overwrite1.send_messages:
+                        await guild_channel.set_permissions(
+                            bot_override,
+                            overwrite=overwrite1,
+                            reason="Securing bot overrides for lockdown",
+                        )
                 except Exception:
                     return await ctx.send(
                         "You'll need to raise my role, or make sure I can manage those channels. I failed trying to secure my own overrides. This lockdown will not resume"
@@ -208,32 +208,35 @@ class LockItUp(BaseCog):
         Settings for lockdown
         For each setting, pass one ID each invocation. So if you need to add multiple channels, run the commands to do so multiple times (same for removal, duh)
         """
-        if ctx.invoked_subcommand is None:
-            guild = ctx.guild
-            get_channel = await self.config.guild(guild).channels()
-            get_lock = await self.config.guild(guild).lockdown_message()
-            get_unlock = await self.config.guild(guild).unlockdown_message()
-            check_embed = await self.config.guild(guild).embed_set()
-            check_silent = await self.config.guild(guild).send_alert()
-            # get_role = await self.config.guild(guild).roles()
-            # role = ""
-            chan = ""
-            for channel in get_channel:
-                chan += "'{}' - <#{}>\n".format(channel, channel)
-            # for r in get_role:
-            #     role += "`{}` - <@&{}>\n".format(r, r)
+        pass
 
-            e = discord.Embed(
-                color=await ctx.embed_color(), title="Lockdown Config:", description=chan,
-            )
+    @lockdownset.command(name="showsettings")
+    async def show_settings(self, ctx):
+        guild = ctx.guild
+        get_channel = await self.config.guild(guild).channels()
+        get_lock = await self.config.guild(guild).lockdown_message()
+        get_unlock = await self.config.guild(guild).unlockdown_message()
+        check_embed = await self.config.guild(guild).embed_set()
+        check_silent = await self.config.guild(guild).send_alert()
+        # get_role = await self.config.guild(guild).roles()
+        # role = ""
+        chan = ""
+        for channel in get_channel:
+            chan += "'{}' - <#{}>\n".format(channel, channel)
+        # for r in get_role:
+        #     role += "`{}` - <@&{}>\n".format(r, r)
 
-            # e.add_field(name="Channels", value=chan, inline=False)
-            e.add_field(name="Lock Message:", value=get_lock, inline=False)
-            e.add_field(name="Unlock Message:", value=get_unlock, inline=False)
-            e.add_field(name="Unlock Embed", value=check_embed, inline=False)
-            # e.add_field(name="Non-Default Roles", value=role, inline=False)
+        e = discord.Embed(
+            color=await ctx.embed_color(), title="Lockdown Config:", description=chan,
+        )
 
-            await ctx.send(embed=e)
+        # e.add_field(name="Channels", value=chan, inline=False)
+        e.add_field(name="Lock Message:", value=get_lock, inline=False)
+        e.add_field(name="Unlock Message:", value=get_unlock, inline=False)
+        e.add_field(name="Unlock Embed", value=check_embed, inline=False)
+        # e.add_field(name="Non-Default Roles", value=role, inline=False)
+
+        await ctx.send(embed=e)
 
     @lockdownset.command("embed")
     async def send_embed(self, ctx: commands.Context, *, default: bool = None):
@@ -284,18 +287,18 @@ class LockItUp(BaseCog):
         await ctx.send("**Channel List:**\n{}".format(chan))
 
     @lockdownset.command()
-    async def rmchan(self, ctx: commands.Context, *, channel: discord.TextChannel = None):
+    async def rmchan(self, ctx: commands.Context, *, channel: int):
         """
         Remove a channel to list of channels to lock/unlock
         """
-        if channel is None:
+        if not int:
             await ctx.send_help()
             return
         guild = ctx.guild
         chans = await self.config.guild(guild).channels()
-        chans.remove(channel.id)
-        await self.config.guild(guild).channels.set(chans)
-        await ctx.send(f"{channel.mention} removed")
+        chans.remove(int)
+        await self.config.guild(guild).channels.set(int)
+        await ctx.send(f"`{int}` removed")
 
     @lockdownset.command(name="reset")
     async def clear_config(self, ctx):
@@ -341,21 +344,6 @@ class LockItUp(BaseCog):
             await ctx.send(f"Your current message is {msg}")
         await self.config.guild(guild).unlockdown_message.set(value=str)
         await ctx.send(f"Your unlock message has been changed to:\n `{str}`")
-
-    # @lockdownset.command(name="confirmtoggle")
-    # async def confirmation_toggle(self, ctx, toggle: bool = False):
-    #     """
-    #     Sets if the bot requires a confirmation before locking/unlocking
-
-    #     If no option is given, it'll default to False
-    #     """
-    #     if toggle is True:
-    #         await self.config.guild(ctx.guild).confirmation_message.set(True)
-    #         return await ctx.send("Done. Confirmation is now required.")
-
-    #     if toggle is False:
-    #         await self.config.guild(ctx.guild).confirmation_message.set(False)
-    #         return await ctx.send("Done. Confirmation is not required.")
 
     @lockdownset.command(name="setvc")
     async def vc_setter(
@@ -469,22 +457,10 @@ class LockItUp(BaseCog):
     @checks.mod_or_permissions(manage_messages=True)
     async def channellock(self, ctx, channel: Union[discord.TextChannel, discord.VoiceChannel]):
         """Locking down selected text/voice channel"""
-
-        def check(m):
-            return m.author == ctx.author and m.channel == ctx.channel
-
-        await ctx.send("Do you want to lockdown {}\n**Yes or No?**".format(channel.mention))
-        # should_lock = await ctx.bot.wait_for("message", check=check, timeout=30)
-        try:
-            should_lock = await ctx.bot.wait_for("message", check=check, timeout=30)
-            if should_lock.content.lower() != "yes":
-                return await ctx.send("Okay. Won't lock {}.".format(channel.mention))
-        except asyncio.TimeoutError:
-            return await ctx.send("You took too long to reply!")
-
         author = ctx.author
         role = ctx.guild.default_role
         overwrite = channel.overwrites_for(role)
+        bot_overwrite = channel.overwrites_for(self.bot.user)
         #   Checking channel type
         if channel.type == discord.ChannelType.text:
             if overwrite.send_messages is False:
@@ -493,6 +469,8 @@ class LockItUp(BaseCog):
                         channel.mention, ctx.prefix, channel.id
                     )
                 )
+            if not bot_overwrite.send_messages:
+                bot_overwrite.update(send_messages=True)
             overwrite.update(send_messages=False)
         elif channel.type == discord.ChannelType.voice:
             if overwrite.connect is False:
@@ -516,19 +494,6 @@ class LockItUp(BaseCog):
     @checks.mod_or_permissions(manage_messages=True)
     async def channelunlock(self, ctx, channel: Union[discord.TextChannel, discord.VoiceChannel]):
         """Unlocking down selected text/voice channel"""
-
-        def check(m):
-            return m.author == ctx.author and m.channel == ctx.channel
-
-        await ctx.send("Do you want to unlock {}\n**Yes or No?**".format(channel.mention))
-        # should_unlock = await ctx.bot.wait_for("message", check=check, timeout=30)
-        try:
-            should_unlock = await ctx.bot.wait_for("message", check=check, timeout=30)
-            if should_unlock.content.lower() != "yes":
-                return await ctx.send("Okay. Won't unlock {}.".format(channel.mention))
-        except asyncio.TimeoutError:
-            return await ctx.send("You took too long to reply!")
-
         author = ctx.author
         role = ctx.guild.default_role
         overwrite = channel.overwrites_for(role)
