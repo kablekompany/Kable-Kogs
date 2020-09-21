@@ -296,15 +296,19 @@ class LockItUp(BaseCog):
     async def rmchan(self, ctx: commands.Context, *, channel: int):
         """
         Remove a channel to list of channels to lock/unlock
+        You can only remove one at a time otherwise run `[p]lds reset`
         """
-        if not int:
-            await ctx.send_help()
+        if channel is None:
+            await ctx.send("Give me a channel id to remove it from this servers configuration")
             return
         guild = ctx.guild
         chans = await self.config.guild(guild).channels()
-        chans.remove(int)
-        await self.config.guild(guild).channels.set(int)
-        await ctx.send(f"`{int}` removed")
+        for chan in channel:
+            if chan not in chans:
+                chans.remove(chan.id)
+                await self.config.guild(guild).channels.set(chans)
+
+        await ctx.send(f"{channel} removed")
 
     @lockdownset.command(name="reset")
     async def clear_config(self, ctx):
