@@ -229,15 +229,15 @@ class LockItUp(BaseCog):
         channel_embed = list(pagify(chan, page_length=1000))
         for idx, page in enumerate(channel_embed, start=1): #from sharky lockdown - to add on potential bot relaunch 
             e = discord.Embed(
-                color=await ctx.embed_color(), title="Lockdown Config:", description=channel_embed,
+                color=await ctx.embed_color(), title="Lockdown Config:", description=chan,
         )
 
         # e.add_field(name="Channels", value=chan, inline=False)
-        e.add_field(name="Lock Message:", value=get_lock, inline=False)
-        e.add_field(name="Unlock Message:", value=get_unlock, inline=False)
-        e.add_field(name="Unlock Embed", value=check_embed, inline=False)
-        e.set_footer(text="Page {}/{}".format(idx, len(channel_embed)))
-        embed_list.append(e)
+            e.add_field(name="Lock Message:", value=get_lock, inline=False)
+            e.add_field(name="Unlock Message:", value=get_unlock, inline=False)
+            e.add_field(name="Unlock Embed", value=check_embed, inline=False)
+            e.set_footer(text="Page {}/{}".format(idx, len(channel_embed)))
+            embed_list.append(e)
 
         await menus.menu(ctx, embed_list, menus.DEFAULT_CONTROLS)
         # e.add_field(name="Non-Default Roles", value=role, inline=False)
@@ -293,18 +293,16 @@ class LockItUp(BaseCog):
         await ctx.send("**Channel List:**\n{}".format(chan))
 
     @lockdownset.command()
-    async def rmchan(self, ctx: commands.Context, *channels: int):
+    async def rmchan(self, ctx: commands.Context, *, channel: int):
         """
         Remove a channel to list of channels to lock/unlock
         """
-        if not channels:
+        if not int:
             await ctx.send_help()
             return
         guild = ctx.guild
         chans = await self.config.guild(guild).channels()
-        for chan in channels:
-            if chan in chans:
-                chans.remove(int)
+        chans.remove(int)
         await self.config.guild(guild).channels.set(int)
         await ctx.send(f"`{int}` removed")
 
@@ -532,4 +530,3 @@ class LockItUp(BaseCog):
         except discord.Forbidden:
             return await ctx.send("Error: Bot doesn't have perms to adjust that channel.")
         await ctx.send("Unlocked {}".format(channel.mention))
-
