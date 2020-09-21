@@ -233,11 +233,11 @@ class LockItUp(BaseCog):
         )
 
         # e.add_field(name="Channels", value=chan, inline=False)
-            e.add_field(name="Lock Message:", value=get_lock, inline=False)
-            e.add_field(name="Unlock Message:", value=get_unlock, inline=False)
-            e.add_field(name="Unlock Embed", value=check_embed, inline=False)
-            e.set_footer(text="Page {}/{}".format(idx, len(channel_embed)))
-            embed_list.append(e)
+        e.add_field(name="Lock Message:", value=get_lock, inline=False)
+        e.add_field(name="Unlock Message:", value=get_unlock, inline=False)
+        e.add_field(name="Unlock Embed", value=check_embed, inline=False)
+        e.set_footer(text="Page {}/{}".format(idx, len(channel_embed)))
+        embed_list.append(e)
 
         await menus.menu(ctx, embed_list, menus.DEFAULT_CONTROLS)
         # e.add_field(name="Non-Default Roles", value=role, inline=False)
