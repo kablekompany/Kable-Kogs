@@ -229,7 +229,7 @@ class LockItUp(BaseCog):
         channel_embed = list(pagify(chan, page_length=1000))
         for idx, page in enumerate(channel_embed, start=1): #from sharky lockdown - to add on potential bot relaunch 
             e = discord.Embed(
-                color=await ctx.embed_color(), title="Lockdown Config:", description=chan,
+                color=await ctx.embed_color(), title="Lockdown Config:", description=channel_embed,
         )
 
         # e.add_field(name="Channels", value=chan, inline=False)
