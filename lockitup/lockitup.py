@@ -226,20 +226,20 @@ class LockItUp(BaseCog):
         for channel in get_channel:
             chan += "'{}' - <#{}>\n".format(channel, channel)
         
-        channel_embed = list(pagify(chan, page_length=1000))
-        for idx, page in enumerate(channel_embed, start=1): #from sharky lockdown - to add on potential bot relaunch 
-            e = discord.Embed(
+        #channel_embed = list(pagify(chan, page_length=1000))
+        #for idx, page in enumerate(channel_embed, start=1): #from sharky lockdown - to add on potential bot relaunch 
+        e = discord.Embed(
                 color=await ctx.embed_color(), title="Lockdown Config:", description=chan,
         )
 
         # e.add_field(name="Channels", value=chan, inline=False)
-            e.add_field(name="Lock Message:", value=get_lock, inline=False)
-            e.add_field(name="Unlock Message:", value=get_unlock, inline=False)
-            e.add_field(name="Unlock Embed", value=check_embed, inline=False)
-            e.set_footer(text="Page {}/{}".format(idx, len(channel_embed)))
-            embed_list.append(e)
+        e.add_field(name="Lock Message:", value=get_lock, inline=False)
+        e.add_field(name="Unlock Message:", value=get_unlock, inline=False)
+        e.add_field(name="Unlock Embed", value=check_embed, inline=False)
+        e.set_footer(text=f"{guild.name}")
+            #embed_list.append(e)
 
-        await menus.menu(ctx, embed_list, menus.DEFAULT_CONTROLS)
+        await ctx.send(embed=e)
         # e.add_field(name="Non-Default Roles", value=role, inline=False)
 
         #await ctx.send(embed=e)
