@@ -530,3 +530,4 @@ class LockItUp(BaseCog):
         except discord.Forbidden:
             return await ctx.send("Error: Bot doesn't have perms to adjust that channel.")
         await ctx.send("Unlocked {}".format(channel.mention))
+
