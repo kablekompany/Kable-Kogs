@@ -293,7 +293,7 @@ class LockItUp(BaseCog):
         await ctx.send("**Channel List:**\n{}".format(chan))
 
     @lockdownset.command()
-    async def rmchan(self, ctx: commands.Context, *, channel: int):
+    async def rmchan(self, ctx: commands.Context, *channel: int):
         """
         Remove a channel to list of channels to lock/unlock
         You can only remove one at a time otherwise run `[p]lds reset`
