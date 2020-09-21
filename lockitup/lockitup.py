@@ -293,16 +293,18 @@ class LockItUp(BaseCog):
         await ctx.send("**Channel List:**\n{}".format(chan))
 
     @lockdownset.command()
-    async def rmchan(self, ctx: commands.Context, *, channel: int):
+    async def rmchan(self, ctx: commands.Context, *channels: int):
         """
         Remove a channel to list of channels to lock/unlock
         """
-        if not int:
+        if not channels:
             await ctx.send_help()
             return
         guild = ctx.guild
         chans = await self.config.guild(guild).channels()
-        chans.remove(int)
+        for chan in channels:
+            if chan in chans:
+                chans.remove(int)
         await self.config.guild(guild).channels.set(int)
         await ctx.send(f"`{int}` removed")
 
