@@ -6,7 +6,8 @@ from typing import Optional, Union
 
 import discord
 from redbot.core import Config, checks, commands
-from redbot.core.utils import menus, pagify
+from redbot.core.utils import menus
+from redbot.core.utils.chat_formatting import box, pagify
 
 BaseCog = getattr(commands, "Cog", object)
 
