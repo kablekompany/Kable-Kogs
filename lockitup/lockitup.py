@@ -298,14 +298,14 @@ class LockItUp(BaseCog):
         Remove a channel to list of channels to lock/unlock
         You can only remove one at a time otherwise run `[p]lds reset`
         """
-        if channel is None:
-            await ctx.send("Give me a channel id to remove it from this servers configuration")
+        if not channel:
+            await ctx.send("Give me a channel ID to remove it from this servers configuration")
             return
         guild = ctx.guild
         chans = await self.config.guild(guild).channels()
         for chan in channel:
             if chan not in chans:
-                chans.remove(chan.id)
+                chans.remove(chan)
                 await self.config.guild(guild).channels.set(chans)
 
         await ctx.send(f"{channel} removed")
