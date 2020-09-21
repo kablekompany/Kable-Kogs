@@ -55,8 +55,7 @@ class LockItUp(BaseCog):
             await ctx.send("You need to set this up by running `;;lockdownset addchan` first!")
             return
 
-        if await self.config.guild(guild).confirmation_message() is True:
-            await ctx.send("You sure you wanna lock up? `[yes|no]`")
+        await ctx.send("You sure you wanna lock up? `[yes|no]`")
 
         try:
             confirm_lockdown = await ctx.bot.wait_for("message", check=check, timeout=30)
@@ -142,14 +141,13 @@ class LockItUp(BaseCog):
             await ctx.send("You need to set this up by running `;;lockdownset addchan` first!")
             return
 
-        if await self.config.guild(guild).confirmation_message() is True:
-            await ctx.send("U Sure About that? `[yes|no]`")
-            try:
-                confirm_unlockdown = await ctx.bot.wait_for("message", check=check, timeout=30)
-                if confirm_unlockdown.content.lower() != "yes":
-                    return await ctx.send("Okay. Won't unlock the guild.")
-            except asyncio.TimeoutError:
-                return await ctx.send("You took too long to reply!")
+        await ctx.send("U Sure About that? `[yes|no]`")
+        try:
+            confirm_unlockdown = await ctx.bot.wait_for("message", check=check, timeout=30)
+            if confirm_unlockdown.content.lower() != "yes":
+                return await ctx.send("Okay. Won't unlock the guild.")
+        except asyncio.TimeoutError:
+            return await ctx.send("You took too long to reply!")
 
         check_embed = await self.config.guild(guild).embed_set()
         author = ctx.author
@@ -212,6 +210,7 @@ class LockItUp(BaseCog):
 
     @lockdownset.command(name="showsettings")
     async def show_settings(self, ctx):
+        """See Guild Configuration"""
         guild = ctx.guild
         get_channel = await self.config.guild(guild).channels()
         get_lock = await self.config.guild(guild).lockdown_message()
