@@ -5,7 +5,8 @@
     "end_user_data_statement": "This cog does not persistently store data or metadata about users.",
     "install_msg": "Hey, thanks for trying this dress on, hope it fits.",
     "author": [
-        "kablekompany (KableKompany#0001)"
+        "kablekompany (KableKompany#0001)",
+        "PhenoM4n4n#0578"
     ],
     "required_cogs": {},
     "requirements": [
