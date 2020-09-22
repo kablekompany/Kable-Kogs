@@ -6,8 +6,8 @@ from typing import Optional, Union
 
 import discord
 from redbot.core import Config, checks, commands
-from redbot.core.utils import menus
 from redbot.core.utils.chat_formatting import box, pagify
+from redbot.core.utils.menus import DEFAULT_CONTROLS, menu
 
 BaseCog = getattr(commands, "Cog", object)
 
@@ -219,30 +219,45 @@ class LockItUp(BaseCog):
         get_unlock = await self.config.guild(guild).unlockdown_message()
         check_embed = await self.config.guild(guild).embed_set()
         check_silent = await self.config.guild(guild).send_alert()
-        # get_role = await self.config.guild(guild).roles()
-        # role = ""
-        embed_list = []
-        chan = ""
-        for channel in get_channel:
-            chan += "'{}' - <#{}>\n".format(channel, channel)
-        
-        #channel_embed = list(pagify(chan, page_length=1000))
-        #for idx, page in enumerate(channel_embed, start=1): #from sharky lockdown - to add on potential bot relaunch 
-        e = discord.Embed(
-                color=await ctx.embed_color(), title="Lockdown Config:", description=chan,
-        )
 
-        # e.add_field(name="Channels", value=chan, inline=False)
-        e.add_field(name="Lock Message:", value=get_lock, inline=False)
-        e.add_field(name="Unlock Message:", value=get_unlock, inline=False)
-        e.add_field(name="Unlock Embed", value=check_embed, inline=False)
-        e.set_footer(text=f"{guild.name}")
-            #embed_list.append(e)
+        chan = []
+        chan_count = len(get_channel)
+        if not get_channel:
+            e = discord.Embed(
+                color=await ctx.embed_color(),
+                title="Lockdown Settings:",
+                description="No channels added",
+            )
+            e.add_field(name="Lock Message:", value=get_lock if get_lock else "**None**")
+            e.add_field(name="Unlock Message:", value=get_unlock if get_unlock else "**None**")
+            e.add_field(
+                name="Confirmation:", value="**Enabled**" if check_silent else "**Disabled**"
+            )
+            return await ctx.send(embed=e)
+        else:
+            msg = ""
+            for chan_id in get_channel:
+                channel_name = f"<#{chan_id}>"
+                msg += f"{chan_id} - {channel_name}\n"
 
-        await ctx.send(embed=e)
-        # e.add_field(name="Non-Default Roles", value=role, inline=False)
+        channel_list = sorted(msg)
+        e_list = []
+        for page in pagify(msg, shorten_by=1000):
+            e = discord.Embed(
+                color=await ctx.embed_color(),
+                title="Lockdown Settings:",
+                description="Channels: {}\n{}".format(chan_count, page),
+            )
+            e.add_field(name="Lock Message:", value=get_lock if get_lock else "**None**")
+            e.add_field(name="Unlock Message:", value=get_unlock if get_unlock else "**None**")
+            e.add_field(
+                name="Confirmation:", value="**Enabled**" if check_silent else "**Disabled**"
+            )
+            e.set_author(name=ctx.guild.name, icon_url=guild.icon_url)
+            e.set_footer(text="Lockdown Configuration")
+            e_list.append(e)
 
-        #await ctx.send(embed=e)
+        await menu(ctx, e_list, DEFAULT_CONTROLS)
 
     @lockdownset.command("embed")
     async def send_embed(self, ctx: commands.Context, *, default: bool = None):
@@ -286,11 +301,24 @@ class LockItUp(BaseCog):
                 await self.config.guild(guild).channels.set(chans)
             else:
                 continue
-        get_channel = await self.config.guild(guild).channels()
-        chan = ""
-        for channel in get_channel:
-            chan += "<#{}>\n".format(channel)
-        await ctx.send("**Channel List:**\n{}".format(chan))
+        chan_count = len(chans)
+        msg = ""
+        for chan_id in chans:
+            channel_name = f"<#{chan_id}>"
+            msg += f"{chan_id} - {channel_name}\n"
+        channel_list = sorted(msg)
+        e_list = []
+        for page in pagify(msg, shorten_by=1000):
+
+            embed = discord.Embed(
+                description="Channel List: {}\n{}".format(chan_count, page),
+                colour=await ctx.embed_color(),
+            )
+            embed.set_author(name=guild.name, icon_url=guild.icon_url)
+            embed.set_footer(text="Lockdown Channel Settings")
+            e_list.append(embed)
+        await ctx.send("Added to the list, here's your current channels")
+        await menu(ctx, e_list, DEFAULT_CONTROLS)
 
     @lockdownset.command()
     async def rmchan(self, ctx: commands.Context, *channel: int):
@@ -304,11 +332,28 @@ class LockItUp(BaseCog):
         guild = ctx.guild
         chans = await self.config.guild(guild).channels()
         for chan in channel:
-            if chan not in chans:
+            if chan in chans:
                 chans.remove(chan)
                 await self.config.guild(guild).channels.set(chans)
 
-        await ctx.send(f"{channel} removed")
+        chan_count = len(chans)
+        msg = ""
+        for chan_id in chans:
+            channel_name = f"<#{chan_id}>"
+            msg += f"{chan_id} - {channel_name}\n"
+        channel_list = sorted(msg)
+        e_list = []
+        for page in pagify(msg, shorten_by=1000):
+
+            embed = discord.Embed(
+                description="Channel List: {}\n{}".format(chan_count, page),
+                colour=await ctx.embed_color(),
+            )
+            embed.set_author(name=guild.name, icon_url=guild.icon_url)
+            embed.set_footer(text="Lockdown Channel Sttings")
+            e_list.append(embed)
+        await ctx.send("Removed from the list, here's your current channels")
+        await menu(ctx, e_list, DEFAULT_CONTROLS)
 
     @lockdownset.command(name="reset")
     async def clear_config(self, ctx):
