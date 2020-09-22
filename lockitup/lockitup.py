@@ -248,10 +248,18 @@ class LockItUp(BaseCog):
                 title="Lockdown Settings:",
                 description="Channels: {}\n{}".format(chan_count, page),
             )
-            e.add_field(name="Lock Message:", value=get_lock if get_lock else "**None**")
-            e.add_field(name="Unlock Message:", value=get_unlock if get_unlock else "**None**")
             e.add_field(
-                name="Confirmation:", value="**Enabled**" if check_silent else "**Disabled**"
+                name="Lock Message:", value=get_lock if get_lock else "**None**", inline=False
+            )
+            e.add_field(
+                name="Unlock Message:",
+                value=get_unlock if get_unlock else "**None**",
+                inline=False,
+            )
+            e.add_field(
+                name="Confirmation:",
+                value="**Enabled**" if check_silent else "**Disabled**",
+                inline=False,
             )
             e.set_author(name=ctx.guild.name, icon_url=guild.icon_url)
             e.set_footer(text="Lockdown Configuration")
