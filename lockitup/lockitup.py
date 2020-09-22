@@ -140,7 +140,11 @@ class LockItUp(BaseCog):
         guild = ctx.guild
         channel_ids = await self.config.guild(guild).channels()
         if not channel_ids:
-            await ctx.send("You need to set this up by running `;;lockdownset addchan` first!")
+            await ctx.send(
+                "You need to set this up by running `{}lockdownset addchan` first!".format(
+                    ctx.prefix
+                )
+            )
             return
 
         await ctx.send("U Sure About that? `[yes|no]`")
@@ -281,7 +285,9 @@ class LockItUp(BaseCog):
             return
         if default is False:
             await ctx.send(
-                "Alright, will send unlock message in plain text if it's set (`;;lockdownset unlockmsg`)"
+                "Alright, will send unlock message in plain text if it's set (`{}lockdownset unlockmsg`)".format(
+                    ctx.prefix
+                )
             )
             await self.config.guild(guild).embed_set.set(default)
             return
