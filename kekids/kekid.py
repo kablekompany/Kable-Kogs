@@ -23,13 +23,12 @@ _ = i18n.Translator("Mod", __file__)
 class RawUserIds(Converter):
     async def convert(self, ctx, argument):
         """
-        Logic taken from the hackban logic in core
+        Logic taken from the hackban in core
         """
-
         if match := _id_regex.match(argument) or _mention_regex.match(argument):
             return int(match.group(1))
 
-        raise BadArgument(_("{} doesn't look like a valid user ID.").format(argument))
+        raise BadArgument("{} doesn't look like a valid user ID.").format(argument)
 
 
 class KekIDs(commands.Cog):
@@ -39,7 +38,7 @@ class KekIDs(commands.Cog):
         self.bot = bot
 
     __author__ = "KableKompany#0001"
-    __version__ = "1.2.1"
+    __version__ = "1.3.1"
 
     async def red_delete_data_for_user(self, **kwargs):
         """This cog does not store user data"""
