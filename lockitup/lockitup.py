@@ -40,6 +40,7 @@ class LockItUp(BaseCog):
 
     @commands.command()
     @checks.mod_or_permissions(manage_channels=True)
+    @checks.bot_has_permissions(manage_channels=True)
     async def lockdown(self, ctx):
         """
         Lockdown a server
@@ -126,6 +127,7 @@ class LockItUp(BaseCog):
 
     @commands.command()
     @checks.mod_or_permissions(manage_messages=True)
+    @checks.bot_has_permissions(manage_channels=True)
     async def unlockdown(self, ctx):
         """
         Ends the lockdown for the guild
@@ -207,6 +209,7 @@ class LockItUp(BaseCog):
     @commands.group(aliases=["lds"])
     @commands.guild_only()
     @checks.admin_or_permissions(manage_guild=True)
+    @checks.bot_has_permissions(manage_channels=True)
     async def lockdownset(self, ctx):
         """
         Settings for lockdown

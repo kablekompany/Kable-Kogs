@@ -1,0 +1,20 @@
+{
+    "name": "Application",
+    "short": "",
+    "description": "A custom application builder cog",
+    "end_user_data_statement": "Data stored in this cog can be removed on user request.",
+    "install_msg": "YYAAAAAAAAAAA got em Installed",
+    "author": [
+        "kablekompany (KableKompany#0001)"
+    ],
+    "required_cogs": {},
+    "requirements": [],
+    "tags": [
+        "application",
+        "utility"
+    ],
+    "min_bot_version": "3.3.10",
+    "hidden": false,
+    "disabled": false,
+    "type": "COG"
+}
