@@ -259,7 +259,7 @@ class Decancer(BaseCog):
                             f"Double check my order in heirarchy buddy, got an error\n```diff\n- {e}\n```"
                         )
                         return
-                    await ctx.send(f"{user.name}: ({m_nick}) was changed to {new_cool_nick}")
+                    await ctx.send(f"({m_nick}) was changed to {new_cool_nick}")
 
                     guild = ctx.guild
                     await self.decancer_log(
@@ -275,17 +275,15 @@ class Decancer(BaseCog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        if member.bot:
-            return
         guild = member.guild
         if not (
             await self.config.auto()
             and await self.config.guild(guild).auto()
             and await self.config.guild(guild).modlogchannel()
+            and guild.me.guild_permissions.manage_nicknames
         ):
             return
-        if not guild.me.guild_permissions.manage_nicknames:
-            await self.config.guild(guild).auto.set(False)
+        if member.bot:
             return
 
         cancerous = 0
