@@ -11,7 +11,8 @@
     "required_cogs": {},
     "requirements": [
         "stringcase",
-        "unidecode"
+        "unidecode",
+        "unicodedata"
     ],
     "tags": [
         "utility",

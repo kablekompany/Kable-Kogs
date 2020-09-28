@@ -26,8 +26,8 @@ class Decancer(BaseCog):
         self.config.register_guild(**default_guild)
         self.config.register_global(**default_global)
 
-    __author__ = "KableKompany#0001"
-    __version__ = "1.6.1"
+    __author__ = ["KableKompany#0001", "PhenoM4n4n#0578"]
+    __version__ = "1.7.1"
 
     async def red_delete_data_for_user(self, **kwargs):
         """This cog does not store user data"""
