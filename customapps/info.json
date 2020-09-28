@@ -1,5 +1,5 @@
 {
-    "name": "Application",
+    "name": "CustomApps",
     "short": "",
     "description": "A custom application builder cog",
     "end_user_data_statement": "Data stored in this cog can be removed on user request.",
@@ -15,7 +15,7 @@
         "utility"
     ],
     "min_bot_version": "3.3.10",
-    "hidden": false,
-    "disabled": false,
+    "hidden": true,
+    "disabled": true,
     "type": "COG"
 }

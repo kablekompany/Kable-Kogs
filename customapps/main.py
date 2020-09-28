@@ -33,7 +33,7 @@ default = {
     "botuse": [],
     "finalcomments": [],
 }
-# TODO - remove hard coded questions and application reference from DMO theme and make it agnostic
+# TODO - remove hard coded questions and application reference from DMO theme and make it agnostic (including answer configuration)
 questions = {
     "question1": [],
     "question2": [],
