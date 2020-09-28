@@ -276,10 +276,11 @@ class Decancer(BaseCog):
     @commands.Cog.listener()
     async def on_member_join(self, member):
         guild = member.guild
+        data = await self.config.guild(guild).all()
         if not (
             await self.config.auto()
-            and await self.config.guild(guild).auto()
-            and await self.config.guild(guild).modlogchannel()
+            and data["auto"]
+            and data["modlogchannel"]
             and guild.me.guild_permissions.manage_nicknames
         ):
             return
@@ -299,7 +300,10 @@ class Decancer(BaseCog):
         await asyncio.sleep(
             5
         )  # waiting for auto mod actions to take place to prevent discord from fucking up the nickname edit
-        if not guild.get_member(member.id):
+        member = guild.get_member(member.id)
+        if not member:
+            return
+        if member.top_role.position >= guild.me.top_role.position:
             return
         new_cool_nick = await self.nick_maker(guild, old_nick)
         if old_nick.lower() != new_cool_nick.lower():
