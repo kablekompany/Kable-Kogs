@@ -1,6 +1,6 @@
-from .main import Application
+from .main import CustomApps
 
 
 def setup(bot):
-    cog = Application(bot)
+    cog = CustomApps(bot)
     bot.add_cog(cog)
