@@ -6,6 +6,7 @@ from typing import Optional, Union
 
 import discord
 from redbot.core import Config, checks, commands
+from redbot.core.commands import Greedy
 from redbot.core.utils.chat_formatting import box, pagify
 from redbot.core.utils.menus import DEFAULT_CONTROLS, menu
 
@@ -300,19 +301,18 @@ class LockItUp(BaseCog):
         )
 
     @lockdownset.command()
-    async def addchan(self, ctx: commands.Context, *channel: discord.TextChannel):
+    async def addchan(self, ctx: commands.Context, channels: Greedy[discord.TextChannel]):
         """
         Adds channel to list of channels to lock/unlock
         You can add as many as needed
         Example: `;;lds addchan general support bot-commands`
         IDs are also accepted.
         """
-        if not channel:
-            await ctx.send_help()
-            return
+        if not channels:
+            raise commands.BadArgument
         guild = ctx.guild
         chans = await self.config.guild(guild).channels()
-        for chan in channel:
+        for chan in channels:
             if chan not in chans:
                 chans.append(chan.id)
                 await self.config.guild(guild).channels.set(chans)
@@ -338,17 +338,16 @@ class LockItUp(BaseCog):
         await menu(ctx, e_list, DEFAULT_CONTROLS)
 
     @lockdownset.command()
-    async def rmchan(self, ctx: commands.Context, *channel: int):
+    async def rmchan(self, ctx: commands.Context, channels: Greedy[int]):
         """
         Remove a channel to list of channels to lock/unlock
         You can only remove one at a time otherwise run `[p]lds reset`
         """
-        if not channel:
-            await ctx.send("Give me a channel ID to remove it from this servers configuration")
-            return
+        if not channels:
+            raise commands.BadArgument
         guild = ctx.guild
         chans = await self.config.guild(guild).channels()
-        for chan in channel:
+        for chan in channels:
             if chan in chans:
                 chans.remove(chan)
                 await self.config.guild(guild).channels.set(chans)
