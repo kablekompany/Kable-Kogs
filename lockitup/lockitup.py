@@ -305,7 +305,6 @@ class LockItUp(BaseCog):
         """
         Adds channel to list of channels to lock/unlock
         You can add as many as needed
-        Example: `;;lds addchan general support bot-commands`
         IDs are also accepted.
         """
         if not channels:
