@@ -14,8 +14,10 @@ from .randomnames import adjectives, nouns, properNouns
 
 BaseCog = getattr(commands, "Cog", object)
 
+
 async def enabled_global(ctx: commands.Context):
     return await ctx.bot.get_cog("Decancer").config.auto()
+
 
 # originally from https://github.com/PumPum7/PumCogs repo which has a en masse version of this
 class Decancer(BaseCog):
@@ -230,7 +232,9 @@ class Decancer(BaseCog):
     @checks.mod_or_permissions(manage_nicknames=True)
     @checks.bot_has_permissions(manage_nicknames=True)
     @commands.guild_only()
-    async def nick_checker(self, ctx: commands.Context, *, user: discord.Member):
+    async def nick_checker(
+        self, ctx: commands.Context, user: discord.Member, freeze: bool = False
+    ):
         """
         Change username glyphs (i.e 乇乂, 黑, etc)
         special font chars (zalgo, latin letters, accents, etc)
@@ -243,7 +247,9 @@ class Decancer(BaseCog):
             )
         await ctx.trigger_typing()
         if user.top_role.position >= ctx.me.top_role.position:
-            return await ctx.send(f"I can't decancer that user since they are higher than me in heirarchy.")
+            return await ctx.send(
+                f"I can't decancer that user since they are higher than me in heirarchy."
+            )
         m_nick = user.display_name
         new_cool_nick = await self.nick_maker(ctx.guild, m_nick)
         if m_nick != new_cool_nick:
@@ -252,24 +258,25 @@ class Decancer(BaseCog):
                     reason=f"Old name ({m_nick}): contained special characters",
                     nick=new_cool_nick,
                 )
+                if (
+                    freeze
+                ):  # thanks for this badass cog from Dav@https://github.com/Dav-Git/Dav-Cogs
+                    cog_checking = self.bot.get_cog("NickNamer")
+                    if not cog_checking:
+                        pass
+                    freeze_it = self.bot.get_command("freezenick")
+                    await ctx.invoke(
+                        freeze_it,
+                        user=user,
+                        nickname=new_cool_nick,
+                        reason="Decancer'd and frozen",
+                    )
             except Exception as e:
                 await ctx.send(
                     f"Double check my order in heirarchy buddy, got an error\n```diff\n- {e}\n```"
                 )
                 return
             await ctx.send(f"({m_nick}) was changed to {new_cool_nick}")
-
-            guild = ctx.guild
-            await self.decancer_log(
-                guild, user, ctx.author, m_nick, new_cool_nick, "decancer"
-            )
-            await ctx.tick()
-        else:
-            await ctx.send(f"{user.display_name} was already decancer'd")
-            try:
-                await ctx.message.add_reaction("\N{CROSS MARK}")
-            except Exception:
-                return
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
