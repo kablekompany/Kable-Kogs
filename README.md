@@ -7,6 +7,7 @@
 [![Contributors][contributors-shield]][contributors-url] [![Forks][forks-shield]][forks-url] [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url] [![MIT License][license-shield]][license-url]
 ![Kable-Kogs](https://github.com/kablekompany/Kable-Kogs/workflows/Style%20formatting/badge.svg)
 ![CodeQL](https://github.com/kablekompany/Kable-Kogs/workflows/CodeQL/badge.svg)
+![Discord Bots](https://top.gg/api/widget/status/632872758665281567.svg)](https://top.gg/bot/632872758665281567)
 
 <br/>
 
