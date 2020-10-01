@@ -279,9 +279,7 @@ class Decancer(BaseCog):
             await ctx.send(f"({m_nick}) was changed to {new_cool_nick}")
 
             guild = ctx.guild
-            await self.decancer_log(
-                guild, user, ctx.author, m_nick, new_cool_nick, "decancer"
-            )
+            await self.decancer_log(guild, user, ctx.author, m_nick, new_cool_nick, "decancer")
             await ctx.tick()
         else:
             await ctx.send(f"{user.display_name} was already decancer'd")
