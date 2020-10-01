@@ -14,6 +14,11 @@ from .randomnames import adjectives, nouns, properNouns
 
 BaseCog = getattr(commands, "Cog", object)
 
+
+async def enabled_global(ctx: commands.Context):
+    return await ctx.bot.get_cog("Decancer").config.auto()
+
+
 # originally from https://github.com/PumPum7/PumCogs repo which has a en masse version of this
 class Decancer(BaseCog):
     """Decancer users' names removing special and accented chars. `[p]decancerset` to get started if you're already using redbot core modlog"""
@@ -26,8 +31,8 @@ class Decancer(BaseCog):
         self.config.register_guild(**default_guild)
         self.config.register_global(**default_global)
 
-    __author__ = "KableKompany#0001"
-    __version__ = "1.6.1"
+    __author__ = ["KableKompany#0001", "PhenoM4n4n"]
+    __version__ = "1.7.1"
 
     async def red_delete_data_for_user(self, **kwargs):
         """This cog does not store user data"""
@@ -191,9 +196,6 @@ class Decancer(BaseCog):
             f"Your fallback name, should the cancer be too gd high for me to fix, is `{name}`"
         )
 
-    async def enabled_global(ctx):
-        return await ctx.cog.config.auto()
-
     @commands.check(enabled_global)
     @decancerset.command()
     async def auto(self, ctx, true_or_false: bool = None):
@@ -217,7 +219,6 @@ class Decancer(BaseCog):
     @decancerset.command(name="autoglobal")
     async def global_auto(self, ctx, true_or_false: bool = None):
         """Enable/disable auto-decancering globally."""
-
         target_state = (
             true_or_false if true_or_false is not None else not (await self.config.auto())
         )
@@ -231,7 +232,9 @@ class Decancer(BaseCog):
     @checks.mod_or_permissions(manage_nicknames=True)
     @checks.bot_has_permissions(manage_nicknames=True)
     @commands.guild_only()
-    async def nick_checker(self, ctx: commands.Context, *, user: discord.Member):
+    async def nick_checker(
+        self, ctx: commands.Context, user: discord.Member, freeze: bool = False
+    ):
         """
         Change username glyphs (i.e 乇乂, 黑, etc)
         special font chars (zalgo, latin letters, accents, etc)
@@ -242,50 +245,61 @@ class Decancer(BaseCog):
             return await ctx.send(
                 f"Set up a modlog for this server using `{ctx.prefix}decancerset modlog #channel`"
             )
-        if not user:
-            await ctx.send_help()
-        if ctx.message.guild.me.guild_permissions.manage_nicknames:
-            async with ctx.typing():
-                m_nick = user.display_name
-                new_cool_nick = await self.nick_maker(ctx.guild, m_nick)
-                if m_nick != new_cool_nick:
-                    try:
-                        await user.edit(
-                            reason=f"Old name ({m_nick}): contained special characters",
-                            nick=new_cool_nick,
-                        )
-                    except Exception as e:
-                        await ctx.send(
-                            f"Double check my order in heirarchy buddy, got an error\n```diff\n- {e}\n```"
-                        )
-                        return
-                    await ctx.send(f"{user.name}: ({m_nick}) was changed to {new_cool_nick}")
-
-                    guild = ctx.guild
-                    await self.decancer_log(
-                        guild, user, ctx.author, m_nick, new_cool_nick, "decancer"
+        await ctx.trigger_typing()
+        if user.top_role.position >= ctx.me.top_role.position:
+            return await ctx.send(
+                f"I can't decancer that user since they are higher than me in heirarchy."
+            )
+        m_nick = user.display_name
+        new_cool_nick = await self.nick_maker(ctx.guild, m_nick)
+        if m_nick != new_cool_nick:
+            try:
+                await user.edit(
+                    reason=f"Old name ({m_nick}): contained special characters",
+                    nick=new_cool_nick,
+                )
+                if (
+                    freeze
+                ):  # thanks for this badass cog from Dav@https://github.com/Dav-Git/Dav-Cogs
+                    cog_checking = self.bot.get_cog("NickNamer")
+                    if not cog_checking:
+                        pass
+                    freeze_it = self.bot.get_command("freezenick")
+                    await ctx.invoke(
+                        freeze_it,
+                        user=user,
+                        nickname=new_cool_nick,
+                        reason="Decancer'd and frozen",
                     )
-                    await ctx.tick()
-                else:
-                    await ctx.send(f"{user.display_name} was already decancer'd")
-                    try:
-                        await ctx.message.add_reaction("\N{CROSS MARK}")
-                    except Exception:
-                        return
+            except Exception as e:
+                await ctx.send(
+                    f"Double check my order in heirarchy buddy, got an error\n```diff\n- {e}\n```"
+                )
+                return
+            await ctx.send(f"({m_nick}) was changed to {new_cool_nick}")
+
+            guild = ctx.guild
+            await self.decancer_log(guild, user, ctx.author, m_nick, new_cool_nick, "decancer")
+            await ctx.tick()
+        else:
+            await ctx.send(f"{user.display_name} was already decancer'd")
+            try:
+                await ctx.message.add_reaction("\N{CROSS MARK}")
+            except Exception:
+                return
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        if member.bot:
-            return
         guild = member.guild
+        data = await self.config.guild(guild).all()
         if not (
             await self.config.auto()
-            and await self.config.guild(guild).auto()
-            and await self.config.guild(guild).modlogchannel()
+            and data["auto"]
+            and data["modlogchannel"]
+            and guild.me.guild_permissions.manage_nicknames
         ):
             return
-        if not guild.me.guild_permissions.manage_nicknames:
-            await self.config.guild(guild).auto.set(False)
+        if member.bot:
             return
 
         cancerous = 0
@@ -301,7 +315,10 @@ class Decancer(BaseCog):
         await asyncio.sleep(
             5
         )  # waiting for auto mod actions to take place to prevent discord from fucking up the nickname edit
-        if not guild.get_member(member.id):
+        member = guild.get_member(member.id)
+        if not member:
+            return
+        if member.top_role.position >= guild.me.top_role.position:
             return
         new_cool_nick = await self.nick_maker(guild, old_nick)
         if old_nick.lower() != new_cool_nick.lower():
@@ -312,6 +329,7 @@ class Decancer(BaseCog):
                 )
             except discord.errors.Forbidden:
                 await self.config.guild(guild).auto.set(False)
-            await self.decancer_log(
-                guild, member, guild.me, old_nick, new_cool_nick, "auto-decancer"
-            )
+            else:
+                await self.decancer_log(
+                    guild, member, guild.me, old_nick, new_cool_nick, "auto-decancer"
+                )
