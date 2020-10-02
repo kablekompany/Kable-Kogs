@@ -38,6 +38,19 @@ class Decancer(BaseCog):
         """This cog does not store user data"""
         return
 
+    @staticmethod
+    def is_cancerous(text: str) -> bool:
+        cancerous = 0
+        for segment in text.split():
+            for char in segment:
+                if not (char.isascii() and char.isalnum()):
+                    cancerous += 1
+
+        if cancerous / len(text) <= 1 / 10:
+            return False # even though decancer output may be different than their current name, there isnt much reason to decancer
+        else:
+            return True
+
     # the magic
     @staticmethod
     def strip_accs(text):
@@ -288,8 +301,34 @@ class Decancer(BaseCog):
             except Exception:
                 return
 
+    @commands.cooldown(2, 600)
+    @checks.mod_or_permissions(manage_nicknames=True)
+    @checks.bot_has_permissions(manage_nicknames=True)
+    @commands.guild_only()
+    @commands.command()
+    async def dehoist(self, ctx: commands.Context):
+        """Decancer all members of the server."""
+        guild = ctx.guild
+        cancerous_list = [member for member in guild.members if self.is_cancerous(member.display_name) and ctx.me.top_role.position > member.top_role.position]
+        for member in cancerous_list:
+            await asyncio.sleep(1)
+            old_nick = member.display_name
+            new_cool_nick = await self.nick_maker(guild, member.display_name)
+            if old_nick.lower() != new_cool_nick.lower():
+                try:
+                    await member.edit(
+                        reason=f"Dehoist | Old name ({old_nick}): contained special characters",
+                        nick=new_cool_nick,
+                    )
+                except discord.errors.Forbidden:
+                    return
+                else:
+                    await self.decancer_log(
+                        guild, member, guild.me, old_nick, new_cool_nick, "dehoist"
+                    )
+
     @commands.Cog.listener()
-    async def on_member_join(self, member):
+    async def on_member_join(self, member: discord.Member):
         guild = member.guild
         data = await self.config.guild(guild).all()
         if not (
@@ -302,15 +341,9 @@ class Decancer(BaseCog):
         if member.bot:
             return
 
-        cancerous = 0
         old_nick = member.display_name
-        for segment in old_nick.split():
-            for char in segment:
-                if not (char.isascii() and char.isalnum()):
-                    cancerous += 1
-
-        if cancerous / len(old_nick) <= 1 / 10:
-            return  # even though decancer output may be different than their current name, there isnt much reason to decancer
+        if not self.is_cancerous(old_nick):
+            return
 
         await asyncio.sleep(
             5
