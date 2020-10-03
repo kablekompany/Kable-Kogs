@@ -2,13 +2,16 @@ import asyncio
 import random
 import re
 import unicodedata
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import discord
 import stringcase
 import unidecode
 from redbot.core import Config, checks, commands, modlog
 from redbot.core.commands import errors
+from redbot.core.utils.chat_formatting import box, humanize_timedelta
+from redbot.core.utils.predicates import ReactionPredicate
+from redbot.core.utils.menus import start_adding_reactions
 
 from .randomnames import adjectives, nouns, properNouns
 
@@ -301,31 +304,83 @@ class Decancer(BaseCog):
             except Exception:
                 return
 
-    @commands.cooldown(2, 600)
+    @commands.max_concurrency(1, commands.BucketType.guild)
+    @commands.cooldown(1, 600, commands.BucketType.guild)
     @checks.mod_or_permissions(manage_nicknames=True)
     @checks.bot_has_permissions(manage_nicknames=True)
     @commands.guild_only()
     @commands.command()
-    async def dehoist(self, ctx: commands.Context):
-        """Decancer all members of the server."""
+    async def dehoist(self, ctx: commands.Context, *, role: discord.Role = None):
+        """Decancer all members of the targeted role.
+        
+        Role defaults to all members of the server."""
+        if not await self.config.guild(ctx.guild).modlogchannel():
+            await ctx.send(
+                f"Set up a modlog for this server using `{ctx.prefix}decancerset modlog #channel`"
+            )
+            ctx.command.reset_cooldown(ctx)
+            return
+
+        role = role or ctx.guild.default_role
         guild = ctx.guild
         cancerous_list = [member for member in guild.members if self.is_cancerous(member.display_name) and ctx.me.top_role.position > member.top_role.position]
-        for member in cancerous_list:
-            await asyncio.sleep(1)
-            old_nick = member.display_name
-            new_cool_nick = await self.nick_maker(guild, member.display_name)
-            if old_nick.lower() != new_cool_nick.lower():
-                try:
-                    await member.edit(
-                        reason=f"Dehoist | Old name ({old_nick}): contained special characters",
-                        nick=new_cool_nick,
-                    )
-                except discord.errors.Forbidden:
-                    return
-                else:
-                    await self.decancer_log(
-                        guild, member, guild.me, old_nick, new_cool_nick, "dehoist"
-                    )
+        if not cancerous_list:
+            await ctx.send("There's no one to decancer.")
+            ctx.command.reset_cooldown(ctx)
+            return
+        if len(cancerous_list) > 5000:
+            await ctx.send(
+                "There are too many members to decancer in the targeted role. "
+                "Please select a role with less than 5000 members."
+            )
+            ctx.command.reset_cooldown(ctx)
+            return
+        member_preview = "\n".join([f"{member} - {member.id}" for index, member in enumerate(cancerous_list, 1) if index <= 10]) + (
+            f"\nand {len(cancerous_list) - 5} other members.." if len(cancerous_list) > 5 else ""
+        )
+        case = "" if len(cancerous_list) == 1 else "s"
+        msg = await ctx.send(
+            f"Are you sure you want me to decancer the following {len(cancerous_list)} member{case}?\n"
+            + box(member_preview, "py")
+        )
+        start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
+        pred = ReactionPredicate.yes_or_no(msg, ctx.author)
+        try:
+            await self.bot.wait_for("reaction_add", check=pred, timeout=60)
+        except asyncio.TimeoutError:
+            await ctx.send("Action cancelled.")
+            ctx.command.reset_cooldown(ctx)
+            return
+
+        if pred.result is True:
+            await ctx.send(f"Ok. This will take around **{humanize_timedelta(timedelta=timedelta(seconds=len(cancerous_list)))}**.")
+            async with ctx.typing():
+                for member in cancerous_list:
+                    await asyncio.sleep(1)
+                    old_nick = member.display_name
+                    new_cool_nick = await self.nick_maker(guild, member.display_name)
+                    if old_nick.lower() != new_cool_nick.lower():
+                        try:
+                            await member.edit(
+                                reason=f"Dehoist | Old name ({old_nick}): contained special characters",
+                                nick=new_cool_nick,
+                            )
+                        except discord.Forbidden:
+                            return
+                        except discord.NotFound:
+                            continue
+                        else:
+                            await self.decancer_log(
+                                guild, member, guild.me, old_nick, new_cool_nick, "dehoist"
+                            )
+            try:
+                await ctx.send("Dehoist completed.")
+            except (discord.NotFound, discord.Forbidden):
+                pass
+        else:
+            await ctx.send("Action cancelled.")
+            ctx.command.reset_cooldown(ctx)
+            return
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
