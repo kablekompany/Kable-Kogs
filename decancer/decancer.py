@@ -371,7 +371,7 @@ class Decancer(BaseCog):
 
         if pred.result is True:
             await ctx.send(
-                f"Ok. This will take around **{humanize_timedelta(timedelta=timedelta(seconds=len(cancerous_list)))}**."
+                f"Ok. This will take around **{humanize_timedelta(timedelta=timedelta(seconds=len(cancerous_list) * 1.5))}**."
             )
             async with ctx.typing():
                 for member in cancerous_list:
@@ -385,6 +385,7 @@ class Decancer(BaseCog):
                                 nick=new_cool_nick,
                             )
                         except discord.Forbidden:
+                            await ctx.send("Dehoist failed due to invalid permissions.")
                             return
                         except discord.NotFound:
                             continue
