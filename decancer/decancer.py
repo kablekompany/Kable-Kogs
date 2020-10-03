@@ -336,7 +336,7 @@ class Decancer(BaseCog):
             and ctx.me.top_role.position > member.top_role.position
         ]
         if not cancerous_list:
-            await ctx.send(f"There's no one I can decancer in **{role}**.")
+            await ctx.send(f"There's no one I can decancer in **`{role}`**.")
             ctx.command.reset_cooldown(ctx)
             return
         if len(cancerous_list) > 5000:
