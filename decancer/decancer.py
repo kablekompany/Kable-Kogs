@@ -310,7 +310,7 @@ class Decancer(BaseCog):
                 return
 
     @commands.max_concurrency(1, commands.BucketType.guild)
-    @commands.cooldown(1, 600, commands.BucketType.guild)
+    @commands.cooldown(1, 6000, commands.BucketType.guild)
     @checks.mod_or_permissions(manage_nicknames=True)
     @checks.bot_has_permissions(manage_nicknames=True)
     @commands.guild_only()
