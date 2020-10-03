@@ -323,9 +323,9 @@ class Decancer(BaseCog):
 
         role = role or ctx.guild.default_role
         guild = ctx.guild
-        cancerous_list = [member for member in guild.members if self.is_cancerous(member.display_name) and ctx.me.top_role.position > member.top_role.position]
+        cancerous_list = [member for member in role.members if self.is_cancerous(member.display_name) and ctx.me.top_role.position > member.top_role.position]
         if not cancerous_list:
-            await ctx.send("There's no one to decancer.")
+            await ctx.send(f"There's no one to decancer in **{role}**.")
             ctx.command.reset_cooldown(ctx)
             return
         if len(cancerous_list) > 5000:
@@ -336,7 +336,7 @@ class Decancer(BaseCog):
             ctx.command.reset_cooldown(ctx)
             return
         member_preview = "\n".join([f"{member} - {member.id}" for index, member in enumerate(cancerous_list, 1) if index <= 10]) + (
-            f"\nand {len(cancerous_list) - 5} other members.." if len(cancerous_list) > 5 else ""
+            f"\nand {len(cancerous_list) - 10} other members.." if len(cancerous_list) > 10 else ""
         )
         case = "" if len(cancerous_list) == 1 else "s"
         msg = await ctx.send(
