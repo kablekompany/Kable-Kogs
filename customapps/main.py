@@ -61,7 +61,11 @@ class CustomApps(Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.config = Config.get_conf(self, identifier=73837383738, force_registration=True,)
+        self.config = Config.get_conf(
+            self,
+            identifier=73837383738,
+            force_registration=True,
+        )
         self.config.register_member(**default)
         self.config.register_guild(**questions)
         self.antispam = {}
@@ -262,7 +266,9 @@ class CustomApps(Cog):
         embed.title = f"User: {ctx.author.name}#{ctx.author.discriminator} | ID: ({ctx.author.id})"
         embed.add_field(name="Name:", value=f"{ctx.author.mention}\n" + name.content, inline=True)
         embed.add_field(
-            name="Year of Birth:", value=age.content + f"\n{yearmath} years old", inline=True,
+            name="Year of Birth:",
+            value=age.content + f"\n{yearmath} years old",
+            inline=True,
         )
         embed.add_field(name="Timezone:", value=timezone.content, inline=True)
         # embed.add_field(name="Desired position:", value=position.content, inline=True)
@@ -279,7 +285,9 @@ class CustomApps(Cog):
             inline=False,
         )
         embed.add_field(
-            name="User missing coins, what do?", value=coinsmissing.content, inline=False,
+            name="User missing coins, what do?",
+            value=coinsmissing.content,
+            inline=False,
         )
         embed.add_field(name="Final Comments", value=finalcomments.content, inline=False)
         try:
@@ -329,7 +337,9 @@ class CustomApps(Cog):
         embed.title = f"User: {applicant_user.name}#{applicant_user.discriminator} | ID: ({applicant_user.id})"
         embed.add_field(name="Name:", value=load_data["name"], inline=True)
         embed.add_field(
-            name="Age", value=load_data["age"], inline=True,
+            name="Age",
+            value=load_data["age"],
+            inline=True,
         )
         embed.add_field(name="Timezone:", value=load_data["timezone"], inline=True)
         # embed.add_field(name="Desired position:", value=position.content, inline=True)
@@ -338,11 +348,15 @@ class CustomApps(Cog):
         embed.add_field(name="Used Dank Memer for:", value=load_data["botuse"], inline=True)
         embed.add_field(name="Previous experience:", value=load_data["experience"], inline=False)
         embed.add_field(
-            name="Reason for interest:", value=load_data["reasonforinterest"], inline=False,
+            name="Reason for interest:",
+            value=load_data["reasonforinterest"],
+            inline=False,
         )
         embed.add_field(name="Bot Perks don't work", value=load_data["perkslinking"], inline=False)
         embed.add_field(
-            name="Enable/Disable Commands", value=load_data["commandcontrol"], inline=False,
+            name="Enable/Disable Commands",
+            value=load_data["commandcontrol"],
+            inline=False,
         )
         embed.add_field(
             name="Unsure what the answer is, what do you do?",
@@ -350,7 +364,9 @@ class CustomApps(Cog):
             inline=False,
         )
         embed.add_field(
-            name="User missing coins, what do?", value=load_data["coinsmissing"], inline=False,
+            name="User missing coins, what do?",
+            value=load_data["coinsmissing"],
+            inline=False,
         )
         embed.add_field(name="Final Comments", value=load_data["finalcomments"], inline=False)
         await ctx.send(embed=embed)
@@ -403,7 +419,9 @@ class CustomApps(Cog):
                 }
             try:
                 channel = await ctx.guild.create_text_channel(
-                    "staff-applications", overwrites=overwrites, reason="Application cog setup",
+                    "staff-applications",
+                    overwrites=overwrites,
+                    reason="Application cog setup",
                 )
             except discord.Forbidden:
                 return await ctx.send(

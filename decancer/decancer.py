@@ -10,8 +10,8 @@ import unidecode
 from redbot.core import Config, checks, commands, modlog
 from redbot.core.commands import errors
 from redbot.core.utils.chat_formatting import box, humanize_timedelta
-from redbot.core.utils.predicates import ReactionPredicate
 from redbot.core.utils.menus import start_adding_reactions
+from redbot.core.utils.predicates import ReactionPredicate
 
 from .randomnames import adjectives, nouns, properNouns
 
@@ -28,7 +28,11 @@ class Decancer(BaseCog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.config = Config.get_conf(self, identifier=7778847744, force_registration=True,)
+        self.config = Config.get_conf(
+            self,
+            identifier=7778847744,
+            force_registration=True,
+        )
         default_guild = {"modlogchannel": None, "new_custom_nick": "simp name", "auto": False}
         default_global = {"auto": True}
         self.config.register_guild(**default_guild)
@@ -50,7 +54,7 @@ class Decancer(BaseCog):
                     cancerous += 1
 
         if cancerous / len(text) <= 1 / 10:
-            return False # even though decancer output may be different than their current name, there isnt much reason to decancer
+            return False  # even though decancer output may be different than their current name, there isnt much reason to decancer
         else:
             return True
 
@@ -158,7 +162,8 @@ class Decancer(BaseCog):
             values.append(f"**Auto-Decancer:** `{auto}`")
         e = discord.Embed(colour=await ctx.embed_colour())
         e.add_field(
-            name=f"{ctx.guild.name} Settings", value="\n".join(values),
+            name=f"{ctx.guild.name} Settings",
+            value="\n".join(values),
         )
         e.set_footer(text="To change these, pass [p]decancerset modlog|defaultname")
         e.set_image(url=ctx.guild.icon_url)
@@ -312,7 +317,7 @@ class Decancer(BaseCog):
     @commands.command()
     async def dehoist(self, ctx: commands.Context, *, role: discord.Role = None):
         """Decancer all members of the targeted role.
-        
+
         Role defaults to all members of the server."""
         if not await self.config.guild(ctx.guild).modlogchannel():
             await ctx.send(
@@ -323,7 +328,13 @@ class Decancer(BaseCog):
 
         role = role or ctx.guild.default_role
         guild = ctx.guild
-        cancerous_list = [member for member in role.members if self.is_cancerous(member.display_name) and ctx.me.top_role.position > member.top_role.position]
+        cancerous_list = [
+            member
+            for member in role.members
+            if not member.bot
+            and self.is_cancerous(member.display_name)
+            and ctx.me.top_role.position > member.top_role.position
+        ]
         if not cancerous_list:
             await ctx.send(f"There's no one to decancer in **{role}**.")
             ctx.command.reset_cooldown(ctx)
@@ -335,7 +346,13 @@ class Decancer(BaseCog):
             )
             ctx.command.reset_cooldown(ctx)
             return
-        member_preview = "\n".join([f"{member} - {member.id}" for index, member in enumerate(cancerous_list, 1) if index <= 10]) + (
+        member_preview = "\n".join(
+            [
+                f"{member} - {member.id}"
+                for index, member in enumerate(cancerous_list, 1)
+                if index <= 10
+            ]
+        ) + (
             f"\nand {len(cancerous_list) - 10} other members.." if len(cancerous_list) > 10 else ""
         )
         case = "" if len(cancerous_list) == 1 else "s"
@@ -353,7 +370,9 @@ class Decancer(BaseCog):
             return
 
         if pred.result is True:
-            await ctx.send(f"Ok. This will take around **{humanize_timedelta(timedelta=timedelta(seconds=len(cancerous_list)))}**.")
+            await ctx.send(
+                f"Ok. This will take around **{humanize_timedelta(timedelta=timedelta(seconds=len(cancerous_list)))}**."
+            )
             async with ctx.typing():
                 for member in cancerous_list:
                     await asyncio.sleep(1)

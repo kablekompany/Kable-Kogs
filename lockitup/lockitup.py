@@ -417,7 +417,10 @@ class LockItUp(BaseCog):
 
     @lockdownset.command(name="setvc")
     async def vc_setter(
-        self, ctx: commands.Context, *, vc_channel: Optional[discord.VoiceChannel] = None,
+        self,
+        ctx: commands.Context,
+        *,
+        vc_channel: Optional[discord.VoiceChannel] = None,
     ):
         """
         Adds channel to list of voice chats to lock/unlock
