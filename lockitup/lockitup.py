@@ -33,7 +33,7 @@ class LockItUp(BaseCog):
         }
 
         self.config.register_guild(**default_guild)
-        self.log = logging.getLogger("kko.cogs.lockitup")
+        self.log = logging.getLogger("red.kko-cogs.lockitup")
 
     async def red_delete_data_for_user(self, **kwargs):
         """This cog does not store user data"""
@@ -120,10 +120,15 @@ class LockItUp(BaseCog):
                             self.log.info(
                                 "Could not send message to {}".format(guild_channel.name)
                             )
+        try:
+            await ctx.send(
+                "We're locked up, fam. Revert this by running `{}unlockdown`".format(ctx.prefix)
+            )
+        except discord.Forbidden:
+            self.log.info(
+                f"Couldn't secure overrides in Guild {ctx.guild.name} ({ctx.guild.id}): Locked as requested."
+            )
 
-        await ctx.send(
-            "We're locked up, fam. Revert this by running `{}unlockdown`".format(ctx.prefix)
-        )
         await self.config.guild(guild).locked.set(True)
 
     @commands.command()
@@ -201,10 +206,13 @@ class LockItUp(BaseCog):
                                 self.log.info(
                                     "Could not send messages in {}".format(guild_channel.name)
                                 )
-                # await asyncio.sleep(4)
-                # await message.edit(content=f"<a:HehWellCyaNever:708582524309471252>")
+        try:
+            await ctx.send("Guild is now unlocked.")
+        except discord.Forbidden:
+            self.log.info(
+                f"Couldn't secure overrides in Guild {ctx.guild.name} ({ctx.guild.id}): Unlocked as requested."
+            )
 
-        await ctx.send("Guild is now unlocked.")
         await self.config.guild(guild).locked.set(False)
 
     @commands.group(aliases=["lds"])
@@ -453,17 +461,20 @@ class LockItUp(BaseCog):
         )
 
     @lockdownset.command(name="addrole")
-    async def add_role(self, ctx: commands.Context, *, role: discord.Role):
+    async def add_role(self, ctx: commands.Context, *roles: Greedy[discord.Role]):
         """
         NOTE: This does not implement yet!
         Add a role to lock from sending messages instead of the @everyone role
         """
         guild = ctx.guild
         role_list = await self.config.guild(guild).roles()
-        role_list.append(role.id)
-        await self.config.guild(guild).roles.set(role_list)
+        for role in roles:
+            if role.id not in role_list:
+                role_list.append(role.id)
+                await self.config.guild(guild).roles.set(role_list)
+
         await ctx.send(
-            f"{role.name} added to the config. Any locks/unlocks will now effect this role for channels in your configuration"
+            f"{roles} added to the config. Any locks/unlocks will now effect this for channels in your configuration"
         )
         await self.config.guild(guild).nondefault.set(value=True)
 
