@@ -33,24 +33,27 @@ default = {
     "answer12": [],
     "finalcomments": [],
 }
-# TODO - remove hard coded questions and application reference from DMO theme and make it agnostic (including answer configuration)
-questions = {
-    "question1": "What name do you prefer to be called?",
-    "question2": "What timezone are you located in? (Use google if you don't know)",
-    "question3": "What year were you born? RESPOND ONLY THE 4 DIGIT YEAR",
-    "question4": "What days can you be active in providing support?",
-    "question5": "How many hours per day can you be active?",
-    "question6": "Do you have any previous experience? If so, please describe.",
-    "question7": "Why do you want to be a member of our staff?",
-    "question8": [],
-    "question9": [],
-    "question10": [],
-    "question11": [],
-    "question12": [],
-    "question13": [],
+
+guild_defaults = {
+    "app_questions": {
+        "name": "What name do you prefer to be called?",
+        "timezone": "What timezone are you located in? (Use google if you don't know)",
+        "age": "What year were you born? RESPOND ONLY THE 4 DIGIT YEAR",
+        "days": "What days can you be active in the server?",
+        "hours": "How many hours per day can you be active?",
+        "experience": "Do you have any previous experience? If so, please describe.",
+        "reasonforinterest": "Why do you want to be a member of our staff?",
+        "question8": None,
+        "question9": None,
+        "question10": None,
+        "question11": None,
+        "question12": None,
+        "finalcomments": "Do you have any final comments for the admins?",
+    },
     "applicant_id": None,
     "accepter_id": None,
     "channel_id": None,
+    "positions_available": ["this position", "that position"],
 }
 
 
@@ -63,7 +66,7 @@ class CustomApps(Cog):
         self.bot = bot
         self.config = Config.get_conf(self, identifier=73837383738, force_registration=True,)
         self.config.register_member(**default)
-        self.config.register_guild(**questions)
+        self.config.register_guild(**guild_defaults)
         self.antispam = {}
 
     async def red_delete_data_for_user(self, *, requester: RequestType, user_id: int):
@@ -71,11 +74,11 @@ class CustomApps(Cog):
 
     @commands.command()
     @commands.guild_only()
-    @checks.bot_has_permissions(manage_roles=True)
+    @checks.bot_has_permissions(manage_roles=True, manage_channels=True, manage_webhooks=True)
     async def apply(self, ctx: commands.Context):
         """Apply to be a staff member."""
         role_add = get(ctx.guild.roles, name="Applicant")
-        app_data = await self.config.guild(ctx.guild).all()
+        app_data = await self.config.guild(ctx.guild).app_questions.all()
         user_data = self.config.member(ctx.author)
         answers = []
         channel = get(ctx.guild.text_channels, name="staff-applications")
@@ -92,9 +95,10 @@ class CustomApps(Cog):
                 "Uh oh. Looks like your Admins haven't added the required channel."
             )
         try:
-            available_positions = "Moderator\nSupport Specialist\nGiveaway Manager\nHeist Manager"
+            available_positions = await self.config.guild(ctx.guild).positions_available()
+            # TODO - ALLOW SETTING OF POSITIONS
             await ctx.author.send(
-                f"Let's start right away! You have maximum of 5 minutes for each question.\nOur current available positions are {available_positions}\nReply with `mel cute` to continue"
+                f"Let's start right away! You have maximum of 5 minutes for each question.\n\nReply with the position you are applying for to continue. To cancel at anytime respond with `cancel`"
             )
         except discord.Forbidden:
             return await ctx.send(f"{ctx.author.mention} I can't DM you. Do you have them closed?")
@@ -105,6 +109,8 @@ class CustomApps(Cog):
 
         try:
             position = await self.bot.wait_for("message", timeout=300, check=check)
+            if position.content.lower() == "cancel":
+                return await ctx.author.send("Application has been canceled.")
             await user_data.position.set(position.content)
         except asyncio.TimeoutError:
             try:
@@ -112,9 +118,11 @@ class CustomApps(Cog):
             except discord.HTTPException:
                 return await ctx.send(f"Thanks for nothing, {ctx.author.mention}")
             return
-        await ctx.author.send(app_data["question1"])
+        await ctx.author.send(app_data["name"])
         try:
             name = await self.bot.wait_for("message", timeout=300, check=check)
+            if name.content.lower() == "cancel":
+                return await ctx.author.send("Application has been canceled.")
             await user_data.name.set(name.content)
         except asyncio.TimeoutError:
             try:
@@ -122,9 +130,11 @@ class CustomApps(Cog):
             except discord.HTTPException:
                 return await ctx.send(f"Thanks for nothing, {ctx.author.mention}")
             return
-        await ctx.author.send(app_data["question2"])
+        await ctx.author.send(app_data["timezone"])
         try:
             timezone = await self.bot.wait_for("message", timeout=300, check=check)
+            if timezone.content.lower() == "cancel":
+                return await ctx.author.send("Application has been canceled.")
             await user_data.timezone.set(timezone.content)
         except asyncio.TimeoutError:
             try:
@@ -132,9 +142,11 @@ class CustomApps(Cog):
             except discord.HTTPException:
                 return await ctx.send(f"Thanks for nothing, {ctx.author.mention}")
             return
-        await ctx.author.send(app_data["question3"])
+        await ctx.author.send(app_data["age"])
         try:
             age = await self.bot.wait_for("message", timeout=300, check=check)
+            if age.content.lower() == "cancel":
+                return await ctx.author.send("Application has been canceled.")
         except asyncio.TimeoutError:
             try:
                 await ctx.author.send("You took too long. Try again, please.")
@@ -145,9 +157,11 @@ class CustomApps(Cog):
         #     a = int(age.content)
         # except commands.CommandInvokeError:
         #     return await ctx.author.send("Start over, and this time make sure the response for this question is what's asked for, LOL")
-        await ctx.author.send(app_data["question4"])
+        await ctx.author.send(app_data["days"])
         try:
             days = await self.bot.wait_for("message", timeout=300, check=check)
+            if days.content.lower() == "cancel":
+                return await ctx.author.send("Application has been canceled.")
             await user_data.days.set(days.content)
         except asyncio.TimeoutError:
             try:
@@ -155,9 +169,11 @@ class CustomApps(Cog):
             except discord.HTTPException:
                 return await ctx.send(f"Thanks for nothing, {ctx.author.mention}")
             return
-        await ctx.author.send(app_data["question5"])
+        await ctx.author.send(app_data["hours"])
         try:
             hours = await self.bot.wait_for("message", timeout=300, check=check)
+            if hours.content.lower() == "cancel":
+                return await ctx.author.send("Application has been canceled.")
             await user_data.hours.set(hours.content)
         except asyncio.TimeoutError:
             try:
@@ -165,9 +181,11 @@ class CustomApps(Cog):
             except discord.HTTPException:
                 return await ctx.send(f"Thanks for nothing, {ctx.author.mention}")
             return
-        await ctx.author.send(app_data["question6"])
+        await ctx.author.send(app_data["experience"])
         try:
             experience = await self.bot.wait_for("message", timeout=300, check=check)
+            if experience.content.lower() == "cancel":
+                return await ctx.author.send("Application has been canceled.")
             await user_data.experience.set(experience.content)
         except asyncio.TimeoutError:
             try:
@@ -175,9 +193,11 @@ class CustomApps(Cog):
             except discord.HTTPException:
                 return await ctx.send(f"Thanks for nothing, {ctx.author.mention}")
             return
-        await ctx.author.send(app_data["question7"])
+        await ctx.author.send(app_data["reasonforinterest"])
         try:
             reasonforinterest = await self.bot.wait_for("message", timeout=300, check=check)
+            if reasonforinterest.content.lower() == "cancel":
+                return await ctx.author.send("Application has been canceled.")
             await user_data.reasonforinterest.set(reasonforinterest.content)
         except asyncio.TimeoutError:
             try:
@@ -185,59 +205,82 @@ class CustomApps(Cog):
             except discord.HTTPException:
                 return await ctx.send(f"Thanks for nothing, {ctx.author.mention}")
             return
-        await ctx.author.send(app_data["question8"])
-        try:
-            perkslinking = await self.bot.wait_for("message", timeout=300, check=check)
-            await user_data.perkslinking.set(perkslinking.content)
-        except asyncio.TimeoutError:
+        check_8 = app_data["question8"]
+        if check_8 is not None:
+            await ctx.author.send(app_data["question8"])
             try:
-                await ctx.author.send("You took too long. Try again, please.")
-            except discord.HTTPException:
-                return await ctx.send(f"Thanks for nothing, {ctx.author.mention}")
-            return
-        await ctx.author.send(app_data["question9"])
-        try:
-            commandcontrol = await self.bot.wait_for("message", timeout=300, check=check)
-            await user_data.commandcontrol.set(commandcontrol.content)
-        except asyncio.TimeoutError:
+                answer8 = await self.bot.wait_for("message", timeout=300, check=check)
+                if answer8.content.lower() == "cancel":
+                    return await ctx.author.send("Application has been canceled.")
+                await user_data.answer8.set(answer8.content)
+            except asyncio.TimeoutError:
+                try:
+                    await ctx.author.send("You took too long. Try again, please.")
+                except discord.HTTPException:
+                    return await ctx.send(f"Thanks for nothing, {ctx.author.mention}")
+                return
+        check_9 = app_data["question9"]
+        if check_9 is not None:
+            await ctx.author.send(app_data["question9"])
             try:
-                await ctx.author.send("You took too long. Try again, please.")
-            except discord.HTTPException:
-                return await ctx.send(f"Thanks for nothing, {ctx.author.mention}")
-            return
-        await ctx.author.send(app_data["question10"])
-        try:
-            coinsmissing = await self.bot.wait_for("message", timeout=300, check=check)
-            await user_data.coinsmissing.set(coinsmissing.content)
-        except asyncio.TimeoutError:
+                answer9 = await self.bot.wait_for("message", timeout=300, check=check)
+                if answer9.content.lower() == "cancel":
+                    return await ctx.author.send("Application has been canceled.")
+                await user_data.answer9.set(answer9.content)
+            except asyncio.TimeoutError:
+                try:
+                    await ctx.author.send("You took too long. Try again, please.")
+                except discord.HTTPException:
+                    return await ctx.send(f"Thanks for nothing, {ctx.author.mention}")
+                return
+        check_10 = app_data["question10"]
+        if check_10 is not None:
+            await ctx.author.send(app_data["question10"])
             try:
-                await ctx.author.send("You took too long. Try again, please.")
-            except discord.HTTPException:
-                return await ctx.send(f"Thanks for nothing, {ctx.author.mention}")
-            return
-        await ctx.author.send(app_data["question11"])
-        try:
-            botadvice = await self.bot.wait_for("message", timeout=300, check=check)
-            await user_data.botadvice.set(botadvice.content)
-        except asyncio.TimeoutError:
+                answer10 = await self.bot.wait_for("message", timeout=300, check=check)
+                if answer10.content.lower() == "cancel":
+                    return await ctx.author.send("Application has been canceled.")
+                await user_data.answer10.set(answer10.content)
+            except asyncio.TimeoutError:
+                try:
+                    await ctx.author.send("You took too long. Try again, please.")
+                except discord.HTTPException:
+                    return await ctx.send(f"Thanks for nothing, {ctx.author.mention}")
+                return
+        check_11 = app_data["question11"]
+        if check_11 is not None:
+            await ctx.author.send(app_data["question11"])
             try:
-                await ctx.author.send("You took too long. Try again, please.")
-            except discord.HTTPException:
-                return await ctx.send(f"Thanks for nothing, {ctx.author.mention}")
-            return
-        await ctx.author.send(app_data["question12"])
-        try:
-            botuse = await self.bot.wait_for("message", timeout=300, check=check)
-            await user_data.botuse.set(botuse.content)
-        except asyncio.TimeoutError:
+                answer11 = await self.bot.wait_for("message", timeout=300, check=check)
+                if answer11.content.lower() == "cancel":
+                    return await ctx.author.send("Application has been canceled.")
+                await user_data.answer11.set(answer11.content)
+            except asyncio.TimeoutError:
+                try:
+                    await ctx.author.send("You took too long. Try again, please.")
+                except discord.HTTPException:
+                    return await ctx.send(f"Thanks for nothing, {ctx.author.mention}")
+                return
+        check_12 = app_data["question12"]
+        if check_12 is not None:
+            await ctx.author.send(app_data["question12"])
             try:
-                await ctx.author.send("You took too long. Try again, please.")
-            except discord.HTTPException:
-                return await ctx.send(f"Thanks for nothing, {ctx.author.mention}")
-            return
-        await ctx.author.send(app_data["question13"])
+                answer12 = await self.bot.wait_for("message", timeout=300, check=check)
+                if answer12.content.lower() == "cancel":
+                    return await ctx.author.send("Application has been canceled.")
+                await user_data.answer12.set(answer12.content)
+            except asyncio.TimeoutError:
+                try:
+                    await ctx.author.send("You took too long. Try again, please.")
+                except discord.HTTPException:
+                    return await ctx.send(f"Thanks for nothing, {ctx.author.mention}")
+                return
+
+        await ctx.author.send(app_data["finalcomments"])
         try:
             finalcomments = await self.bot.wait_for("message", timeout=300, check=check)
+            if finalcomments.content.lower() == "cancel":
+                return await ctx.author.send("Application has been canceled.")
             await user_data.finalcomments.set(finalcomments.content)
         except asyncio.TimeoutError:
             return await ctx.author.send("You took too long. Try again, please.")
@@ -253,7 +296,7 @@ class CustomApps(Cog):
             )  # TODO: make less hacky
         # else:
         #     return
-        user_data.app_check.set(True)
+
         embed = discord.Embed(color=await ctx.embed_colour(), timestamp=datetime.utcnow())
         embed.set_author(name="New application!", icon_url=ctx.author.avatar_url)
         embed.set_footer(
@@ -265,30 +308,45 @@ class CustomApps(Cog):
             name="Year of Birth:", value=age.content + f"\n{yearmath} years old", inline=True,
         )
         embed.add_field(name="Timezone:", value=timezone.content, inline=True)
-        # embed.add_field(name="Desired position:", value=position.content, inline=True)
+        embed.add_field(name="Desired position:", value=position.content, inline=True)
         embed.add_field(name="Active days/week:", value=days.content, inline=True)
         embed.add_field(name="Active hours/day:", value=hours.content, inline=True)
-        embed.add_field(name="Used Dank Memer for:", value=botuse.content, inline=True)
+        embed.add_field(
+            name=app_data["reasonforinterest"], value=reasonforinterest.content, inline=False
+        )
         embed.add_field(name="Previous experience:", value=experience.content, inline=False)
-        embed.add_field(name="Reason for interest:", value=reasonforinterest.content, inline=False)
-        embed.add_field(name="Bot Perks don't work", value=perkslinking.content, inline=False)
-        embed.add_field(name="Enable/Disable Commands", value=commandcontrol.content, inline=False)
-        embed.add_field(
-            name="Unsure what the answer is, what do you do?",
-            value=botadvice.content,
-            inline=False,
-        )
-        embed.add_field(
-            name="User missing coins, what do?", value=coinsmissing.content, inline=False,
-        )
+        if check_8 is not None:
+            embed.add_field(name=app_data["question8"], value=answer8.content, inline=False)
+        if check_9 is not None:
+            embed.add_field(name=app_data["question9"], value=answer9.content, inline=False)
+        if check_10 is not None:
+            embed.add_field(name=app_data["question10"], value=answer10.content, inline=False)
+        if check_11 is not None:
+            embed.add_field(
+                name=app_data["question11"], value=answer11.content, inline=False,
+            )
+        if check_12 is not None:
+            embed.add_field(
+                name=app_data["question12"], value=answer12.content, inline=False,
+            )
         embed.add_field(name="Final Comments", value=finalcomments.content, inline=False)
         try:
-            await channel.send(embed=embed)
+            webhook = None
+            for hook in await channel.webhooks():
+                if hook.name == ctx.guild.me.name:
+                    webhook = hook
+            if webhook is None:
+                webhook = await channel.create_webhook(name=ctx.guild.me.name)
+
+            await webhook.send(
+                embed=embed, username=ctx.guild.me.display_name, avatar_url=ctx.guild.me.avatar_url
+            )
+
         except discord.HTTPException:
             return await ctx.author.send(
                 "Your final application was too long to resolve as an embed. Give this another shot, keeping answers a bit shorter."
             )
-        except discord.ext.commands.CommandInvokeError:
+        except commands.CommandInvokeError:
             return await ctx.author.send(
                 "You need to start over but this time when it asks for year of birth, respond only with a 4 digit year i.e `1999`"
             )
@@ -304,6 +362,265 @@ class CustomApps(Cog):
             )
         self.antispam[ctx.guild][ctx.author].stamp()
 
+        await self.config.member(ctx.author).app_check.set(True)
+
+    @checks.admin_or_permissions(manage_guild=True)
+    @commands.group(name="appq", aliases=["appquestions"])
+    @commands.guild_only()
+    async def app_questions(self, ctx: commands.Context):
+        """Set/see the custom questions for the applications in your server"""
+        app_questions = await self.config.guild(ctx.guild).app_questions.get_raw()
+        question_1 = app_questions["name"]
+        question_2 = app_questions["timezone"]
+        question_3 = app_questions["age"]
+        question_4 = app_questions["days"]
+        question_5 = app_questions["hours"]
+        question_6 = app_questions["experience"]
+        question_7 = app_questions["reasonforinterest"]
+        question_8 = app_questions["question8"]
+        question_9 = app_questions["question9"]
+        question_10 = app_questions["question10"]
+        question_11 = app_questions["question11"]
+        question_12 = app_questions["question12"]
+        question_13 = app_questions["finalcomments"]
+
+        await ctx.send(
+            "There are 13 questions in this application feature, with a few preloaded already for you.\nHere is the current configuration:"
+        )
+        e = discord.Embed(colour=await ctx.embed_colour())
+        e.add_field(
+            name="Question 1", value=f"{question_1}" if question_1 else "Not Set", inline=False
+        )
+        e.add_field(
+            name="Question 2", value=f"{question_2}" if question_2 else "Not Set", inline=False
+        )
+        e.add_field(
+            name="Question 3", value=f"{question_3}" if question_3 else "Not Set", inline=False
+        )
+        e.add_field(
+            name="Question 4", value=f"{question_4}" if question_4 else "Not Set", inline=False
+        )
+        e.add_field(
+            name="Question 5", value=f"{question_5}" if question_5 else "Not Set", inline=False
+        )
+        e.add_field(
+            name="Question 6", value=f"{question_6}" if question_6 else "Not Set", inline=False
+        )
+        e.add_field(
+            name="Question 7", value=f"{question_7}" if question_7 else "Not Set", inline=False
+        )
+        e.add_field(
+            name="Question 8", value=f"{question_8}" if question_8 else "Not Set", inline=False
+        )
+        e.add_field(
+            name="Question 9", value=f"{question_9}" if question_9 else "Not Set", inline=False
+        )
+        e.add_field(
+            name="Question 10", value=f"{question_10}" if question_10 else "Not Set", inline=False
+        )
+        e.add_field(
+            name="Question 11", value=f"{question_11}" if question_11 else "Not Set", inline=False
+        )
+        e.add_field(
+            name="Question 12", value=f"{question_12}" if question_12 else "Not Set", inline=False
+        )
+        e.add_field(
+            name="Question 13", value=f"{question_13}" if question_13 else "Not Set", inline=False
+        )
+        await ctx.send(embed=e)
+
+    @app_questions.command(name="set")
+    async def set_questions(self, ctx: commands.Context):
+        def check(m):
+            return m.author == ctx.author and m.channel == ctx.channel
+
+        await ctx.send(
+            "Let's set up those questions we've not pre-filled:\nYou will be setting questions 8-12. You can view the preloaded questions by passing `{}appq`. To begin, reply with `admin abuse` *spelled exact*".format(
+                ctx.prefix
+            )
+        )
+        try:
+            confirmation = await ctx.bot.wait_for("message", check=check, timeout=20)
+            if confirmation.content.lower() != "admin abuse":
+                return await ctx.send("Alright, let's do these later then")
+        except asyncio.TimeoutError:
+            return await ctx.send(
+                "Took to long to respond, gotta be smarter than the users you're hiring for sure."
+            )
+
+        app_questions = await self.config.guild(ctx.guild).app_questions.get_raw()
+        question_8 = app_questions["question8"]
+        question_9 = app_questions["question9"]
+        question_10 = app_questions["question10"]
+        question_11 = app_questions["question11"]
+        question_12 = app_questions["question12"]
+        await ctx.send(
+            "Alright, let's start with question 8: You have 5min to decide and respond with question you'd like, or respond with cancel to do this later"
+        )
+
+        if question_8 is None:
+            try:
+                submit_8 = await ctx.bot.wait_for("message", check=check, timeout=300)
+                if submit_8.content.lower() != "cancel":
+                    if len(submit_8.content) > 750:
+                        return await ctx.send(
+                            "Talkitive are we? Too many characters to fit in final embed, shorten the question some"
+                        )
+                    await self.config.guild(ctx.guild).app_questions.question8.set(
+                        submit_8.content
+                    )
+            except asyncio.TimeoutError:
+                return await ctx.send(
+                    "Took too long bud. Let's be coherent for this and try again."
+                )
+            await ctx.send("Moving to question 9: Please respond with your next app question")
+
+        await ctx.send(
+            f"Looks like question 8 is currently `{question_8}`:\n Do you want to change this? Type `no` to skip or the question you wish to change to if you want to change."
+        )
+        try:
+            submit_8 = await ctx.bot.wait_for("message", check=check, timeout=300)
+            if submit_8.content.lower() != "no":
+                if len(submit_8.content) > 750:
+                    return await ctx.send(
+                        "Talkitive are we? Too many characters to fit in final embed, shorten the question some"
+                    )
+                await self.config.guild(ctx.guild).app_questions.question8.set(submit_8.content)
+        except asyncio.TimeoutError:
+            return await ctx.send("Took too long bud. Let's be coherent for this and try again.")
+
+        if question_9 is None:
+            try:
+                submit_9 = await ctx.bot.wait_for("message", check=check, timeout=300)
+                if submit_9.content.lower() != "cancel":
+                    if len(submit_9.content) > 750:
+                        return await ctx.send(
+                            "Talkitive are we? Too many characters to fit in final embed, shorten the question some"
+                        )
+                    await self.config.guild(ctx.guild).app_questions.question9.set(
+                        submit_9.content
+                    )
+            except asyncio.TimeoutError:
+                return await ctx.send(
+                    "Took too long bud. Let's be coherent for this and try again."
+                )
+            await ctx.send("Moving to question 10: Please respond with your next app question")
+
+        await ctx.send(
+            f"Looks like question 9 is currently `{question_9}`:\n Do you want to change this? Type `no` to skip or the question you wish to change to if you want to change."
+        )
+        try:
+            submit_9 = await ctx.bot.wait_for("message", check=check, timeout=300)
+            if submit_9.content.lower() != "no":
+                if len(submit_9.content) > 750:
+                    return await ctx.send(
+                        "Talkitive are we? Too many characters to fit in final embed, shorten the question some"
+                    )
+                await self.config.guild(ctx.guild).app_questions.question9.set(submit_9.content)
+        except asyncio.TimeoutError:
+            return await ctx.send("Took too long bud. Let's be coherent for this and try again.")
+        await ctx.send("Moving to question 10: Please respond with your next app question")
+
+        if question_10 is None:
+            try:
+                submit_10 = await ctx.bot.wait_for("message", check=check, timeout=300)
+                if submit_10.content.lower() != "cancel":
+                    if len(submit_10.content) > 750:
+                        return await ctx.send(
+                            "Talkitive are we? Too many characters to fit in final embed, shorten the question some"
+                        )
+                    await self.config.guild(ctx.guild).app_questions.question10.set(
+                        submit_10.content
+                    )
+            except asyncio.TimeoutError:
+                return await ctx.send(
+                    "Took too long bud. Let's be coherent for this and try again."
+                )
+            await ctx.send("Moving to question 11: Please respond with your next app question")
+
+        await ctx.send(
+            f"Looks like question 10 is currently `{question_10}`:\n Do you want to change this? Type `no` to skip or the question you wish to change to if you want to change."
+        )
+        try:
+            submit_10 = await ctx.bot.wait_for("message", check=check, timeout=300)
+            if submit_10.content.lower() != "no":
+                if len(submit_10.content) > 750:
+                    return await ctx.send(
+                        "Talkitive are we? Too many characters to fit in final embed, shorten the question some"
+                    )
+                await self.config.guild(ctx.guild).app_questions.question10.set(submit_10.content)
+        except asyncio.TimeoutError:
+            return await ctx.send("Took too long bud. Let's be coherent for this and try again.")
+        await ctx.send("Moving to question 11: Please respond with your next app question")
+
+        if question_11 is None:
+            try:
+                submit_11 = await ctx.bot.wait_for("message", check=check, timeout=300)
+                if submit_11.content.lower() != "cancel":
+                    if len(submit_11.content) > 750:
+                        return await ctx.send(
+                            "Talkitive are we? Too many characters to fit in final embed, shorten the question some"
+                        )
+                    await self.config.guild(ctx.guild).app_questions.question11.set(
+                        submit_11.content
+                    )
+            except asyncio.TimeoutError:
+                return await ctx.send(
+                    "Took too long bud. Let's be coherent for this and try again."
+                )
+            await ctx.send("Moving to question 12: Please respond with your next app question")
+
+        await ctx.send(
+            f"Looks like question 11 is currently `{question_11}`:\n Do you want to change this? Type `no` to skip or the question you wish to change to if you want to change."
+        )
+        try:
+            submit_11 = await ctx.bot.wait_for("message", check=check, timeout=300)
+            if submit_11.content.lower() != "no":
+                if len(submit_11.content) > 750:
+                    return await ctx.send(
+                        "Talkitive are we? Too many characters to fit in final embed, shorten the question some"
+                    )
+                await self.config.guild(ctx.guild).app_questions.question11.set(submit_11.content)
+        except asyncio.TimeoutError:
+            return await ctx.send("Took too long bud. Let's be coherent for this and try again.")
+        await ctx.send("Moving to question 12: Please respond with your next app question")
+
+        if question_12 is None:
+            try:
+                submit_12 = await ctx.bot.wait_for("message", check=check, timeout=300)
+                if submit_12.content.lower() != "cancel":
+                    if len(submit_12.content) > 750:
+                        return await ctx.send(
+                            "Talkitive are we? Too many characters to fit in final embed, shorten the question some"
+                        )
+                    await self.config.guild(ctx.guild).app_questions.question12.set(
+                        submit_12.content
+                    )
+            except asyncio.TimeoutError:
+                return await ctx.send(
+                    "Took too long bud. Let's be coherent for this and try again."
+                )
+
+        await ctx.send(
+            f"Looks like question 12 is currently `{question_12}`:\n Do you want to change this? Type `no` to skip or the question you wish to change to if you want to change."
+        )
+        try:
+            submit_12 = await ctx.bot.wait_for("message", check=check, timeout=300)
+            if submit_12.content.lower() != "no":
+                if len(submit_12.content) > 750:
+                    return await ctx.send(
+                        "Talkitive are we? Too many characters to fit in final embed, shorten the question some"
+                    )
+                await self.config.guild(ctx.guild).app_questions.question12.set(submit_12.content)
+        except asyncio.TimeoutError:
+            return await ctx.send("Took too long bud. Let's be coherent for this and try again.")
+
+        await ctx.send(
+            "That's all the questions and your apps are set *maybe, if you answered, anyway*. Check this with `{}appq`".format(
+                ctx.prefix
+            )
+        )
+
     @checks.mod_or_permissions(manage_roles=True)
     @commands.command()
     @commands.guild_only()
@@ -316,6 +633,12 @@ class CustomApps(Cog):
             return await ctx.send_help()
 
         load_data = await self.config.member(user_id).all()
+        app_data = await self.config.guild(ctx.guild).app_questions.all()
+        check_8 = app_data["question8"]
+        check_9 = app_data["question9"]
+        check_10 = app_data["question10"]
+        check_11 = app_data["question11"]
+        check_12 = app_data["question12"]
         app_check_user = load_data["app_check"]
         if not app_check_user:
             return await ctx.send("That user hasn't filled out an application here")
@@ -327,32 +650,40 @@ class CustomApps(Cog):
             text=f"{applicant_user.name}#{applicant_user.discriminator} UserID: {applicant_user.id})"
         )
         embed.title = f"User: {applicant_user.name}#{applicant_user.discriminator} | ID: ({applicant_user.id})"
-        embed.add_field(name="Name:", value=load_data["name"], inline=True)
+        embed = discord.Embed(color=await ctx.embed_colour(), timestamp=datetime.utcnow())
+        embed.set_author(name="New application!", icon_url=ctx.author.avatar_url)
+        embed.set_footer(
+            text=f"{ctx.author.name}#{ctx.author.discriminator} UserID: {ctx.author.id})"
+        )
+        embed.title = f"User: {ctx.author.name}#{ctx.author.discriminator} | ID: ({ctx.author.id})"
+        embed.add_field(name="Name:", value=f"{ctx.author.mention}\n" + name.content, inline=True)
         embed.add_field(
-            name="Age", value=load_data["age"], inline=True,
+            name="Year of Birth:", value=load_data["age"] + f"\n{yearmath} years old", inline=True,
         )
         embed.add_field(name="Timezone:", value=load_data["timezone"], inline=True)
-        # embed.add_field(name="Desired position:", value=position.content, inline=True)
+        embed.add_field(name="Desired position:", value=load_data["position"], inline=True)
         embed.add_field(name="Active days/week:", value=load_data["days"], inline=True)
         embed.add_field(name="Active hours/day:", value=load_data["hours"], inline=True)
-        embed.add_field(name="Used Dank Memer for:", value=load_data["botuse"], inline=True)
+        embed.add_field(
+            name=app_data["reasonforinterest"], value=load_data["reasonforinterest"], inline=False
+        )
         embed.add_field(name="Previous experience:", value=load_data["experience"], inline=False)
-        embed.add_field(
-            name="Reason for interest:", value=load_data["reasonforinterest"], inline=False,
-        )
-        embed.add_field(name="Bot Perks don't work", value=load_data["perkslinking"], inline=False)
-        embed.add_field(
-            name="Enable/Disable Commands", value=load_data["commandcontrol"], inline=False,
-        )
-        embed.add_field(
-            name="Unsure what the answer is, what do you do?",
-            value=load_data["botadvice"],
-            inline=False,
-        )
-        embed.add_field(
-            name="User missing coins, what do?", value=load_data["coinsmissing"], inline=False,
-        )
+        if check_8 is not None:
+            embed.add_field(name=app_data["question8"], value=load_data["answer8"], inline=False)
+        if check_9 is not None:
+            embed.add_field(name=app_data["question9"], value=load_data["answer9"], inline=False)
+        if check_10 is not None:
+            embed.add_field(name=app_data["question10"], value=load_data["answer10"], inline=False)
+        if check_11 is not None:
+            embed.add_field(
+                name=app_data["question11"], value=load_data["answer11"], inline=False,
+            )
+        if check_12 is not None:
+            embed.add_field(
+                name=app_data["question12"], value=load_data["answer12"], inline=False,
+            )
         embed.add_field(name="Final Comments", value=load_data["finalcomments"], inline=False)
+
         await ctx.send(embed=embed)
 
     @checks.admin_or_permissions(administrator=True)
