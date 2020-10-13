@@ -431,6 +431,7 @@ class CustomApps(Cog):
 
     @app_questions.command(name="set")
     async def set_questions(self, ctx: commands.Context):
+        """Set up custom questions for your server"""
         def check(m):
             return m.author == ctx.author and m.channel == ctx.channel
 
