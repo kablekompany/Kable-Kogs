@@ -69,8 +69,6 @@ class LockItUp(BaseCog):
         e.set_footer(text=f"{guild.name}")
         bot_override = ctx.bot.user
 
-        await ctx.trigger_typing()
-
         nondefault_lock = await self.config.guild(guild).nondefault()
         if nondefault_lock is True:
             await ctx.send("You ready to lock up? `[yes|no]`")
@@ -80,6 +78,8 @@ class LockItUp(BaseCog):
                     return await ctx.send("Canceling....")
             except asyncio.TimeoutError:
                 return await ctx.send("You didn't answer in time!")
+
+            await ctx.trigger_typing()
 
             special_chans = await self.config.guild(guild).secondary_channels()
             spec_role = await self.config.guild(guild).secondary_role()
@@ -218,8 +218,6 @@ class LockItUp(BaseCog):
         )
         e.set_footer(text=f"{guild.name}")
 
-        await ctx.trigger_typing()
-
         nondefault_lock = await self.config.guild(guild).nondefault()
         if nondefault_lock is True:
             await ctx.send("Ready to unlock? `[yes|no]`")
@@ -231,6 +229,8 @@ class LockItUp(BaseCog):
                     return await ctx.send("Looks like we aren't locking this thing up today")
             except asyncio.TimeoutError:
                 return await ctx.send("You took too long to reply!")
+
+            await ctx.trigger_typing()
 
             for guild_channel in guild.channels:
                 if guild_channel.id in special_chans:
