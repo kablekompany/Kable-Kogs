@@ -77,7 +77,7 @@ class CustomApps(Cog):
     @checks.bot_has_permissions(manage_roles=True, manage_channels=True, manage_webhooks=True)
     async def apply(self, ctx: commands.Context):
         """Apply to be a staff member."""
-        role_add = get(ctx.guild.roles, name="Applicant")
+        role_add = get(ctx.guild.roles, name="Staff Applicant")
         app_data = await self.config.guild(ctx.guild).app_questions.all()
         user_data = self.config.member(ctx.author)
         answers = []
