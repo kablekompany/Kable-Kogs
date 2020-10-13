@@ -432,6 +432,7 @@ class CustomApps(Cog):
     @app_questions.command(name="set")
     async def set_questions(self, ctx: commands.Context):
         """Set up custom questions for your server"""
+
         def check(m):
             return m.author == ctx.author and m.channel == ctx.channel
 
@@ -459,6 +460,25 @@ class CustomApps(Cog):
             "Alright, let's start with question 8: You have 5min to decide and respond with question you'd like, or respond with cancel to do this later"
         )
 
+        if question_8 is not None:
+            await ctx.send(
+                f"Looks like question 8 is currently `{question_8}`:\n Do you want to change this? Type `no` to skip or the question you wish to change to if you want to change."
+            )
+            try:
+                submit_8 = await ctx.bot.wait_for("message", check=check, timeout=300)
+                if submit_8.content.lower() != "no":
+                    if len(submit_8.content) > 750:
+                        return await ctx.send(
+                            "Talkitive are we? Too many characters to fit in final embed, shorten the question some"
+                        )
+                    await self.config.guild(ctx.guild).app_questions.question8.set(
+                        submit_8.content
+                    )
+            except asyncio.TimeoutError:
+                return await ctx.send(
+                    "Took too long bud. Let's be coherent for this and try again."
+                )
+
         if question_8 is None:
             try:
                 submit_8 = await ctx.bot.wait_for("message", check=check, timeout=300)
@@ -476,19 +496,25 @@ class CustomApps(Cog):
                 )
             await ctx.send("Moving to question 9: Please respond with your next app question")
 
-        await ctx.send(
-            f"Looks like question 8 is currently `{question_8}`:\n Do you want to change this? Type `no` to skip or the question you wish to change to if you want to change."
-        )
-        try:
-            submit_8 = await ctx.bot.wait_for("message", check=check, timeout=300)
-            if submit_8.content.lower() != "no":
-                if len(submit_8.content) > 750:
-                    return await ctx.send(
-                        "Talkitive are we? Too many characters to fit in final embed, shorten the question some"
+        if question_9 is not None:
+            await ctx.send(
+                f"Looks like question 9 is currently `{question_9}`:\n Do you want to change this? Type `no` to skip or the question you wish to change to if you want to change."
+            )
+            try:
+                submit_9 = await ctx.bot.wait_for("message", check=check, timeout=300)
+                if submit_9.content.lower() != "no":
+                    if len(submit_9.content) > 750:
+                        return await ctx.send(
+                            "Talkitive are we? Too many characters to fit in final embed, shorten the question some"
+                        )
+                    await self.config.guild(ctx.guild).app_questions.question9.set(
+                        submit_9.content
                     )
-                await self.config.guild(ctx.guild).app_questions.question8.set(submit_8.content)
-        except asyncio.TimeoutError:
-            return await ctx.send("Took too long bud. Let's be coherent for this and try again.")
+            except asyncio.TimeoutError:
+                return await ctx.send(
+                    "Took too long bud. Let's be coherent for this and try again."
+                )
+            await ctx.send("Moving to question 10: Please respond with your next app question")
 
         if question_9 is None:
             try:
@@ -507,20 +533,25 @@ class CustomApps(Cog):
                 )
             await ctx.send("Moving to question 10: Please respond with your next app question")
 
-        await ctx.send(
-            f"Looks like question 9 is currently `{question_9}`:\n Do you want to change this? Type `no` to skip or the question you wish to change to if you want to change."
-        )
-        try:
-            submit_9 = await ctx.bot.wait_for("message", check=check, timeout=300)
-            if submit_9.content.lower() != "no":
-                if len(submit_9.content) > 750:
-                    return await ctx.send(
-                        "Talkitive are we? Too many characters to fit in final embed, shorten the question some"
+        if question_10 is not None:
+            await ctx.send(
+                f"Looks like question 10 is currently `{question_10}`:\n Do you want to change this? Type `no` to skip or the question you wish to change to if you want to change."
+            )
+            try:
+                submit_10 = await ctx.bot.wait_for("message", check=check, timeout=300)
+                if submit_10.content.lower() != "no":
+                    if len(submit_10.content) > 750:
+                        return await ctx.send(
+                            "Talkitive are we? Too many characters to fit in final embed, shorten the question some"
+                        )
+                    await self.config.guild(ctx.guild).app_questions.question10.set(
+                        submit_10.content
                     )
-                await self.config.guild(ctx.guild).app_questions.question9.set(submit_9.content)
-        except asyncio.TimeoutError:
-            return await ctx.send("Took too long bud. Let's be coherent for this and try again.")
-        await ctx.send("Moving to question 10: Please respond with your next app question")
+            except asyncio.TimeoutError:
+                return await ctx.send(
+                    "Took too long bud. Let's be coherent for this and try again."
+                )
+            await ctx.send("Moving to question 11: Please respond with your next app question")
 
         if question_10 is None:
             try:
@@ -539,20 +570,25 @@ class CustomApps(Cog):
                 )
             await ctx.send("Moving to question 11: Please respond with your next app question")
 
-        await ctx.send(
-            f"Looks like question 10 is currently `{question_10}`:\n Do you want to change this? Type `no` to skip or the question you wish to change to if you want to change."
-        )
-        try:
-            submit_10 = await ctx.bot.wait_for("message", check=check, timeout=300)
-            if submit_10.content.lower() != "no":
-                if len(submit_10.content) > 750:
-                    return await ctx.send(
-                        "Talkitive are we? Too many characters to fit in final embed, shorten the question some"
+        if question_11 is not None:
+            await ctx.send(
+                f"Looks like question 11 is currently `{question_11}`:\n Do you want to change this? Type `no` to skip or the question you wish to change to if you want to change."
+            )
+            try:
+                submit_11 = await ctx.bot.wait_for("message", check=check, timeout=300)
+                if submit_11.content.lower() != "no":
+                    if len(submit_11.content) > 750:
+                        return await ctx.send(
+                            "Talkitive are we? Too many characters to fit in final embed, shorten the question some"
+                        )
+                    await self.config.guild(ctx.guild).app_questions.question11.set(
+                        submit_11.content
                     )
-                await self.config.guild(ctx.guild).app_questions.question10.set(submit_10.content)
-        except asyncio.TimeoutError:
-            return await ctx.send("Took too long bud. Let's be coherent for this and try again.")
-        await ctx.send("Moving to question 11: Please respond with your next app question")
+            except asyncio.TimeoutError:
+                return await ctx.send(
+                    "Took too long bud. Let's be coherent for this and try again."
+                )
+            await ctx.send("Moving to question 12: Please respond with your next app question")
 
         if question_11 is None:
             try:
@@ -571,20 +607,24 @@ class CustomApps(Cog):
                 )
             await ctx.send("Moving to question 12: Please respond with your next app question")
 
-        await ctx.send(
-            f"Looks like question 11 is currently `{question_11}`:\n Do you want to change this? Type `no` to skip or the question you wish to change to if you want to change."
-        )
-        try:
-            submit_11 = await ctx.bot.wait_for("message", check=check, timeout=300)
-            if submit_11.content.lower() != "no":
-                if len(submit_11.content) > 750:
-                    return await ctx.send(
-                        "Talkitive are we? Too many characters to fit in final embed, shorten the question some"
+        if question_12 is not None:
+            await ctx.send(
+                f"Looks like question 12 is currently `{question_12}`:\n Do you want to change this? Type `no` to skip or the question you wish to change to if you want to change."
+            )
+            try:
+                submit_12 = await ctx.bot.wait_for("message", check=check, timeout=300)
+                if submit_12.content.lower() != "no":
+                    if len(submit_12.content) > 750:
+                        return await ctx.send(
+                            "Talkitive are we? Too many characters to fit in final embed, shorten the question some"
+                        )
+                    await self.config.guild(ctx.guild).app_questions.question12.set(
+                        submit_12.content
                     )
-                await self.config.guild(ctx.guild).app_questions.question11.set(submit_11.content)
-        except asyncio.TimeoutError:
-            return await ctx.send("Took too long bud. Let's be coherent for this and try again.")
-        await ctx.send("Moving to question 12: Please respond with your next app question")
+            except asyncio.TimeoutError:
+                return await ctx.send(
+                    "Took too long bud. Let's be coherent for this and try again."
+                )
 
         if question_12 is None:
             try:
@@ -601,20 +641,6 @@ class CustomApps(Cog):
                 return await ctx.send(
                     "Took too long bud. Let's be coherent for this and try again."
                 )
-
-        await ctx.send(
-            f"Looks like question 12 is currently `{question_12}`:\n Do you want to change this? Type `no` to skip or the question you wish to change to if you want to change."
-        )
-        try:
-            submit_12 = await ctx.bot.wait_for("message", check=check, timeout=300)
-            if submit_12.content.lower() != "no":
-                if len(submit_12.content) > 750:
-                    return await ctx.send(
-                        "Talkitive are we? Too many characters to fit in final embed, shorten the question some"
-                    )
-                await self.config.guild(ctx.guild).app_questions.question12.set(submit_12.content)
-        except asyncio.TimeoutError:
-            return await ctx.send("Took too long bud. Let's be coherent for this and try again.")
 
         await ctx.send(
             "That's all the questions and your apps are set *maybe, if you answered, anyway*. Check this with `{}appq`".format(
