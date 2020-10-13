@@ -381,12 +381,17 @@ class LockItUp(BaseCog):
                 e.add_field(
                     name="Special Role",
                     value=f"<@&{get_sec_role}> — `{get_sec_role}`" if get_sec_role else "**None**",
+                    inline=False,
                 )
                 spec_msg = ""
                 for chan_id in get_sec_chans:
                     channel_name = f"<#{chan_id}>"
                     spec_msg += f"`{chan_id}` — {channel_name}\n"
-                e.add_field(name="Special Channels", value=f"{spec_msg}" if get_sec_chans else "**None**")
+                e.add_field(
+                    name="Special Channels",
+                    value=f"{spec_msg}" if get_sec_chans else "**None**",
+                    inline=False,
+                )
 
             e.add_field(
                 name="Channel Notification:",
