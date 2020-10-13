@@ -358,7 +358,7 @@ class LockItUp(BaseCog):
             msg = ""
             for chan_id in get_channel:
                 channel_name = f"<#{chan_id}>"
-                msg += f"{channel_name} — `{chan_id}`\n"
+                msg += f"`{chan_id}` — {channel_name}\n"
 
         channel_list = sorted(msg)
         e_list = []
@@ -385,7 +385,7 @@ class LockItUp(BaseCog):
                 spec_msg = ""
                 for chan_id in get_sec_chans:
                     channel_name = f"<#{chan_id}>"
-                    spec_msg += f"{channel_name} — `{chan_id}`\n"
+                    spec_msg += f"`{chan_id}` — {channel_name}\n"
                 e.add_field(name="Special Channels", value=f"{spec_msg}" if get_sec_chans else "**None**")
 
             e.add_field(
@@ -420,7 +420,7 @@ class LockItUp(BaseCog):
         msg = ""
         for chan_id in chans:
             channel_name = f"<#{chan_id}>"
-            msg += f"{chan_id} - {channel_name}\n"
+            msg += f"`{chan_id}` - {channel_name}\n"
         channel_list = sorted(msg)
         e_list = []
         for page in pagify(msg, shorten_by=1000):
@@ -456,7 +456,7 @@ class LockItUp(BaseCog):
         msg = ""
         for chan_id in chans:
             channel_name = f"<#{chan_id}>"
-            msg += f"{chan_id} - {channel_name}\n"
+            msg += f"`{chan_id}` - {channel_name}\n"
         channel_list = sorted(msg)
         e_list = []
         for page in pagify(msg, shorten_by=1000):
@@ -501,7 +501,7 @@ class LockItUp(BaseCog):
         msg = ""
         for chan_id in chans:
             channel_name = f"<#{chan_id}>"
-            msg += f"{chan_id} - {channel_name}\n"
+            msg += f"`{chan_id}` - {channel_name}\n"
         channel_list = sorted(msg)
         e_list = []
         for page in pagify(msg, shorten_by=1000):
@@ -544,7 +544,7 @@ class LockItUp(BaseCog):
         msg = ""
         for chan_id in chans:
             channel_name = f"<#{chan_id}>"
-            msg += f"{chan_id} - {channel_name}\n"
+            msg += f"`{chan_id}` - {channel_name}\n"
         channel_list = sorted(msg)
         e_list = []
         for page in pagify(msg, shorten_by=1000):
