@@ -344,18 +344,11 @@ class LockItUp(BaseCog):
             e.add_field(name="Lock Message:", value=get_lock if get_lock else "**None**")
             e.add_field(name="Unlock Message:", value=get_unlock if get_unlock else "**None**")
             check_specs = fetch_all["nondefault"]
-            if check_specs is False:
+            if check_specs is True:
                 e.add_field(
                     name="Special Role",
                     value=f"<@&{get_sec_role}> — `{get_sec_role}`" if get_sec_role else "**None**",
                 )
-            if get_sec_chans:
-                if not get_sec_role:
-                    e.add_field(
-                        name="Special Channels",
-                        value="There are channels set, but a role needs to be set for them to work",
-                    )
-
             e.add_field(
                 name="Channel Notification:",
                 value="**Enabled**" if check_silent else "**Disabled**",
