@@ -124,7 +124,11 @@ class LockItUp(BaseCog):
         # proceed to default lockdown
         channel_ids = await self.config.guild(guild).channels()
         if not channel_ids:
-            await ctx.send("You need to set this up by running `;;lockdownset addchan` first!")
+            await ctx.send(
+                "You need to set this up by running `{}lockdownset addchan` first!".format(
+                    ctx.prefix
+                )
+            )
             return
         spec_ran = await self.config.guild(guild).nondefault()
         if spec_ran is False:
@@ -256,7 +260,11 @@ class LockItUp(BaseCog):
         # proceed to default lockdown
         channel_ids = await self.config.guild(guild).channels()
         if not channel_ids:
-            await ctx.send("You need to set this up by running `{}lockdownset addchan` first!".format(ctx.prefix))
+            await ctx.send(
+                "You need to set this up by running `{}lockdownset addchan` first!".format(
+                    ctx.prefix
+                )
+            )
             return
         spec_ran = await self.config.guild(guild).nondefault()
         if spec_ran is False:
@@ -687,7 +695,9 @@ class LockItUp(BaseCog):
         """
         set_check = await self.config.guild(ctx.guild).vc_channels()
         if not set_check:
-            await ctx.send("You need to set the channels using `{}lds setvc <channels>`".format(ctx.prefix))
+            await ctx.send(
+                "You need to set the channels using `{}lds setvc <channels>`".format(ctx.prefix)
+            )
         guild = ctx.guild
         author = ctx.author
         channel = ctx.guild.get_channel
@@ -719,7 +729,9 @@ class LockItUp(BaseCog):
         """
         set_check = await self.config.guild(ctx.guild).vc_channels()
         if not set_check:
-            await ctx.send("You need to set the channels using `{}lds setvc <channels>`".format(ctx.prefix))
+            await ctx.send(
+                "You need to set the channels using `{}lds setvc <channels>`".format(ctx.prefix)
+            )
         guild = ctx.guild
         author = ctx.author
         channel = ctx.guild.get_channel
