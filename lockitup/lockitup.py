@@ -343,12 +343,12 @@ class LockItUp(BaseCog):
             )
             e.add_field(name="Lock Message:", value=get_lock if get_lock else "**None**")
             e.add_field(name="Unlock Message:", value=get_unlock if get_unlock else "**None**")
-            check_specs = fetch_all["nondefault"]
-            if check_specs is True:
-                e.add_field(
-                    name="Special Role",
-                    value=f"<@&{get_sec_role}> — `{get_sec_role}`" if get_sec_role else "**None**",
-                )
+            # check_specs = fetch_all["nondefault"]
+            # if check_specs is True:
+            #     e.add_field(
+            #         name="Special Role",
+            #         value=f"<@&{get_sec_role}> — `{get_sec_role}`" if get_sec_role else "**None**",
+            #     )
             e.add_field(
                 name="Channel Notification:",
                 value="**Enabled**" if check_silent else "**Disabled**",
@@ -377,7 +377,7 @@ class LockItUp(BaseCog):
                 inline=False,
             )
             check_specs = fetch_all["nondefault"]
-            if check_specs is True:
+            if check_specs:
                 e.add_field(
                     name="Special Role",
                     value=f"<@&{get_sec_role}> — `{get_sec_role}`" if get_sec_role else "**None**",
@@ -386,7 +386,7 @@ class LockItUp(BaseCog):
                 for chan_id in get_sec_chans:
                     channel_name = f"<#{chan_id}>"
                     spec_msg += f"{channel_name} — `{chan_id}`\n"
-                e.add_field(name="Special Channels", value=spec_msg)
+                e.add_field(name="Special Channels", value=f"{spec_msg}" if get_sec_chans else "**None**")
 
             e.add_field(
                 name="Channel Notification:",
@@ -749,6 +749,7 @@ class LockItUp(BaseCog):
 
     @commands.command(aliases=["lockchan", "lockit"])
     @checks.mod_or_permissions(manage_messages=True)
+    @checks.bot_has_permissions(manage_channels=True)
     @commands.guild_only()
     async def channellock(
         self,
@@ -795,6 +796,7 @@ class LockItUp(BaseCog):
 
     @commands.command(aliases=["ulockchan", "unlockit"])
     @checks.mod_or_permissions(manage_messages=True)
+    @checks.bot_has_permissions(manage_channels=True)
     @commands.guild_only()
     async def channelunlock(
         self,
