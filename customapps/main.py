@@ -683,7 +683,7 @@ class CustomApps(Cog):
             text=f"{ctx.author.name}#{ctx.author.discriminator} UserID: {ctx.author.id})"
         )
         embed.title = f"User: {ctx.author.name}#{ctx.author.discriminator} | ID: ({ctx.author.id})"
-        embed.add_field(name="Name:", value=f"{ctx.author.mention}\n" + name.content, inline=True)
+        embed.add_field(name="Name:", value=f"{ctx.author.mention}\n" + load_data['name'], inline=True)
         embed.add_field(
             name="Year of Birth:", value=load_data["age"], inline=True,
         )
