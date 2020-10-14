@@ -81,7 +81,7 @@ class CustomApps(Cog):
         app_data = await self.config.guild(ctx.guild).app_questions.all()
         user_data = self.config.member(ctx.author)
         answers = []
-        channel = get(ctx.guild.text_channels, name="staff-applications")
+        channel = get(ctx.guild.text_channels, name="applications")
         if ctx.guild not in self.antispam:
             self.antispam[ctx.guild] = {}
         if ctx.author not in self.antispam[ctx.guild]:
