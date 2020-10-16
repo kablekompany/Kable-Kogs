@@ -768,7 +768,7 @@ class LockItUp(BaseCog):
             channel = ctx.channel
 
         overwrite = channel.overwrites_for(role)
-        bot_overwrite = channel.overwrites_for(self.bot.user)
+        bot_overwrite = channel.overwrites_for(ctx.bot.user)
         #   Checking channel type
 
         if channel.type == discord.ChannelType.text:
@@ -790,6 +790,9 @@ class LockItUp(BaseCog):
                 )
             overwrite.update(connect=False)
         try:
+            await channel.set_permissions(
+                ctx.bot.user, overwrite=bot_overwrite, reason="Securing overrides for Kronos",
+            )
             await channel.set_permissions(
                 role,
                 overwrite=overwrite,
