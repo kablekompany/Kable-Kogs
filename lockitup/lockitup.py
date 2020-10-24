@@ -317,7 +317,6 @@ class LockItUp(BaseCog):
     async def lockdownset(self, ctx: commands.Context):
         """
         Settings for lockdown
-        For each setting, pass one ID each invocation. So if you need to add multiple channels, run the commands to do so multiple times (same for removal, duh)
         """
         pass
 
@@ -341,14 +340,24 @@ class LockItUp(BaseCog):
                 title="Lockdown Settings:",
                 description="No channels added",
             )
+            check_specs = fetch_all["nondefault"]
+            if check_specs:
+                e.add_field(
+                    name="Special Role",
+                    value=f"<@&{get_sec_role}> — `{get_sec_role}`" if get_sec_role else "**None**",
+                    inline=False,
+                )
+                spec_msg = ""
+                for chan_id in get_sec_chans:
+                    channel_name = f"<#{chan_id}>"
+                    spec_msg += f"`{chan_id}` — {channel_name}\n"
+                e.add_field(
+                    name="Special Channels",
+                    value=f"{spec_msg}" if get_sec_chans else "**None**",
+                    inline=False,
+                )
             e.add_field(name="Lock Message:", value=get_lock if get_lock else "**None**")
             e.add_field(name="Unlock Message:", value=get_unlock if get_unlock else "**None**")
-            # check_specs = fetch_all["nondefault"]
-            # if check_specs is True:
-            #     e.add_field(
-            #         name="Special Role",
-            #         value=f"<@&{get_sec_role}> — `{get_sec_role}`" if get_sec_role else "**None**",
-            #     )
             e.add_field(
                 name="Channel Notification:",
                 value="**Enabled**" if check_silent else "**Disabled**",
@@ -408,7 +417,7 @@ class LockItUp(BaseCog):
     async def addchan(self, ctx: commands.Context, channels: Greedy[discord.TextChannel]):
         """
         Adds channel to list of channels to lock/unlock
-        You can add as many as needed
+
         IDs are also accepted.
         """
         if not channels:
@@ -492,6 +501,8 @@ class LockItUp(BaseCog):
     async def remove_special_channel(self, ctx: commands.Context, channels: Greedy[int]):
         """
         Remove a channel to list of channels to lock/unlock for special roles
+
+        Accepts only channel IDs
         """
         if not channels:
             raise commands.BadArgument
@@ -503,6 +514,10 @@ class LockItUp(BaseCog):
                 await self.config.guild(guild).secondary_channels.set(chans)
 
         chan_count = len(chans)
+        if not chan_count:
+            return await ctx.send(
+                "After removing that, no more special channels exist in this server's configuration."
+            )
         msg = ""
         for chan_id in chans:
             channel_name = f"<#{chan_id}>"
@@ -534,7 +549,8 @@ class LockItUp(BaseCog):
     async def rmchan(self, ctx: commands.Context, channels: Greedy[int]):
         """
         Remove a channel to list of channels to lock/unlock
-        You can only remove one at a time otherwise run `[p]lds reset`
+
+        Accepts only channel IDs
         """
         if not channels:
             raise commands.BadArgument
@@ -546,6 +562,10 @@ class LockItUp(BaseCog):
                 await self.config.guild(guild).channels.set(chans)
 
         chan_count = len(chans)
+        if not chan_count:
+            return await ctx.send(
+                "After removing that, no more channels are left in this server's configuration"
+            )
         msg = ""
         for chan_id in chans:
             channel_name = f"<#{chan_id}>"
@@ -761,7 +781,7 @@ class LockItUp(BaseCog):
         ctx: commands.Context,
         channel: Union[discord.TextChannel, discord.VoiceChannel] = None,
     ):
-        """Locking down selected text/voice channel"""
+        """Lock selected text/voice channel"""
         author = ctx.author
         role = ctx.guild.default_role
         if channel is None:
@@ -811,7 +831,7 @@ class LockItUp(BaseCog):
         ctx: commands.Context,
         channel: Union[discord.TextChannel, discord.VoiceChannel] = None,
     ):
-        """Unlocking down selected text/voice channel"""
+        """Unlock selected text/voice channel"""
         author = ctx.author
         role = ctx.guild.default_role
         if channel is None:
