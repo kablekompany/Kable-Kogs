@@ -1,8 +1,10 @@
 import asyncio
+import logging
 import random
 import re
 import unicodedata
 from datetime import datetime, timedelta
+from typing import cast
 
 import discord
 import stringcase
@@ -17,6 +19,8 @@ from .randomnames import adjectives, nouns, properNouns
 
 BaseCog = getattr(commands, "Cog", object)
 
+log = logging.getLogger("red.KableKogs.decancer")
+
 
 async def enabled_global(ctx: commands.Context):
     return await ctx.bot.get_cog("Decancer").config.auto()
@@ -24,8 +28,8 @@ async def enabled_global(ctx: commands.Context):
 
 # originally from https://github.com/PumPum7/PumCogs repo which has a en masse version of this
 class Decancer(BaseCog):
-    """Decancer users' names removing special and accented chars. 
-    
+    """Decancer users' names removing special and accented chars.
+
     `[p]decancerset` to get started if you're already using redbot core modlog."""
 
     def __init__(self, bot):
@@ -42,6 +46,16 @@ class Decancer(BaseCog):
     async def red_delete_data_for_user(self, **kwargs):
         """This cog does not store user data"""
         return
+
+    def cog_unload(self):
+        # Remove command logic from: https://github.com/mikeshardmind/SinbadCogs/tree/v3/messagebox
+        global _old_rename
+        if _old_rename:
+            try:
+                self.bot.remove_command("rename")
+            except Exception as error:
+                log.info(error)
+            self.bot.add_command(_old_rename)
 
     @staticmethod
     def is_cancerous(text: str) -> bool:
@@ -128,6 +142,66 @@ class Decancer(BaseCog):
             nounNicks = nouns, properNouns
             new_nick = random.choice(random.choices(nounNicks, weights=map(len, nounNicks))[0])
         return new_nick
+
+    # from Red-DiscordBot Core Mod Cog
+    @commands.command()
+    @commands.guild_only()
+    @commands.bot_has_permissions(manage_nicknames=True)
+    @checks.admin_or_permissions(manage_nicknames=True)
+    async def rename(
+        self,
+        ctx: commands.Context,
+        user: discord.Member,
+        *,
+        nickname: str = "",
+        freeze: bool = False,
+    ):
+        """Change a user's nickname.
+
+        Leaving the nickname empty will remove it.
+        """
+        nickname = nickname.strip()
+        me = cast(discord.Member, ctx.me)
+        if not nickname:
+            nickname = None
+        elif not 2 <= len(nickname) <= 32:
+            await ctx.send("Nicknames must be between 2 and 32 characters long.")
+            return
+        if not (
+            (me.guild_permissions.manage_nicknames or me.guild_permissions.administrator)
+            and me.top_role > user.top_role
+            and user != ctx.guild.owner
+        ):
+            await ctx.send(
+                (
+                    "I do not have permission to rename that member. They may be higher than or "
+                    "equal to me in the role hierarchy."
+                )
+            )
+        else:
+            try:
+                reason = "Nickname changed by {}".format(ctx.author.name)
+                await user.edit(reason=reason(ctx.author, None), nick=nickname)
+                if (
+                    freeze
+                ):  # thanks for this badass cog from Dav@https://github.com/Dav-Git/Dav-Cogs
+                    cog_checking = self.bot.get_cog("NickNamer")
+                    if not cog_checking:
+                        pass
+                    freeze_it = self.bot.get_command("freezenick")
+                    await ctx.invoke(
+                        freeze_it, user=user, nickname=nickname, reason="Renamed and frozen",
+                    )
+            except discord.Forbidden:
+                # Just in case we missed something in the permissions check above
+                await ctx.send("I do not have permission to rename that member.")
+            except discord.HTTPException as exc:
+                if exc.status == 400:  # BAD REQUEST
+                    await ctx.send("That nickname is invalid.")
+                else:
+                    await ctx.send("An unexpected error has occured.")
+            else:
+                await ctx.send("Done.")
 
     @commands.group()
     @checks.mod_or_permissions(manage_channels=True)
@@ -438,3 +512,12 @@ class Decancer(BaseCog):
                 await self.decancer_log(
                     guild, member, guild.me, old_nick, new_cool_nick, "auto-decancer"
                 )
+
+
+async def setup(bot):
+    rename = Decancer(bot)
+    global _old_rename
+    _old_rename = bot.get_command("rename")
+    if _old_rename:
+        bot.remove_command(_old_rename.name)
+    bot.add_cog(rename)
