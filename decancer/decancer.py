@@ -153,7 +153,7 @@ class Decancer(BaseCog):
         ctx: commands.Context,
         user: discord.Member,
         *,
-        nickname: str = None,
+        nickname: str = "",
         freeze: bool = False,
     ):
         """Change a user's nickname.
