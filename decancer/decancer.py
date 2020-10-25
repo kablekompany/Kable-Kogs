@@ -153,14 +153,15 @@ class Decancer(BaseCog):
         ctx: commands.Context,
         user: discord.Member,
         *,
-        nickname: str = "",
+        nickname: str = None,
         freeze: bool = False,
     ):
         """Change a user's nickname.
 
         Leaving the nickname empty will remove it.
         """
-        nickname = nickname.strip()
+        if nickname is not None:
+            nickname = nickname.strip()
         me = cast(discord.Member, ctx.me)
         if not nickname:
             nickname = None
@@ -181,7 +182,7 @@ class Decancer(BaseCog):
         else:
             try:
                 reason = "Nickname changed by {}".format(ctx.author.name)
-                await user.edit(reason=reason(ctx.author, None), nick=nickname)
+                await user.edit(reason=reason, nick=nickname)
                 if (
                     freeze
                 ):  # thanks for this badass cog from Dav@https://github.com/Dav-Git/Dav-Cogs
