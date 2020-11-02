@@ -44,9 +44,11 @@ class LockItUp(BaseCog):
     @commands.guild_only()
     @checks.mod_or_permissions(manage_channels=True)
     @checks.bot_has_permissions(manage_channels=True)
-    async def lockdown(self, ctx: commands.Context):
+    async def lockdown(self, ctx: commands.Context, lockrole: bool=False):
         """
         Lockdown a server
+        
+        If you pass true, your @everyone role will also be denied permissions from within the role menu
         """
         guild = ctx.guild
 
@@ -179,6 +181,21 @@ class LockItUp(BaseCog):
                             self.log.info(
                                 "Could not send message to {}".format(guild_channel.name)
                             )
+                            
+        if lockrole:
+            perms = ctx.guild.get_role(ctx.guild.id).permissions
+            perms.send_messages = False
+            if not ctx.me.guild_permissions.manage_roles:
+                await ctx.send("I'm missing the ability to manage roles so we will skip making changes to roles in the server settings")
+                pass
+            try:
+                await ctx.guild.default_role.edit(permissions=perms, reason=f"Role Lockdown requested by {ctx.author.name}")
+            except Exception as e:
+                await ctx.send(f"Getting an error when attempting to edit role permissions in server settings:\n{e}\nSkipping...")
+                pass
+                
+        # finalize
+
         try:
             await ctx.send(
                 "We're locked up, fam. Revert this by running `{}unlockdown`".format(ctx.prefix)
@@ -194,9 +211,11 @@ class LockItUp(BaseCog):
     @commands.guild_only()
     @checks.mod_or_permissions(manage_messages=True)
     @checks.bot_has_permissions(manage_channels=True)
-    async def unlockdown(self, ctx: commands.Context):
+    async def unlockdown(self, ctx: commands.Context, unlockrole: bool=False):
         """
-        Ends the lockdown for the guild
+        Ends the lockdown
+        
+        If you pass True, it will unlock send message perms for the @everyone role in the role menu
         """
         guild = ctx.guild
 
@@ -301,6 +320,19 @@ class LockItUp(BaseCog):
                             self.log.info(
                                 "Could not send message to {}".format(guild_channel.name)
                             )
+        if unlockrole:
+            perms = ctx.guild.get_role(ctx.guild.id).permissions
+            perms.send_messages = True
+            if not ctx.me.guild_permissions.manage_roles:
+                await ctx.send("I'm missing the ability to manage roles so we will skip making changes to roles in the server settings")
+                pass
+            try:
+                await ctx.guild.default_role.edit(permissions=perms, reason=f"Role unlock requested by {ctx.author.name}")
+            except Exception as e:
+                await ctx.send(f"Getting an error when attempting to edit role permissions in server settings:\n{e}\nSkipping...")
+                pass
+                
+        # finalize
         try:
             await ctx.send("Server Unlocked")
         except discord.Forbidden:
