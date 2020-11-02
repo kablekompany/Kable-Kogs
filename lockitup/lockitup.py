@@ -31,6 +31,7 @@ class LockItUp(BaseCog):
             "nondefault": False,
             "secondary_role": None,
             "secondary_channels": [],
+            "lock_role": None,
         }
 
         self.config.register_guild(**default_guild)
@@ -43,11 +44,11 @@ class LockItUp(BaseCog):
     @commands.command()
     @commands.guild_only()
     @checks.mod_or_permissions(manage_channels=True)
-    @checks.bot_has_permissions(manage_channels=True)
-    async def lockdown(self, ctx: commands.Context, lockrole: bool=False):
+    @checks.bot_has_permissions(manage_channels=True, manage_roles=True)
+    async def lockdown(self, ctx: commands.Context, lockrole: bool = False):
         """
         Lockdown a server
-        
+
         If you pass true, your @everyone role will also be denied permissions from within the role menu
         """
         guild = ctx.guild
@@ -181,21 +182,27 @@ class LockItUp(BaseCog):
                             self.log.info(
                                 "Could not send message to {}".format(guild_channel.name)
                             )
-                            
+
         if lockrole:
             perms = ctx.guild.get_role(ctx.guild.id).permissions
             perms.send_messages = False
             if not ctx.me.guild_permissions.manage_roles:
-                await ctx.send("I'm missing the ability to manage roles so we will skip making changes to roles in the server settings")
+                await ctx.send(
+                    "I'm missing the ability to manage roles so we will skip making changes to roles in the server settings"
+                )
                 pass
             try:
-                await ctx.guild.default_role.edit(permissions=perms, reason=f"Role Lockdown requested by {ctx.author.name}")
+                await ctx.guild.default_role.edit(
+                    permissions=perms, reason=f"Role Lockdown requested by {ctx.author.name}"
+                )
+                await self.config.guild(ctx.guild).lock_role.set(True)
             except Exception as e:
-                await ctx.send(f"Getting an error when attempting to edit role permissions in server settings:\n{e}\nSkipping...")
+                await ctx.send(
+                    f"Getting an error when attempting to edit role permissions in server settings:\n{e}\nSkipping..."
+                )
                 pass
-                
-        # finalize
 
+        # finalize
         try:
             await ctx.send(
                 "We're locked up, fam. Revert this by running `{}unlockdown`".format(ctx.prefix)
@@ -205,16 +212,16 @@ class LockItUp(BaseCog):
                 f"Couldn't secure overrides in Guild {ctx.guild.name} ({ctx.guild.id}): Locked as requested."
             )
 
-        await self.config.guild(guild).locked.set(True)
+        await self.config.guild(guild).locked.set(True)  # write it to configs
 
     @commands.command()
     @commands.guild_only()
     @checks.mod_or_permissions(manage_messages=True)
-    @checks.bot_has_permissions(manage_channels=True)
-    async def unlockdown(self, ctx: commands.Context, unlockrole: bool=False):
+    @checks.bot_has_permissions(manage_channels=True, manage_roles=True)
+    async def unlockdown(self, ctx: commands.Context, unlockrole: bool = False):
         """
         Ends the lockdown
-        
+
         If you pass True, it will unlock send message perms for the @everyone role in the role menu
         """
         guild = ctx.guild
@@ -245,7 +252,7 @@ class LockItUp(BaseCog):
             try:
                 confirm_special = await ctx.bot.wait_for("message", check=check, timeout=30)
                 if confirm_special.content.lower() != "yes":
-                    return await ctx.send("Looks like we aren't locking this thing up today")
+                    return await ctx.send("Looks like we aren't unlocking this thing today")
             except asyncio.TimeoutError:
                 return await ctx.send("You took too long to reply!")
 
@@ -320,18 +327,50 @@ class LockItUp(BaseCog):
                             self.log.info(
                                 "Could not send message to {}".format(guild_channel.name)
                             )
-        if unlockrole:
+
+        lock_role_check = await self.config.guild(
+            guild
+        ).lock_role()  # prevent forgetfulness of passing true at unlock if passed at lock
+        if lock_role_check:
             perms = ctx.guild.get_role(ctx.guild.id).permissions
             perms.send_messages = True
             if not ctx.me.guild_permissions.manage_roles:
-                await ctx.send("I'm missing the ability to manage roles so we will skip making changes to roles in the server settings")
+                await ctx.send(
+                    "I'm missing the ability to manage roles so we will skip making changes to roles in the server settings, however, your default role is currently set to deny send messages."
+                )
                 pass
             try:
-                await ctx.guild.default_role.edit(permissions=perms, reason=f"Role unlock requested by {ctx.author.name}")
+                await ctx.guild.default_role.edit(
+                    permissions=perms, reason=f"Role unlock requested by {ctx.author.name}"
+                )
+                await self.config.guild(ctx.guild).lock_role.set(False)
+
             except Exception as e:
-                await ctx.send(f"Getting an error when attempting to edit role permissions in server settings:\n{e}\nSkipping...")
+                await ctx.send(
+                    f"Getting an error when attempting to edit role permissions in server settings:\n{e}\nSkipping..."
+                )
                 pass
-                
+
+        if not lock_role_check:
+            if unlockrole:  # cover manual passing
+                perms = ctx.guild.get_role(ctx.guild.id).permissions
+                perms.send_messages = True
+                if not ctx.me.guild_permissions.manage_roles:
+                    await ctx.send(
+                        "I'm missing the ability to manage roles so we will skip making changes to roles in the server settings"
+                    )
+                    pass
+                try:
+                    await ctx.guild.default_role.edit(
+                        permissions=perms, reason=f"Role unlock requested by {ctx.author.name}"
+                    )
+                    await self.config.guild(ctx.guild).lock_role.set(False)
+                except Exception as e:
+                    await ctx.send(
+                        f"Getting an error when attempting to edit role permissions in server settings:\n{e}\nSkipping..."
+                    )
+                    pass
+
         # finalize
         try:
             await ctx.send("Server Unlocked")
@@ -340,7 +379,7 @@ class LockItUp(BaseCog):
                 f"Something is wrong with my permissions in {ctx.guild.name} ({ctx.guild.id}) when unlock was requested."
             )
 
-        await self.config.guild(guild).locked.set(False)
+        await self.config.guild(guild).locked.set(False)  # write it to configs
 
     @commands.group(aliases=["lds"])
     @commands.guild_only()
