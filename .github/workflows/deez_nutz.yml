@@ -13,20 +13,20 @@ jobs:
       - uses: actions/setup-python@v1
         with:
           python_version: "3.8"
-      - run: "python -m pip install black==20.8b1 isort==4.3.21"
+      - run: "python -m pip install black==20.8b1 isort"
         name: Install black and isort
       - run: "make reformat"
         name: Format
         continue-on-error: true
-      - run: |
+      - name Commit Ish
+        run: |
            git config --local committer.email "noreply@github.com"
            git config --local committer.name "GitHub"
            git config --local author.email "${{ github.actor }}@users.noreply.github.com"
            git config --local author.name "{{ github.actor }}"
            git add .
            git commit -m "Style Reformatting"
-           git push "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REF#refs/heads/}
-         name: Commit Changes
+           git push
 
 
   lint_python:
