@@ -704,7 +704,10 @@ class LockItUp(BaseCog):
 
     @lockdownset.command(name="setvc")
     async def vc_setter(
-        self, ctx: commands.Context, *, vc_channel: Greedy[discord.VoiceChannel],
+        self,
+        ctx: commands.Context,
+        *,
+        vc_channel: Greedy[discord.VoiceChannel],
     ):
         """
         Adds channel to list of voice chats to lock/unlock
@@ -884,7 +887,9 @@ class LockItUp(BaseCog):
             overwrite.update(connect=False)
         try:
             await channel.set_permissions(
-                ctx.bot.user, overwrite=bot_overwrite, reason="Securing overrides for Kronos",
+                ctx.bot.user,
+                overwrite=bot_overwrite,
+                reason="Securing overrides for Kronos",
             )
             await channel.set_permissions(
                 role,
