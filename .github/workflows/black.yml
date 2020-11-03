@@ -18,7 +18,7 @@ jobs:
       - run: "make reformat"
         name: Format
         continue-on-error: true
-      - name Commit Ish
+      - name Commit changes
         run: |
            git config --local committer.email "noreply@github.com"
            git config --local committer.name "GitHub"
