@@ -43,6 +43,7 @@ class LockItUp(BaseCog):
 
     @commands.command()
     @commands.guild_only()
+    @commands.max_concurrency(1, commands.BucketType.guild)
     @checks.mod_or_permissions(manage_channels=True)
     @checks.bot_has_permissions(manage_channels=True, manage_roles=True)
     async def lockdown(self, ctx: commands.Context, lockrole: bool = False):
@@ -216,6 +217,7 @@ class LockItUp(BaseCog):
 
     @commands.command()
     @commands.guild_only()
+    @commands.max_concurrency(1, commands.BucketType.guild)
     @checks.mod_or_permissions(manage_messages=True)
     @checks.bot_has_permissions(manage_channels=True, manage_roles=True)
     async def unlockdown(self, ctx: commands.Context, unlockrole: bool = False):
