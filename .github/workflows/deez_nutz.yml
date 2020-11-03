@@ -6,17 +6,28 @@ on: [push, pull_request]
 
 jobs:
   black:
-    name: Style Check with Black
+    name: Style Check with Black&iSort
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-python@v1
         with:
           python_version: "3.8"
-      - run: "python -m pip install black"
-        name: Install black
-      - run: "python -m black --check -l 99"
-        name: Style checking with black
+      - run: "python -m pip install black==20.8b1 isort==4.3.21"
+        name: Install black and isort
+      - run: "make reformat"
+        name: Format
+        continue-on-error: true
+      - run: |
+           git config --local committer.email "noreply@github.com"
+           git config --local committer.name "GitHub"
+           git config --local author.email "${{ github.actor }}@users.noreply.github.com"
+           git config --local author.name "{{ github.actor }}"
+           git add .
+           git commit -m "Style Reformatting"
+           git push "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REF#refs/heads/}
+         name: Commit Changes
+
 
   lint_python:
     name: Lint Python
