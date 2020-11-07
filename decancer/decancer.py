@@ -71,7 +71,6 @@ class Decancer(BaseCog):
             text = text.decode("utf-8")
         except Exception as e:
             print(e)
-            pass
         return str(text)
 
     # the magician

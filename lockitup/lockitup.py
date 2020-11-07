@@ -1,8 +1,6 @@
 import asyncio
 import logging
-from datetime import datetime
-from os.path import exists
-from typing import Optional, Union
+from typing import Union
 
 import discord
 from redbot.core import Config, checks, commands
@@ -191,7 +189,6 @@ class LockItUp(BaseCog):
                 await ctx.send(
                     "I'm missing the ability to manage roles so we will skip making changes to roles in the server settings"
                 )
-                pass
             try:
                 await ctx.guild.default_role.edit(
                     permissions=perms, reason=f"Role Lockdown requested by {ctx.author.name}"
@@ -201,7 +198,6 @@ class LockItUp(BaseCog):
                 await ctx.send(
                     f"Getting an error when attempting to edit role permissions in server settings:\n{e}\nSkipping..."
                 )
-                pass
 
         # finalize
         try:
@@ -340,7 +336,6 @@ class LockItUp(BaseCog):
                 await ctx.send(
                     "I'm missing the ability to manage roles so we will skip making changes to roles in the server settings, however, your default role is currently set to deny send messages."
                 )
-                pass
             try:
                 await ctx.guild.default_role.edit(
                     permissions=perms, reason=f"Role unlock requested by {ctx.author.name}"
@@ -351,7 +346,6 @@ class LockItUp(BaseCog):
                 await ctx.send(
                     f"Getting an error when attempting to edit role permissions in server settings:\n{e}\nSkipping..."
                 )
-                pass
 
         if not lock_role_check:
             if unlockrole:  # cover manual passing
@@ -361,7 +355,6 @@ class LockItUp(BaseCog):
                     await ctx.send(
                         "I'm missing the ability to manage roles so we will skip making changes to roles in the server settings"
                     )
-                    pass
                 try:
                     await ctx.guild.default_role.edit(
                         permissions=perms, reason=f"Role unlock requested by {ctx.author.name}"
@@ -371,7 +364,6 @@ class LockItUp(BaseCog):
                     await ctx.send(
                         f"Getting an error when attempting to edit role permissions in server settings:\n{e}\nSkipping..."
                     )
-                    pass
 
         # finalize
         try:
@@ -391,7 +383,6 @@ class LockItUp(BaseCog):
         """
         Settings for lockdown
         """
-        pass
 
     @lockdownset.command(name="showsettings")
     async def show_settings(self, ctx: commands.Context):

@@ -1,10 +1,5 @@
-import asyncio
-import contextlib
 import logging
 import re
-from collections import namedtuple
-from datetime import datetime, timedelta
-from typing import Optional, Union, cast
 
 import discord
 from redbot.core import checks, commands, i18n, modlog
