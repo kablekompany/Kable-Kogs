@@ -12,7 +12,7 @@ jobs:
       - uses: actions/setup-python@v1
         with:
           python_version: "3.8"
-      - run: "python -m pip install black==20.8b1 isort"
+      - run: "python -m pip install black isort autoflake"
         name: Install requirements
       - run: "make reformat"
         continue-on-error: true
