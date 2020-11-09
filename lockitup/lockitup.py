@@ -455,7 +455,7 @@ class LockItUp(BaseCog):
         Set up logging channel to record what channels the bot couldn't successfully lock/unlock
         """
         guild = ctx.guild
-        load_check = await self.config.guild(guild).logging_channel()
+
         await self.config.guild(guild).logging_channel.set(logchannel.id)
         try:
             await self.loggerhook(
