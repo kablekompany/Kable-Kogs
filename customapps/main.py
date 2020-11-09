@@ -64,7 +64,11 @@ class CustomApps(Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.config = Config.get_conf(self, identifier=73837383738, force_registration=True,)
+        self.config = Config.get_conf(
+            self,
+            identifier=73837383738,
+            force_registration=True,
+        )
         self.config.register_member(**default)
         self.config.register_guild(**guild_defaults)
         self.antispam = {}
@@ -305,7 +309,9 @@ class CustomApps(Cog):
         embed.title = f"User: {ctx.author.name}#{ctx.author.discriminator} | ID: ({ctx.author.id})"
         embed.add_field(name="Name:", value=f"{ctx.author.mention}\n" + name.content, inline=True)
         embed.add_field(
-            name="Year of Birth:", value=age.content + f"\n{yearmath} years old", inline=True,
+            name="Year of Birth:",
+            value=age.content + f"\n{yearmath} years old",
+            inline=True,
         )
         embed.add_field(name="Timezone:", value=timezone.content, inline=True)
         embed.add_field(name="Desired position:", value=position.content, inline=True)
@@ -323,11 +329,15 @@ class CustomApps(Cog):
             embed.add_field(name=app_data["question10"], value=answer10.content, inline=False)
         if check_11 is not None:
             embed.add_field(
-                name=app_data["question11"], value=answer11.content, inline=False,
+                name=app_data["question11"],
+                value=answer11.content,
+                inline=False,
             )
         if check_12 is not None:
             embed.add_field(
-                name=app_data["question12"], value=answer12.content, inline=False,
+                name=app_data["question12"],
+                value=answer12.content,
+                inline=False,
             )
         embed.add_field(name="Final Comments", value=finalcomments.content, inline=False)
         try:
@@ -687,7 +697,9 @@ class CustomApps(Cog):
             name="Name:", value=f"{ctx.author.mention}\n" + load_data["name"], inline=True
         )
         embed.add_field(
-            name="Year of Birth:", value=load_data["age"], inline=True,
+            name="Year of Birth:",
+            value=load_data["age"],
+            inline=True,
         )
         embed.add_field(name="Timezone:", value=load_data["timezone"], inline=True)
         embed.add_field(name="Desired position:", value=load_data["position"], inline=True)
@@ -705,11 +717,15 @@ class CustomApps(Cog):
             embed.add_field(name=app_data["question10"], value=load_data["answer10"], inline=False)
         if check_11 is not None:
             embed.add_field(
-                name=app_data["question11"], value=load_data["answer11"], inline=False,
+                name=app_data["question11"],
+                value=load_data["answer11"],
+                inline=False,
             )
         if check_12 is not None:
             embed.add_field(
-                name=app_data["question12"], value=load_data["answer12"], inline=False,
+                name=app_data["question12"],
+                value=load_data["answer12"],
+                inline=False,
             )
         embed.add_field(name="Final Comments", value=load_data["finalcomments"], inline=False)
 
@@ -763,7 +779,9 @@ class CustomApps(Cog):
                 }
             try:
                 channel = await ctx.guild.create_text_channel(
-                    "staff-applications", overwrites=overwrites, reason="Application cog setup",
+                    "staff-applications",
+                    overwrites=overwrites,
+                    reason="Application cog setup",
                 )
             except discord.Forbidden:
                 return await ctx.send(

@@ -1,8 +1,6 @@
 import asyncio
 import logging
-from datetime import datetime
-from os.path import exists
-from typing import Optional, Union
+from typing import Union
 
 import discord
 from redbot.core import Config, checks, commands
@@ -211,7 +209,6 @@ class LockItUp(BaseCog):
                 await ctx.send(
                     "I'm missing the ability to manage roles so we will skip making changes to roles in the server settings"
                 )
-                pass
             try:
                 await ctx.guild.default_role.edit(
                     permissions=perms, reason=f"Role Lockdown requested by {ctx.author.name}"
@@ -221,7 +218,6 @@ class LockItUp(BaseCog):
                 await ctx.send(
                     f"Getting an error when attempting to edit role permissions in server settings:\n{e}\nSkipping..."
                 )
-                pass
 
         # finalize
         try:
@@ -385,7 +381,6 @@ class LockItUp(BaseCog):
                 await ctx.send(
                     "I'm missing the ability to manage roles so we will skip making changes to roles in the server settings, however, your default role is currently set to deny send messages."
                 )
-                pass
             try:
                 await ctx.guild.default_role.edit(
                     permissions=perms, reason=f"Role unlock requested by {ctx.author.name}"
@@ -396,7 +391,6 @@ class LockItUp(BaseCog):
                 await ctx.send(
                     f"Getting an error when attempting to edit role permissions in server settings:\n{e}\nSkipping..."
                 )
-                pass
 
         if not lock_role_check:
             if unlockrole:  # cover manual passing
@@ -406,7 +400,6 @@ class LockItUp(BaseCog):
                     await ctx.send(
                         "I'm missing the ability to manage roles so we will skip making changes to roles in the server settings"
                     )
-                    pass
                 try:
                     await ctx.guild.default_role.edit(
                         permissions=perms, reason=f"Role unlock requested by {ctx.author.name}"
@@ -441,7 +434,6 @@ class LockItUp(BaseCog):
         """
         Settings for lockdown
         """
-        pass
 
     @lockdownset.command(name="logchan")
     @checks.admin_or_permissions(manage_guild=True)
@@ -798,7 +790,10 @@ class LockItUp(BaseCog):
 
     @lockdownset.command(name="setvc")
     async def vc_setter(
-        self, ctx: commands.Context, *, vc_channel: Greedy[discord.VoiceChannel],
+        self,
+        ctx: commands.Context,
+        *,
+        vc_channel: Greedy[discord.VoiceChannel],
     ):
         """
         Adds channel to list of voice chats to lock/unlock
@@ -978,7 +973,9 @@ class LockItUp(BaseCog):
             overwrite.update(connect=False)
         try:
             await channel.set_permissions(
-                ctx.bot.user, overwrite=bot_overwrite, reason="Securing overrides for Kronos",
+                ctx.bot.user,
+                overwrite=bot_overwrite,
+                reason="Securing overrides for Kronos",
             )
             await channel.set_permissions(
                 role,
