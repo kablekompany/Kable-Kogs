@@ -119,7 +119,7 @@ class LockItUp(BaseCog):
                                 author.name, author.id
                             ),
                         )
-                    except discord.Forbidden as er:
+                    except Exception as er:
                         self.log.info(
                             "In {}, could not lock {}".format(guild.id, guild_channel.name)
                         )
@@ -132,7 +132,7 @@ class LockItUp(BaseCog):
                         if notifier is True:
                             try:
                                 await guild_channel.send(embed=e)
-                            except discord.Forbidden:
+                            except Exception as er:
                                 self.log.info(
                                     "Could not send message to {}".format(guild_channel.name)
                                 )
@@ -188,7 +188,7 @@ class LockItUp(BaseCog):
                             author.name, author.id
                         ),
                     )
-                except discord.Forbidden:
+                except Exception as er:
                     self.log.info("Could not lockdown {}".format(guild_channel.name))
                     await self.loggerhook(
                             guild,
@@ -228,7 +228,7 @@ class LockItUp(BaseCog):
             await ctx.send(
                 "We're locked up, fam. Revert this by running `{}unlockdown`".format(ctx.prefix)
             )
-        except discord.Forbidden:
+        except Exception as er:
             self.log.info(
                 f"Couldn't secure overrides in Guild {ctx.guild.name} ({ctx.guild.id}): Locked as requested."
             )
@@ -299,7 +299,7 @@ class LockItUp(BaseCog):
                                 author.name, author.id
                             ),
                         )
-                    except discord.Forbidden as er:
+                    except Exception as er:
                         self.log.info(
                             "In {}, could not unlock {}".format(guild.id, guild_channel.name)
                         )
@@ -312,7 +312,7 @@ class LockItUp(BaseCog):
                         if notifier is True:
                             try:
                                 await guild_channel.send(embed=e)
-                            except discord.Forbidden as er:
+                            except Exception as er:
                                 self.log.info(
                                     "In {}, could not send message to {}".format(
                                         guild.id, guild_channel.name
@@ -356,7 +356,7 @@ class LockItUp(BaseCog):
                             author.name, author.id
                         ),
                     )
-                except discord.Forbidden as er:
+                except Exception as er:
                     self.log.info(
                         "In {}, could not unlock {}".format(guild.id, guild_channel.name)
                     )
@@ -416,15 +416,20 @@ class LockItUp(BaseCog):
                     await ctx.send(
                         f"Getting an error when attempting to edit role permissions in server settings:\n{e}\nSkipping..."
                     )
-                    pass
+                    await self.loggerhook(
+                        guild, error=f"Error on unlock for {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```"
+                    )
 
         # finalize
         try:
             await ctx.send("Server Unlocked")
-        except discord.Forbidden:
+        except Exception as er:
             self.log.info(
                 f"Something is wrong with my permissions in {ctx.guild.name} ({ctx.guild.id}) when unlock was requested."
             )
+            await self.loggerhook(
+                        guild, error=f"Error on unlock for {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```"
+                    )
 
         await self.config.guild(guild).locked.set(False)  # write it to configs
 
