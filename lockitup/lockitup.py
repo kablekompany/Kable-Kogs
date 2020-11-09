@@ -30,6 +30,7 @@ class LockItUp(BaseCog):
             "secondary_role": None,
             "secondary_channels": [],
             "lock_role": None,
+            "logging_channel": None,
         }
 
         self.config.register_guild(**default_guild)
@@ -51,6 +52,13 @@ class LockItUp(BaseCog):
         If you pass true, your @everyone role will also be denied permissions from within the role menu
         """
         guild = ctx.guild
+        check_logger = await self.config.guild(guild).logging_channel()
+        if not check_logger:
+            await ctx.send(
+                "Please update your server configurations by running `{}lds logchan <channel>` so I can deliver informative errors you may encounter. Will continue this lockdown for now".format(
+                    ctx.prefix
+                )
+            )
 
         def check(m):
             return m.author == ctx.author and m.channel == ctx.channel
@@ -96,10 +104,12 @@ class LockItUp(BaseCog):
                                 overwrite=overwrite1,
                                 reason="Securing bot overrides for lockdown",
                             )
-                    except Exception:
-                        return await ctx.send(
-                            "You'll need to raise my role, or make sure I can manage those channels. I failed trying to secure my own overrides. This lockdown will not resume"
+                    except Exception as er:
+                        return await self.loggerhook(
+                            guild,
+                            error=f"Not able to lockdown {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```\nLockdown will not resume",
                         )
+
                     role = discord.utils.get(guild.roles, id=spec_role)
                     spec_overwrite = guild_channel.overwrites_for(role)
                     spec_overwrite.update(send_messages=False)
@@ -111,16 +121,26 @@ class LockItUp(BaseCog):
                                 author.name, author.id
                             ),
                         )
-                    except discord.Forbidden:
-                        self.log.info("Could not lockdown {}".format(guild_channel.name))
+                    except Exception as er:
+                        self.log.info(
+                            "In {}, could not lock {}".format(guild.id, guild_channel.name)
+                        )
+                        await self.loggerhook(
+                            guild,
+                            error=f"Not able to lockdown {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```",
+                        )
                     if msg is not None:
                         notifier = await self.config.guild(guild).send_alert()
                         if notifier is True:
                             try:
                                 await guild_channel.send(embed=e)
-                            except discord.Forbidden:
+                            except Exception as er:
                                 self.log.info(
                                     "Could not send message to {}".format(guild_channel.name)
+                                )
+                                await self.loggerhook(
+                                    guild,
+                                    error=f"Not able to send messages to {guild_channel.mention} after lockdown\n```diff\n+ ERROR:\n- {er}\n```",
                                 )
 
         # proceed to default lockdown
@@ -170,8 +190,12 @@ class LockItUp(BaseCog):
                             author.name, author.id
                         ),
                     )
-                except discord.Forbidden:
+                except Exception as er:
                     self.log.info("Could not lockdown {}".format(guild_channel.name))
+                    await self.loggerhook(
+                        guild,
+                        error=f"Not able to lockdown {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```",
+                    )
                 if msg is not None:
                     notifier = await self.config.guild(guild).send_alert()
                     if notifier is True:
@@ -204,9 +228,13 @@ class LockItUp(BaseCog):
             await ctx.send(
                 "We're locked up, fam. Revert this by running `{}unlockdown`".format(ctx.prefix)
             )
-        except discord.Forbidden:
+        except Exception as er:
             self.log.info(
                 f"Couldn't secure overrides in Guild {ctx.guild.name} ({ctx.guild.id}): Locked as requested."
+            )
+            await self.loggerhook(
+                guild,
+                error=f"Unable to send messages on lockdown to {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```",
             )
 
         await self.config.guild(guild).locked.set(True)  # write it to configs
@@ -223,6 +251,13 @@ class LockItUp(BaseCog):
         If you pass True, it will unlock send message perms for the @everyone role in the role menu
         """
         guild = ctx.guild
+        check_logger = await self.config.guild(guild).logging_channel()
+        if not check_logger:
+            await ctx.send(
+                "Please update your server configurations by running `{}lds logchan <channel>` so I can deliver informative errors you may encounter. Will continue this unlock for now".format(
+                    ctx.prefix
+                )
+            )
 
         def check(m):
             return m.author == ctx.author and m.channel == ctx.channel
@@ -269,16 +304,28 @@ class LockItUp(BaseCog):
                                 author.name, author.id
                             ),
                         )
-                    except discord.Forbidden:
-                        self.log.info("Could not unlock {}".format(guild_channel.name))
+                    except Exception as er:
+                        self.log.info(
+                            "In {}, could not unlock {}".format(guild.id, guild_channel.name)
+                        )
+                        await self.loggerhook(
+                            guild,
+                            error=f"Error on unlock for {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```",
+                        )
                     if msg is not None:
                         notifier = await self.config.guild(guild).send_alert()
                         if notifier is True:
                             try:
                                 await guild_channel.send(embed=e)
-                            except discord.Forbidden:
+                            except Exception as er:
                                 self.log.info(
-                                    "Could not send message to {}".format(guild_channel.name)
+                                    "In {}, could not send message to {}".format(
+                                        guild.id, guild_channel.name
+                                    )
+                                )
+                                await self.loggerhook(
+                                    guild,
+                                    error=f"Can't seem to send messages to {guild_channel.mention} after lockdown\n```diff\n+ ERROR:\n- {er}\n```",
                                 )
 
         # proceed to default lockdown
@@ -314,8 +361,14 @@ class LockItUp(BaseCog):
                             author.name, author.id
                         ),
                     )
-                except discord.Forbidden:
-                    self.log.info("Could not unlock {}".format(guild_channel.name))
+                except Exception as er:
+                    self.log.info(
+                        "In {}, could not unlock {}".format(guild.id, guild_channel.name)
+                    )
+                    await self.loggerhook(
+                        guild,
+                        error=f"Error on unlock for {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```",
+                    )
                 if msg is not None:
                     notifier = await self.config.guild(guild).send_alert()
                     if notifier is True:
@@ -323,7 +376,9 @@ class LockItUp(BaseCog):
                             await guild_channel.send(embed=e)
                         except discord.Forbidden:
                             self.log.info(
-                                "Could not send message to {}".format(guild_channel.name)
+                                "In {} could not send message to {}".format(
+                                    guild.id, guild_channel.name
+                                )
                             )
 
         lock_role_check = await self.config.guild(
@@ -360,17 +415,25 @@ class LockItUp(BaseCog):
                         permissions=perms, reason=f"Role unlock requested by {ctx.author.name}"
                     )
                     await self.config.guild(ctx.guild).lock_role.set(False)
-                except Exception as e:
+                except Exception as er:
                     await ctx.send(
                         f"Getting an error when attempting to edit role permissions in server settings:\n{e}\nSkipping..."
+                    )
+                    await self.loggerhook(
+                        guild,
+                        error=f"Error on unlock for {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```",
                     )
 
         # finalize
         try:
             await ctx.send("Server Unlocked")
-        except discord.Forbidden:
+        except Exception as er:
             self.log.info(
                 f"Something is wrong with my permissions in {ctx.guild.name} ({ctx.guild.id}) when unlock was requested."
+            )
+            await self.loggerhook(
+                guild,
+                error=f"Error on unlock for {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```",
             )
 
         await self.config.guild(guild).locked.set(False)  # write it to configs
@@ -383,6 +446,53 @@ class LockItUp(BaseCog):
         """
         Settings for lockdown
         """
+
+    @lockdownset.command(name="logchan")
+    @checks.admin_or_permissions(manage_guild=True)
+    @checks.bot_has_permissions(manage_channels=True, manage_webhooks=True)
+    async def logging_channel(self, ctx: commands.Context, logchannel: discord.TextChannel):
+        """
+        Set up logging channel to record what channels the bot couldn't successfully lock/unlock
+        """
+        guild = ctx.guild
+
+        await self.config.guild(guild).logging_channel.set(logchannel.id)
+        try:
+            await self.loggerhook(
+                guild,
+                error="THIS IS A TEST\n```diff\n+ If you are seeing this, you have correctly set up error log for lock/unlock features\n```",
+            )
+        except Exception:
+            self.log.info(f"Error'd on setup in {guild.id} for webhook logging")
+
+        try:
+            await ctx.send(
+                f"Set up the logging — will send webhooks to {logchannel.mention} when there is a permissions error on lock/unlocks"
+            )
+        except Exception as e:
+            self.log.info(f"Error setting up guild logs in {ctx.guild.id}: Error {e}")
+
+    async def loggerhook(self, guild: discord.Guild, error: str):
+        channel = guild.get_channel(await self.config.guild(guild).logging_channel())
+        if not channel or not (
+            channel.permissions_for(guild.me).send_messages
+            and channel.permissions_for(guild.me).embed_links
+        ):
+            await self.config.guild(guild).logging_channel.clear()
+            return
+
+        webhook = None
+        for hook in await channel.webhooks():
+            if hook.name == self.bot.user.name:
+                webhook = hook
+        if webhook is None:
+            webhook = await channel.create_webhook(name=self.bot.user.name)
+
+        await webhook.send(
+            content=f"**LockItUp Error Log**\n{error}",
+            username=self.bot.user.name,
+            avatar_url=self.bot.user.avatar_url,
+        )
 
     @lockdownset.command(name="showsettings")
     async def show_settings(self, ctx: commands.Context):
