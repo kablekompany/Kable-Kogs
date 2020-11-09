@@ -412,7 +412,7 @@ class LockItUp(BaseCog):
                         permissions=perms, reason=f"Role unlock requested by {ctx.author.name}"
                     )
                     await self.config.guild(ctx.guild).lock_role.set(False)
-                except Exception as e:
+                except Exception as er:
                     await ctx.send(
                         f"Getting an error when attempting to edit role permissions in server settings:\n{e}\nSkipping..."
                     )
