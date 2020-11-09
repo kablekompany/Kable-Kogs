@@ -54,7 +54,11 @@ class LockItUp(BaseCog):
         guild = ctx.guild
         check_logger = await self.config.guild(guild).logging_channel()
         if not check_logger:
-            await ctx.send("Please update your server configurations by running `{}lds logchan <channel>` so I can deliver informative errors you may encounter. Will continue this lockdown for now".format(ctx.prefix))
+            await ctx.send(
+                "Please update your server configurations by running `{}lds logchan <channel>` so I can deliver informative errors you may encounter. Will continue this lockdown for now".format(
+                    ctx.prefix
+                )
+            )
 
         def check(m):
             return m.author == ctx.author and m.channel == ctx.channel
@@ -189,8 +193,9 @@ class LockItUp(BaseCog):
                 except Exception as er:
                     self.log.info("Could not lockdown {}".format(guild_channel.name))
                     await self.loggerhook(
-                            guild,
-                            error=f"Not able to lockdown {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```")
+                        guild,
+                        error=f"Not able to lockdown {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```",
+                    )
                 if msg is not None:
                     notifier = await self.config.guild(guild).send_alert()
                     if notifier is True:
@@ -200,7 +205,6 @@ class LockItUp(BaseCog):
                             self.log.info(
                                 "Could not send message to {}".format(guild_channel.name)
                             )
-                            
 
         if lockrole:
             perms = ctx.guild.get_role(ctx.guild.id).permissions
@@ -229,8 +233,9 @@ class LockItUp(BaseCog):
                 f"Couldn't secure overrides in Guild {ctx.guild.name} ({ctx.guild.id}): Locked as requested."
             )
             await self.loggerhook(
-                            guild,
-                            error=f"Unable to send messages on lockdown to {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```")
+                guild,
+                error=f"Unable to send messages on lockdown to {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```",
+            )
 
         await self.config.guild(guild).locked.set(True)  # write it to configs
 
@@ -248,7 +253,11 @@ class LockItUp(BaseCog):
         guild = ctx.guild
         check_logger = await self.config.guild(guild).logging_channel()
         if not check_logger:
-            await ctx.send("Please update your server configurations by running `{}lds logchan <channel>` so I can deliver informative errors you may encounter. Will continue this unlock for now".format(ctx.prefix))
+            await ctx.send(
+                "Please update your server configurations by running `{}lds logchan <channel>` so I can deliver informative errors you may encounter. Will continue this unlock for now".format(
+                    ctx.prefix
+                )
+            )
 
         def check(m):
             return m.author == ctx.author and m.channel == ctx.channel
@@ -357,7 +366,8 @@ class LockItUp(BaseCog):
                         "In {}, could not unlock {}".format(guild.id, guild_channel.name)
                     )
                     await self.loggerhook(
-                        guild, error=f"Error on unlock for {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```"
+                        guild,
+                        error=f"Error on unlock for {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```",
                     )
                 if msg is not None:
                     notifier = await self.config.guild(guild).send_alert()
@@ -410,7 +420,8 @@ class LockItUp(BaseCog):
                         f"Getting an error when attempting to edit role permissions in server settings:\n{e}\nSkipping..."
                     )
                     await self.loggerhook(
-                        guild, error=f"Error on unlock for {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```"
+                        guild,
+                        error=f"Error on unlock for {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```",
                     )
 
         # finalize
@@ -421,8 +432,9 @@ class LockItUp(BaseCog):
                 f"Something is wrong with my permissions in {ctx.guild.name} ({ctx.guild.id}) when unlock was requested."
             )
             await self.loggerhook(
-                        guild, error=f"Error on unlock for {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```"
-                    )
+                guild,
+                error=f"Error on unlock for {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```",
+            )
 
         await self.config.guild(guild).locked.set(False)  # write it to configs
 
@@ -446,7 +458,10 @@ class LockItUp(BaseCog):
         load_check = await self.config.guild(guild).logging_channel()
         await self.config.guild(guild).logging_channel.set(logchannel.id)
         try:
-            await self.loggerhook(guild, error="THIS IS A TEST\n```diff\n+ If you are seeing this, you have correctly set up error log for lock/unlock features\n```")
+            await self.loggerhook(
+                guild,
+                error="THIS IS A TEST\n```diff\n+ If you are seeing this, you have correctly set up error log for lock/unlock features\n```",
+            )
         except Exception:
             self.log.info(f"Error'd on setup in {guild.id} for webhook logging")
 
