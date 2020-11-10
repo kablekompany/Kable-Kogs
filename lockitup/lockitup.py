@@ -40,6 +40,31 @@ class LockItUp(BaseCog):
         """This cog does not store user data"""
         return
 
+    async def loggerhook(self, guild: discord.Guild, error: str):
+        channel = guild.get_channel(await self.config.guild(guild).logging_channel())
+        # if not channel or not (
+        #     # channel.permissions_for(guild.me).send_messages
+        #     # and channel.permissions_for(guild.me).embed_links
+        # ):
+        if not channel or not (
+            channel.permissions_for(guild.me).manage_webhooks
+        ):
+            await self.config.guild(guild).logging_channel.clear()
+            return
+
+        webhook = None
+        for hook in await channel.webhooks():
+            if hook.name == self.bot.user.name:
+                webhook = hook
+        if webhook is None:
+            webhook = await channel.create_webhook(name=self.bot.user.name)
+
+        await webhook.send(
+            content=f"**LockItUp Error Log**\n{error}",
+            username=self.bot.user.name,
+            avatar_url=self.bot.user.avatar_url,
+        )
+
     @commands.command()
     @commands.guild_only()
     @commands.max_concurrency(1, commands.BucketType.guild)
@@ -471,28 +496,6 @@ class LockItUp(BaseCog):
             )
         except Exception as e:
             self.log.info(f"Error setting up guild logs in {ctx.guild.id}: Error {e}")
-
-    async def loggerhook(self, guild: discord.Guild, error: str):
-        channel = guild.get_channel(await self.config.guild(guild).logging_channel())
-        if not channel or not (
-            channel.permissions_for(guild.me).send_messages
-            and channel.permissions_for(guild.me).embed_links
-        ):
-            await self.config.guild(guild).logging_channel.clear()
-            return
-
-        webhook = None
-        for hook in await channel.webhooks():
-            if hook.name == self.bot.user.name:
-                webhook = hook
-        if webhook is None:
-            webhook = await channel.create_webhook(name=self.bot.user.name)
-
-        await webhook.send(
-            content=f"**LockItUp Error Log**\n{error}",
-            username=self.bot.user.name,
-            avatar_url=self.bot.user.avatar_url,
-        )
 
     @lockdownset.command(name="showsettings")
     async def show_settings(self, ctx: commands.Context):
