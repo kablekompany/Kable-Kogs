@@ -46,9 +46,7 @@ class LockItUp(BaseCog):
         #     # channel.permissions_for(guild.me).send_messages
         #     # and channel.permissions_for(guild.me).embed_links
         # ):
-        if not channel or not (
-            channel.permissions_for(guild.me).manage_webhooks
-        ):
+        if not channel or not (channel.permissions_for(guild.me).manage_webhooks):
             await self.config.guild(guild).logging_channel.clear()
             return
 
