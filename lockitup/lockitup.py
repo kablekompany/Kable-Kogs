@@ -42,6 +42,120 @@ class LockItUp(BaseCog):
         """This cog does not store user data"""
         return
 
+    async def ack_lockdown(self, ctx: commands.Context, guild: discord.Guild):
+        msg = await self.config.guild(guild).lockdown_message()
+        color1 = 0xF50A0A
+        e = discord.Embed(
+            color=discord.Color(color1),
+            title=f"Server Lockdown :lock:",
+            description=msg,
+            timestamp=ctx.message.created_at,
+        )
+        e.set_footer(text=f"{guild.name}")
+        channel_ids = await self.config.guild(guild).channels()
+        spec_check = await self.config.guild(guild).secondary_channels()
+        if spec_check:
+            channel_ids += spec_check
+        for guild_channel in guild.channels:
+            if guild_channel.id in channel_ids:
+                try:
+                    await guild_channel.send(embed=e)
+                    await asyncio.sleep(1)
+                except discord.Forbidden:
+                    self.log.info(
+                            "Could not send message to {}".format(guild_channel.name)
+                    )
+                    await self.loggerhook(
+                        guild,
+                        error=f"Can't send messages in {guild_channel.mention} after lock down. Check bot perms.",
+                    )
+
+    async def reign_lockdown(self, ctx: commands.Context, guild: discord.Guild):
+        bot_override = self.bot.user
+        author = ctx.author
+        channel_ids = await self.config.guild(guild).channels()
+        role = guild.default_role
+        for guild_channel in guild.channels:
+            if guild_channel.id in channel_ids:
+                overwrite1 = guild_channel.overwrites_for(bot_override)
+                overwrite1.update(send_messages=True, embed_links=True)
+                try:
+                    if not overwrite1.send_messages:
+                        await guild_channel.set_permissions(
+                            bot_override,
+                            overwrite=overwrite1,
+                            reason="Securing bot overrides for lockdown",
+                        )
+                        await asyncio.sleep(.5)
+                except Exception:
+                    return await ctx.send(
+                        "You'll need to give me permissions to send messages so I can manage that permissions for others. I failed trying to secure my own overrides. This lockdown will not resume"
+                    )
+
+                overwrite = guild_channel.overwrites_for(role)
+                overwrite.update(send_messages=False)
+                try:
+                    await guild_channel.set_permissions(
+                        role,
+                        overwrite=overwrite,
+                        reason="Lockdown in effect. Requested by {} ({})".format(
+                            author.name, author.id
+                        ),
+                    )
+                    await asyncio.sleep(.5)
+                except discord.Forbidden:
+                    self.log.info("Could not lockdown {}".format(guild_channel.name))
+
+        msg = await self.config.guild(guild).lockdown_message()
+        if msg:
+            notifier = await self.config.guild(guild).send_alert()
+            if notifier is True:
+                await self.ack_lockdown(ctx, guild)
+
+    async def secondary_lockdown(self, ctx: commands.Context, guild: discord.Guild):
+        bot_override = self.bot.user
+        author = ctx.author
+        special_chans = await self.config.guild(guild).secondary_channels()
+        spec_role = await self.config.guild(guild).secondary_role()
+        for guild_channel in guild.channels:
+            if guild_channel.id in special_chans:
+                overwrite1 = guild_channel.overwrites_for(bot_override)
+                overwrite1.update(send_messages=True, embed_links=True)
+                try:
+                    if not overwrite1.send_messages:
+                        await guild_channel.set_permissions(
+                            bot_override,
+                            overwrite=overwrite1,
+                            reason="Securing bot overrides for lockdown",
+                        )
+                        await asyncio.sleep(.5)
+                except Exception as er:
+                    return await self.loggerhook(
+                        guild,
+                        error=f"Error on lock for {guild_channel.mention} in securing bot overrides. Make sure I have the ability to send messages in these channels so I can manage this permission for others. ERROR: {er}\nLockdown will not resume",
+                    )
+
+                role = discord.utils.get(guild.roles, id=spec_role)
+                spec_overwrite = guild_channel.overwrites_for(role)
+                spec_overwrite.update(send_messages=False)
+                try:
+                    await guild_channel.set_permissions(
+                        role,
+                        overwrite=spec_overwrite,
+                        reason="Lockdown in effect. Requested by {} ({})".format(
+                            author.name, author.id
+                        ),
+                    )
+                    await asyncio.sleep(.5)
+                except discord.Forbidden as er:
+                    self.log.info(
+                        "In {}, could not lock {}".format(guild.id, guild_channel.name)
+                    )
+                    await self.loggerhook(
+                        guild,
+                        error=f"Error on locking for {guild_channel.mention}. ERROR: {er}",
+                    )
+
     @commands.command()
     @commands.guild_only()
     @commands.max_concurrency(1, commands.BucketType.guild)
@@ -63,139 +177,21 @@ class LockItUp(BaseCog):
             return await ctx.send("You're already locked")
 
         author = ctx.author
-        msg = await self.config.guild(guild).lockdown_message()
-        color1 = 0xF50A0A
-        e = discord.Embed(
-            color=discord.Color(color1),
-            title=f"Server Lockdown :lock:",
-            description=msg,
-            timestamp=ctx.message.created_at,
-        )
-        e.set_footer(text=f"{guild.name}")
-        bot_override = ctx.bot.user
+        await ctx.send("You ready to lock up? `[yes|no]`")
+        try:
+            confirm_lock = await ctx.bot.wait_for("message", check=check, timeout=30)
+            if confirm_lock.content.lower() != "yes":
+                return await ctx.send("Looks like we aren't unlocking this thing today")
+        except asyncio.TimeoutError:
+            return await ctx.send("You took too long to reply!")
 
+        await ctx.trigger_typing()
         nondefault_lock = await self.config.guild(guild).nondefault()
         if nondefault_lock is True:
-            await ctx.send("You ready to lock up? `[yes|no]`")
-            try:
-                confirm_special = await ctx.bot.wait_for("message", check=check, timeout=30)
-                if confirm_special.content.lower() != "yes":
-                    return await ctx.send("Canceling....")
-            except asyncio.TimeoutError:
-                return await ctx.send("You didn't answer in time!")
-
-            await ctx.trigger_typing()
-
-            special_chans = await self.config.guild(guild).secondary_channels()
-            spec_role = await self.config.guild(guild).secondary_role()
-            for guild_channel in guild.channels:
-                if guild_channel.id in special_chans:
-                    overwrite1 = guild_channel.overwrites_for(bot_override)
-                    overwrite1.update(send_messages=True, embed_links=True)
-                    try:
-                        if not overwrite1.send_messages:
-                            await guild_channel.set_permissions(
-                                bot_override,
-                                overwrite=overwrite1,
-                                reason="Securing bot overrides for lockdown",
-                            )
-                    except Exception as er:
-                        return await self.loggerhook(
-                            guild,
-                            error=f"Error on lock for {guild_channel.mention} in securing bot overrides. ERROR: {er}\nLockdown will not resume",
-                        )
-
-                    role = discord.utils.get(guild.roles, id=spec_role)
-                    spec_overwrite = guild_channel.overwrites_for(role)
-                    spec_overwrite.update(send_messages=False)
-                    try:
-                        await guild_channel.set_permissions(
-                            role,
-                            overwrite=spec_overwrite,
-                            reason="Lockdown in effect. Requested by {} ({})".format(
-                                author.name, author.id
-                            ),
-                        )
-                    except discord.Forbidden as er:
-                        self.log.info(
-                            "In {}, could not lock {}".format(guild.id, guild_channel.name)
-                        )
-                        await self.loggerhook(
-                            guild,
-                            error=f"Error on locking for {guild_channel.mention}. ERROR: {er}",
-                        )
-                    if msg is not None:
-                        notifier = await self.config.guild(guild).send_alert()
-                        if notifier is True:
-                            try:
-                                await guild_channel.send(embed=e)
-                            except discord.Forbidden:
-                                self.log.info(
-                                    "Could not send message to {}".format(guild_channel.name)
-                                )
-                                await self.loggerhook(
-                                    guild,
-                                    error=f"Can't send messages in {guild_channel.mention} after lock down. Check bot perms.",
-                                )
+            await self.secondary_lockdown(ctx, guild)
 
         # proceed to default lockdown
-        channel_ids = await self.config.guild(guild).channels()
-        if not channel_ids:
-            await ctx.send(
-                "You need to set this up by running `{}lockdownset addchan` first!".format(
-                    ctx.prefix
-                )
-            )
-            return
-        spec_ran = await self.config.guild(guild).nondefault()
-        if spec_ran is False:
-            await ctx.send("You sure you wanna lock up? `[yes|no]`")
-
-            try:
-                confirm_lockdown = await ctx.bot.wait_for("message", check=check, timeout=30)
-                if confirm_lockdown.content.lower() != "yes":
-                    return await ctx.send("Okay. Stop wasting my time")
-            except asyncio.TimeoutError:
-                return await ctx.send("You took too long to reply!")
-
-        role = guild.default_role
-        for guild_channel in guild.channels:
-            if guild_channel.id in channel_ids:
-                overwrite1 = guild_channel.overwrites_for(bot_override)
-                overwrite1.update(send_messages=True, embed_links=True)
-                try:
-                    if not overwrite1.send_messages:
-                        await guild_channel.set_permissions(
-                            bot_override,
-                            overwrite=overwrite1,
-                            reason="Securing bot overrides for lockdown",
-                        )
-                except Exception:
-                    return await ctx.send(
-                        "You'll need to raise my role, or make sure I can manage those channels. I failed trying to secure my own overrides. This lockdown will not resume"
-                    )
-
-                overwrite = guild_channel.overwrites_for(role)
-                overwrite.update(send_messages=False)
-                try:
-                    await guild_channel.set_permissions(
-                        role,
-                        overwrite=overwrite,
-                        reason="Lockdown in effect. Requested by {} ({})".format(
-                            author.name, author.id
-                        ),
-                    )
-                except discord.Forbidden:
-                    self.log.info("Could not lockdown {}".format(guild_channel.name))
-                if msg is not None:
-                    notifier = await self.config.guild(guild).send_alert()
-                    if notifier is True:
-                        try:
-                            await guild_channel.send(embed=e)
-                        except discord.Forbidden:
-                            self.log.info(
-                                "Could not send message to {}".format(guild_channel.name)
-                            )
+        await self.reign_lockdown(ctx, guild)
 
         if lockrole:
             perms = ctx.guild.get_role(ctx.guild.id).permissions
@@ -228,27 +224,7 @@ class LockItUp(BaseCog):
 
         await self.config.guild(guild).locked.set(True)  # write it to configs
 
-    @commands.command()
-    @commands.guild_only()
-    @commands.max_concurrency(1, commands.BucketType.guild)
-    @checks.mod_or_permissions(manage_messages=True)
-    @checks.bot_has_permissions(manage_channels=True, manage_roles=True)
-    async def unlockdown(self, ctx: commands.Context, unlockrole: bool = False):
-        """
-        Ends the lockdown
-
-        If you pass True, it will unlock send message perms for the @everyone role in the role menu
-        """
-        guild = ctx.guild
-
-        def check(m):
-            return m.author == ctx.author and m.channel == ctx.channel
-
-        lock_check = await self.config.guild(ctx.guild).locked()
-        if lock_check is False:
-            return await ctx.send("You're not locked")
-
-        author = ctx.author
+    async def ack_unlockdown(self, ctx: commands.Context, guild: discord.Guild):
         msg = await self.config.guild(guild).unlockdown_message()
         color2 = 0x2FFFFF
         e = discord.Embed(
@@ -259,77 +235,27 @@ class LockItUp(BaseCog):
         )
         e.set_footer(text=f"{guild.name}")
 
-        nondefault_lock = await self.config.guild(guild).nondefault()
-        if nondefault_lock is True:
-            await ctx.send("Ready to unlock? `[yes|no]`")
-            special_chans = await self.config.guild(guild).secondary_channels()
-            spec_role = await self.config.guild(guild).secondary_role()
-            try:
-                confirm_special = await ctx.bot.wait_for("message", check=check, timeout=30)
-                if confirm_special.content.lower() != "yes":
-                    return await ctx.send("Looks like we aren't unlocking this thing today")
-            except asyncio.TimeoutError:
-                return await ctx.send("You took too long to reply!")
-
-            await ctx.trigger_typing()
-
-            for guild_channel in guild.channels:
-                if guild_channel.id in special_chans:
-                    role = discord.utils.get(guild.roles, id=spec_role)
-                    spec_overwrite = guild_channel.overwrites_for(role)
-                    spec_overwrite.update(send_messages=True)
-                    try:
-                        await guild_channel.set_permissions(
-                            role,
-                            overwrite=spec_overwrite,
-                            reason="Lockdown rescinded. Requested by {} ({})".format(
-                                author.name, author.id
-                            ),
-                        )
-                    except discord.Forbidden as er:
-                        self.log.info(
-                            "In {}, could not unlock {}".format(guild.id, guild_channel.name)
-                        )
-                        await self.loggerhook(
-                            guild,
-                            error=f"Error on unlock for {guild_channel.mention}. ERROR: {er}",
-                        )
-                    if msg is not None:
-                        notifier = await self.config.guild(guild).send_alert()
-                        if notifier is True:
-                            try:
-                                await guild_channel.send(embed=e)
-                            except discord.Forbidden:
-                                self.log.info(
-                                    "In {}, could not send message to {}".format(
-                                        guild.id, guild_channel.name
-                                    )
-                                )
-                                await self.loggerhook(
-                                    guild,
-                                    error=f"Can't send messages in {guild_channel.mention} after lock down. Check bot perms.",
-                                )
-
-        # proceed to default lockdown
         channel_ids = await self.config.guild(guild).channels()
-        if not channel_ids:
-            await ctx.send(
-                "You need to set this up by running `{}lockdownset addchan` first!".format(
-                    ctx.prefix
-                )
-            )
-            return
-        spec_ran = await self.config.guild(guild).nondefault()
-        if spec_ran is False:
-            await ctx.send("R U sure about that `[yes|no]`")
+        spec_check = await self.config.guild(guild).secondary_channels()
+        if spec_check:
+            channel_ids += spec_check
+        for guild_channel in guild.channels:
+            if guild_channel.id in channel_ids:
+                try:
+                    await guild_channel.send(embed=e)
+                    await asyncio.sleep(1)
+                except discord.Forbidden:
+                    self.log.info(
+                            "Could not send message to {}".format(guild_channel.name)
+                    )
+                    await self.loggerhook(
+                        guild,
+                        error=f"Can't send messages in {guild_channel.mention} after lock down. Check bot perms.",
+                    )
 
-            try:
-                confirm_unlockdown = await ctx.bot.wait_for("message", check=check, timeout=30)
-                if confirm_unlockdown.content.lower() != "yes":
-                    return await ctx.send("Okay. Stop wasting my time")
-            except asyncio.TimeoutError:
-                return await ctx.send("You took too long to reply!")
-
+    async def reign_unlockdown(self, ctx: commands.Context, guild: discord.Guild):
+        author = ctx.author
+        channel_ids = await self.config.guild(guild).channels()
         role = guild.default_role
         for guild_channel in guild.channels:
             if guild_channel.id in channel_ids:
@@ -343,74 +269,107 @@ class LockItUp(BaseCog):
                             author.name, author.id
                         ),
                     )
+                    await asyncio.sleep(.5)
+                except discord.Forbidden:
+                    self.log.info("Could not unlock {}".format(guild_channel.name))
+
+        msg = await self.config.guild(guild).unlockdown_message()
+        if msg:
+            notifier = await self.config.guild(guild).send_alert()
+            if notifier is True:
+                await self.ack_unlockdown(ctx, guild)
+
+    async def secondary_unlockdown(self, ctx: commands.Context, guild: discord.Guild):
+        author = ctx.author
+        special_chans = await self.config.guild(guild).secondary_channels()
+        spec_role = await self.config.guild(guild).secondary_role()
+        for guild_channel in guild.channels:
+            if guild_channel.id in special_chans:
+                role = discord.utils.get(guild.roles, id=spec_role)
+                spec_overwrite = guild_channel.overwrites_for(role)
+                spec_overwrite.update(send_messages=True)
+                try:
+                    await guild_channel.set_permissions(
+                        role,
+                        overwrite=spec_overwrite,
+                        reason="Lockdown rescinded. Requested by {} ({})".format(
+                            author.name, author.id
+                        ),
+                    )
+                    await asyncio.sleep(.5)
                 except discord.Forbidden as er:
                     self.log.info(
                         "In {}, could not unlock {}".format(guild.id, guild_channel.name)
                     )
                     await self.loggerhook(
-                        guild, error=f"Error on unlock for {guild_channel.mention}. ERROR: {er}"
+                        guild,
+                        error=f"Error on unlocking for {guild_channel.mention}. ERROR: {er}",
                     )
-                if msg is not None:
-                    notifier = await self.config.guild(guild).send_alert()
-                    if notifier is True:
-                        try:
-                            await guild_channel.send(embed=e)
-                        except discord.Forbidden:
-                            self.log.info(
-                                "In {} could not send message to {}".format(
-                                    guild.id, guild_channel.name
-                                )
-                            )
 
-        lock_role_check = await self.config.guild(
-            guild
-        ).lock_role()  # prevent forgetfulness of passing true at unlock if passed at lock
-        if lock_role_check:
+    @commands.command()
+    @commands.guild_only()
+    @commands.max_concurrency(1, commands.BucketType.guild)
+    @checks.mod_or_permissions(manage_channels=True)
+    @checks.bot_has_permissions(manage_channels=True, manage_roles=True)
+    async def unlockdown(self, ctx: commands.Context, lockrole: bool = False):
+        """
+        Unlock the server
+
+        If you pass true, your @everyone role will also be allowed permissions from within the role menu to send messages
+        """
+        guild = ctx.guild
+
+        def check(m):
+            return m.author == ctx.author and m.channel == ctx.channel
+
+        unlock_check = await self.config.guild(ctx.guild).locked()
+        if unlock_check is False:
+            return await ctx.send("You're not locked")
+
+        author = ctx.author
+        await ctx.send("R U Sure Abou That? `[yes|no]`")
+        try:
+            confirm_unlock = await ctx.bot.wait_for("message", check=check, timeout=30)
+            if confirm_unlock.content.lower() != "yes":
+                return await ctx.send("Looks like we aren't unlocking this thing today")
+        except asyncio.TimeoutError:
+            return await ctx.send("You took too long to reply!")
+
+        await ctx.trigger_typing()
+        nondefault_lock = await self.config.guild(guild).nondefault()
+        if nondefault_lock is True:
+            await self.secondary_unlockdown(ctx, guild)
+
+        # proceed to default lockdown
+        await self.reign_unlockdown(ctx, guild)
+
+        if lockrole:
             perms = ctx.guild.get_role(ctx.guild.id).permissions
-            perms.send_messages = True
+            perms.send_messages = False
             if not ctx.me.guild_permissions.manage_roles:
                 await ctx.send(
-                    "I'm missing the ability to manage roles so we will skip making changes to roles in the server settings, however, your default role is currently set to deny send messages."
+                    "I'm missing the ability to manage roles so we will skip making changes to roles in the server settings"
                 )
                 pass
             try:
                 await ctx.guild.default_role.edit(
-                    permissions=perms, reason=f"Role unlock requested by {ctx.author.name}"
+                    permissions=perms, reason=f"Role Unlock requested by {ctx.author.name}"
                 )
-                await self.config.guild(ctx.guild).lock_role.set(False)
-
+                await self.config.guild(ctx.guild).lock_role.set(True)
             except Exception as e:
                 await ctx.send(
                     f"Getting an error when attempting to edit role permissions in server settings:\n{e}\nSkipping..."
                 )
                 pass
 
-        if not lock_role_check:
-            if unlockrole:  # cover manual passing
-                perms = ctx.guild.get_role(ctx.guild.id).permissions
-                perms.send_messages = True
-                if not ctx.me.guild_permissions.manage_roles:
-                    await ctx.send(
-                        "I'm missing the ability to manage roles so we will skip making changes to roles in the server settings"
-                    )
-                    pass
-                try:
-                    await ctx.guild.default_role.edit(
-                        permissions=perms, reason=f"Role unlock requested by {ctx.author.name}"
-                    )
-                    await self.config.guild(ctx.guild).lock_role.set(False)
-                except Exception as e:
-                    await ctx.send(
-                        f"Getting an error when attempting to edit role permissions in server settings:\n{e}\nSkipping..."
-                    )
-                    pass
-
         # finalize
         try:
-            await ctx.send("Server Unlocked")
+            await ctx.send(
+                "Server is unlocked"
+            )
         except discord.Forbidden:
             self.log.info(
-                f"Something is wrong with my permissions in {ctx.guild.name} ({ctx.guild.id}) when unlock was requested."
+                f"Couldn't secure overrides in Guild {ctx.guild.name} ({ctx.guild.id}) on unlock"
             )
 
         await self.config.guild(guild).locked.set(False)  # write it to configs
@@ -481,7 +440,6 @@ class LockItUp(BaseCog):
         get_sec_chans = fetch_all["secondary_channels"]
         check_silent = fetch_all["send_alert"]
 
-        chan = []
         chan_count = len(get_channel)
         if not get_channel:
             e = discord.Embed(
@@ -518,7 +476,6 @@ class LockItUp(BaseCog):
                 channel_name = f"<#{chan_id}>"
                 msg += f"`{chan_id}` — {channel_name}\n"
 
-        channel_list = sorted(msg)
         e_list = []
         for page in pagify(msg, shorten_by=1000):
             e = discord.Embed(
@@ -584,7 +541,7 @@ class LockItUp(BaseCog):
         for chan_id in chans:
             channel_name = f"<#{chan_id}>"
             msg += f"`{chan_id}` - {channel_name}\n"
-        channel_list = sorted(msg)
+
         e_list = []
         for page in pagify(msg, shorten_by=1000):
 
@@ -620,7 +577,7 @@ class LockItUp(BaseCog):
         for chan_id in chans:
             channel_name = f"<#{chan_id}>"
             msg += f"`{chan_id}` - {channel_name}\n"
-        channel_list = sorted(msg)
+
         e_list = []
         for page in pagify(msg, shorten_by=1000):
 
@@ -671,7 +628,7 @@ class LockItUp(BaseCog):
         for chan_id in chans:
             channel_name = f"<#{chan_id}>"
             msg += f"`{chan_id}` - {channel_name}\n"
-        channel_list = sorted(msg)
+
         e_list = []
         for page in pagify(msg, shorten_by=1000):
 
@@ -719,7 +676,7 @@ class LockItUp(BaseCog):
         for chan_id in chans:
             channel_name = f"<#{chan_id}>"
             msg += f"`{chan_id}` - {channel_name}\n"
-        channel_list = sorted(msg)
+
         e_list = []
         for page in pagify(msg, shorten_by=1000):
 

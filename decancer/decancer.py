@@ -254,6 +254,8 @@ class Decancer(BaseCog):
         self, ctx: commands.Context, user: discord.Member, freeze: bool = False
     ):
         """
+        Remove special/cancerous characters from user nicknames
+
         Change username glyphs (i.e 乇乂, 黑, etc)
         special font chars (zalgo, latin letters, accents, etc)
         to their unicode counterpart. If the former, expect the "english"
@@ -263,7 +265,7 @@ class Decancer(BaseCog):
             return await ctx.send(
                 f"Set up a modlog for this server using `{ctx.prefix}decancerset modlog #channel`"
             )
-        await ctx.trigger_typing()
+
         if user.top_role.position >= ctx.me.top_role.position:
             return await ctx.send(
                 f"I can't decancer that user since they are higher than me in heirarchy."
@@ -298,7 +300,11 @@ class Decancer(BaseCog):
 
             guild = ctx.guild
             await self.decancer_log(guild, user, ctx.author, m_nick, new_cool_nick, "decancer")
-            await ctx.tick()
+            try:
+                await ctx.tick()
+            except:
+                pass
+
         else:
             await ctx.send(f"{user.display_name} was already decancer'd")
             try:
