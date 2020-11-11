@@ -173,7 +173,6 @@ class LockItUp(commands.Cog):
         if lock_check is True:
             return await ctx.send("You're already locked")
 
-        author = ctx.author
         await ctx.send("You ready to lock up? `[yes|no]`")
         try:
             confirm_lock = await ctx.bot.wait_for("message", check=check, timeout=30)
@@ -325,7 +324,6 @@ class LockItUp(commands.Cog):
         if unlock_check is False:
             return await ctx.send("You're not locked")
 
-        author = ctx.author
         await ctx.send("R U Sure Abou That? `[yes|no]`")
         try:
             confirm_unlock = await ctx.bot.wait_for("message", check=check, timeout=30)

@@ -306,7 +306,7 @@ class Decancer(BaseCog):
             await self.decancer_log(guild, user, ctx.author, m_nick, new_cool_nick, "decancer")
             try:
                 await ctx.tick()
-            except:
+            except discord.NotFound:
                 pass
 
         else:
