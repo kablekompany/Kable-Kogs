@@ -15,7 +15,6 @@ from redbot.core.utils.predicates import ReactionPredicate
 from .randomnames import adjectives, nouns, properNouns
 
 
-
 async def enabled_global(ctx: commands.Context):
     return await ctx.bot.get_cog("Decancer").config.auto()
 

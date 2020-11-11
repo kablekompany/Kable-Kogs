@@ -57,7 +57,7 @@ class LockItUp(commands.Cog):
             if guild_channel.id in channel_ids:
                 try:
                     await guild_channel.send(embed=e)
-                    await asyncio.sleep(.75)
+                    await asyncio.sleep(0.75)
                 except discord.Forbidden:
                     self.log.info("Could not send message to {}".format(guild_channel.name))
                     await self.loggerhook(
@@ -237,7 +237,7 @@ class LockItUp(commands.Cog):
             if guild_channel.id in channel_ids:
                 try:
                     await guild_channel.send(embed=e)
-                    await asyncio.sleep(.75)
+                    await asyncio.sleep(0.75)
                 except discord.Forbidden:
                     self.log.info("Could not send message to {}".format(guild_channel.name))
                     await self.loggerhook(
@@ -399,9 +399,7 @@ class LockItUp(commands.Cog):
 
     async def loggerhook(self, guild: discord.Guild, error: str):
         channel = guild.get_channel(await self.config.guild(guild).logging_channel())
-        if not channel or not (
-            channel.permissions_for(guild.me).manage_webhooks
-        ):
+        if not channel or not (channel.permissions_for(guild.me).manage_webhooks):
             await self.config.guild(guild).logging_channel.clear()
             return
 

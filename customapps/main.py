@@ -917,4 +917,3 @@ class CustomApps(Cog):
             return await ctx.send("You took too long to reply")
         await self.config.guild(ctx.guild).app_questions.clear_raw()
         await ctx.send("Guild Reset, goodluck")
-
