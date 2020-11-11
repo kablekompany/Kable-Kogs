@@ -57,7 +57,7 @@ class LockItUp(commands.Cog):
             if guild_channel.id in channel_ids:
                 try:
                     await guild_channel.send(embed=e)
-                    await asyncio.sleep(1)
+                    await asyncio.sleep(.75)
                 except discord.Forbidden:
                     self.log.info("Could not send message to {}".format(guild_channel.name))
                     await self.loggerhook(
@@ -146,7 +146,7 @@ class LockItUp(commands.Cog):
                     self.log.info("In {}, could not lock {}".format(guild.id, guild_channel.name))
                     await self.loggerhook(
                         guild,
-                        error=f"Error on locking for {guild_channel.mention}. ERROR: {er}",
+                        error=f"Error on locking for {guild_channel.mention}.\nERROR: {er}",
                     )
 
     @commands.command()
@@ -237,7 +237,7 @@ class LockItUp(commands.Cog):
             if guild_channel.id in channel_ids:
                 try:
                     await guild_channel.send(embed=e)
-                    await asyncio.sleep(1)
+                    await asyncio.sleep(.75)
                 except discord.Forbidden:
                     self.log.info("Could not send message to {}".format(guild_channel.name))
                     await self.loggerhook(
@@ -295,7 +295,7 @@ class LockItUp(commands.Cog):
                     )
                     await self.loggerhook(
                         guild,
-                        error=f"Error on unlocking for {guild_channel.mention}. ERROR: {er}",
+                        error=f"Error on unlocking for {guild_channel.mention}.\nERROR: {er}",
                     )
 
     @commands.command()
@@ -400,8 +400,7 @@ class LockItUp(commands.Cog):
     async def loggerhook(self, guild: discord.Guild, error: str):
         channel = guild.get_channel(await self.config.guild(guild).logging_channel())
         if not channel or not (
-            channel.permissions_for(guild.me).send_messages
-            and channel.permissions_for(guild.me).embed_links
+            channel.permissions_for(guild.me).manage_webhooks
         ):
             await self.config.guild(guild).logging_channel.clear()
             return
