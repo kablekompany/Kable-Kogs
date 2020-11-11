@@ -270,7 +270,7 @@ class LockItUp(commands.Cog):
                         ),
                     )
                     await asyncio.sleep(0.5)
-                except discord.Forbidden:
+                except discord.Forbidden as er:
                     self.log.info("Could not unlock {}".format(guild_channel.name))
                     await self.loggerhook(
                         guild,
