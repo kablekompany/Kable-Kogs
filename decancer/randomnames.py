@@ -2,11 +2,11 @@ properNouns = [
     "Donald Trump",
     "Joe Biden",
     "Ninja",
-    "https://discord.com",
     "Proton Bomb",
     "He Who Shall Not Be Named",
     "Definitely Phen's Alt",
     "Cable Company without K",
+    "Probably Sharts",
 ]
 
 nouns = [
