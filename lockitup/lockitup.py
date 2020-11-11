@@ -57,7 +57,7 @@ class LockItUp(commands.Cog):
             if guild_channel.id in channel_ids:
                 try:
                     await guild_channel.send(embed=e)
-                    await asyncio.sleep(1)
+                    await asyncio.sleep(0.75)
                 except discord.Forbidden:
                     self.log.info("Could not send message to {}".format(guild_channel.name))
                     await self.loggerhook(
@@ -146,7 +146,7 @@ class LockItUp(commands.Cog):
                     self.log.info("In {}, could not lock {}".format(guild.id, guild_channel.name))
                     await self.loggerhook(
                         guild,
-                        error=f"Error on locking for {guild_channel.mention}. ERROR: {er}",
+                        error=f"Error on lockdown for {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```",
                     )
 
     @commands.command()
@@ -161,6 +161,14 @@ class LockItUp(commands.Cog):
         If you pass true, your @everyone role will also be denied permissions from within the role menu
         """
         guild = ctx.guild
+        config_check = await self.config.guild(guild).channels()
+        if not config_check:
+            await ctx.send(
+                "You need to set this up by running `{}lockdownset`, first and stepping through those configuration subcommands".format(
+                    ctx.prefix
+                )
+            )
+            return
 
         def check(m):
             return m.author == ctx.author and m.channel == ctx.channel
@@ -237,7 +245,7 @@ class LockItUp(commands.Cog):
             if guild_channel.id in channel_ids:
                 try:
                     await guild_channel.send(embed=e)
-                    await asyncio.sleep(1)
+                    await asyncio.sleep(0.75)
                 except discord.Forbidden:
                     self.log.info("Could not send message to {}".format(guild_channel.name))
                     await self.loggerhook(
@@ -262,8 +270,12 @@ class LockItUp(commands.Cog):
                         ),
                     )
                     await asyncio.sleep(0.5)
-                except discord.Forbidden:
+                except discord.Forbidden as er:
                     self.log.info("Could not unlock {}".format(guild_channel.name))
+                    await self.loggerhook(
+                        guild,
+                        error=f"Error on unlock for {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```",
+                    )
 
         msg = await self.config.guild(guild).unlockdown_message()
         if msg:
@@ -295,7 +307,7 @@ class LockItUp(commands.Cog):
                     )
                     await self.loggerhook(
                         guild,
-                        error=f"Error on unlocking for {guild_channel.mention}. ERROR: {er}",
+                        error=f"Error on unlock for {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```",
                     )
 
     @commands.command()
@@ -399,10 +411,7 @@ class LockItUp(commands.Cog):
 
     async def loggerhook(self, guild: discord.Guild, error: str):
         channel = guild.get_channel(await self.config.guild(guild).logging_channel())
-        if not channel or not (
-            channel.permissions_for(guild.me).send_messages
-            and channel.permissions_for(guild.me).embed_links
-        ):
+        if not channel or not (channel.permissions_for(guild.me).manage_webhooks):
             await self.config.guild(guild).logging_channel.clear()
             return
 
@@ -414,7 +423,7 @@ class LockItUp(commands.Cog):
             webhook = await channel.create_webhook(name=self.bot.user.name)
 
         await webhook.send(
-            content=f"Error while executing the invoked action. ERROR: {error}",
+            content=f"**LockItUp Error Log**\n{error}",
             username=self.bot.user.name,
             avatar_url=self.bot.user.avatar_url,
         )
