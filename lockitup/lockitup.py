@@ -129,6 +129,7 @@ class LockItUp(commands.Cog):
                         guild,
                         error=f"Error on lock for {guild_channel.mention} in securing bot overrides. Make sure I have the ability to send messages in these channels so I can manage this permission for others. ERROR: {er}\nLockdown will not resume",
                     )
+                    
 
                 role = discord.utils.get(guild.roles, id=spec_role)
                 spec_overwrite = guild_channel.overwrites_for(role)
@@ -146,7 +147,7 @@ class LockItUp(commands.Cog):
                     self.log.info("In {}, could not lock {}".format(guild.id, guild_channel.name))
                     await self.loggerhook(
                         guild,
-                        error=f"Error on locking for {guild_channel.mention}.\nERROR: {er}",
+                        error=f"Error on lockdown for {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```",
                     )
 
     @commands.command()
@@ -264,6 +265,10 @@ class LockItUp(commands.Cog):
                     await asyncio.sleep(0.5)
                 except discord.Forbidden:
                     self.log.info("Could not unlock {}".format(guild_channel.name))
+                    await self.loggerhook(
+                        guild,
+                        error=f"Error on unlock for {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```",
+                    )
 
         msg = await self.config.guild(guild).unlockdown_message()
         if msg:
@@ -295,7 +300,7 @@ class LockItUp(commands.Cog):
                     )
                     await self.loggerhook(
                         guild,
-                        error=f"Error on unlocking for {guild_channel.mention}.\nERROR: {er}",
+                        error=f"Error on unlock for {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```",
                     )
 
     @commands.command()
@@ -413,7 +418,7 @@ class LockItUp(commands.Cog):
             webhook = await channel.create_webhook(name=self.bot.user.name)
 
         await webhook.send(
-            content=f"Error while executing the invoked action. ERROR: {error}",
+            content=f"**LockItUp Error Log**\n{error}",
             username=self.bot.user.name,
             avatar_url=self.bot.user.avatar_url,
         )
