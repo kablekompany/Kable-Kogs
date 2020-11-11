@@ -1,19 +1,16 @@
 import asyncio
 import logging
-from datetime import datetime
-from os.path import exists
-from typing import Optional, Union
+from typing import Union
 
 import discord
 from redbot.core import Config, checks, commands
 from redbot.core.commands import Greedy
-from redbot.core.utils.chat_formatting import box, pagify
+from redbot.core.utils.chat_formatting import pagify
 from redbot.core.utils.menus import DEFAULT_CONTROLS, menu
 
-BaseCog = getattr(commands, "Cog", object)
 
 # core functioning from Sharky-Cogs @https://github.com/SharkyTheKing/Sharky
-class LockItUp(BaseCog):
+class LockItUp(commands.Cog):
     """`[p]lds` to get started on configuration"""
 
     def __init__(self, bot):
@@ -200,7 +197,6 @@ class LockItUp(BaseCog):
                 await ctx.send(
                     "I'm missing the ability to manage roles so we will skip making changes to roles in the server settings"
                 )
-                pass
             try:
                 await ctx.guild.default_role.edit(
                     permissions=perms, reason=f"Role Lockdown requested by {ctx.author.name}"
@@ -210,16 +206,19 @@ class LockItUp(BaseCog):
                 await ctx.send(
                     f"Getting an error when attempting to edit role permissions in server settings:\n{e}\nSkipping..."
                 )
-                pass
 
         # finalize
         try:
             await ctx.send(
                 "We're locked up, fam. Revert this by running `{}unlockdown`".format(ctx.prefix)
             )
-        except discord.Forbidden:
+        except Exception as er:
             self.log.info(
                 f"Couldn't secure overrides in Guild {ctx.guild.name} ({ctx.guild.id}): Locked as requested."
+            )
+            await self.loggerhook(
+                guild,
+                error=f"Unable to send messages on lockdown to your channels due to the following error\n```diff\n+ ERROR:\n- {er}\n```",
             )
 
         await self.config.guild(guild).locked.set(True)  # write it to configs
@@ -340,7 +339,7 @@ class LockItUp(BaseCog):
         if nondefault_lock is True:
             await self.secondary_unlockdown(ctx, guild)
 
-        # proceed to default lockdown
+        # proceed to default unlockdown
         await self.reign_unlockdown(ctx, guild)
 
         if lockrole:
@@ -350,7 +349,6 @@ class LockItUp(BaseCog):
                 await ctx.send(
                     "I'm missing the ability to manage roles so we will skip making changes to roles in the server settings"
                 )
-                pass
             try:
                 await ctx.guild.default_role.edit(
                     permissions=perms, reason=f"Role Unlock requested by {ctx.author.name}"
@@ -360,7 +358,6 @@ class LockItUp(BaseCog):
                 await ctx.send(
                     f"Getting an error when attempting to edit role permissions in server settings:\n{e}\nSkipping..."
                 )
-                pass
 
         # finalize
         try:
@@ -368,9 +365,8 @@ class LockItUp(BaseCog):
                 "Server is unlocked"
             )
         except discord.Forbidden:
-            self.log.info(
-                f"Couldn't secure overrides in Guild {ctx.guild.name} ({ctx.guild.id}) on unlock"
-            )
+            await self.loggerhook(guild, error="I lack perms to successfully unlock this server — please verify I have the send messagees permissions myself in the role menu")
+            return
 
         await self.config.guild(guild).locked.set(False)  # write it to configs
 
@@ -382,7 +378,6 @@ class LockItUp(BaseCog):
         """
         Settings for lockdown
         """
-        pass
 
     @lockdownset.command(name="logchan")
     @checks.admin_or_permissions(manage_guild=True)
@@ -392,10 +387,13 @@ class LockItUp(BaseCog):
         Set up logging channel to record what channels the bot couldn't successfully lock/unlock
         """
         guild = ctx.guild
-        load_check = await self.config.guild(guild).logging_channel()
+
         await self.config.guild(guild).logging_channel.set(logchannel.id)
         try:
-            await self.loggerhook(guild, error="Test Firing webhook setup")
+            await self.loggerhook(
+                guild,
+                error="THIS IS A TEST\n```diff\n+ If you are seeing this, you have correctly set up error log for lock/unlock features\n```",
+            )
         except Exception:
             self.log.info(f"Error'd on setup in {guild.id} for webhook logging")
 
@@ -737,7 +735,10 @@ class LockItUp(BaseCog):
 
     @lockdownset.command(name="setvc")
     async def vc_setter(
-        self, ctx: commands.Context, *, vc_channel: Greedy[discord.VoiceChannel],
+        self,
+        ctx: commands.Context,
+        *,
+        vc_channel: Greedy[discord.VoiceChannel],
     ):
         """
         Adds channel to list of voice chats to lock/unlock
@@ -917,7 +918,9 @@ class LockItUp(BaseCog):
             overwrite.update(connect=False)
         try:
             await channel.set_permissions(
-                ctx.bot.user, overwrite=bot_overwrite, reason="Securing overrides for Kronos",
+                ctx.bot.user,
+                overwrite=bot_overwrite,
+                reason="Securing overrides for Kronos",
             )
             await channel.set_permissions(
                 role,
