@@ -99,7 +99,7 @@ class CustomApps(Cog):
                 "Uh oh. Looks like your Admins haven't added the required channel."
             )
         try:
-            available_positions = await self.config.guild(ctx.guild).positions_available()
+            # available_positions = await self.config.guild(ctx.guild).positions_available()
             # TODO - ALLOW SETTING OF POSITIONS
             await ctx.author.send(
                 f"Let's start right away! You have maximum of 5 minutes for each question.\n\nReply with the position you are applying for to continue. To cancel at anytime respond with `cancel`"
