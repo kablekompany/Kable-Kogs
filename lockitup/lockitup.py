@@ -818,7 +818,7 @@ class LockItUp(commands.Cog):
             )
         guild = ctx.guild
         author = ctx.author
-        channel = ctx.guild.get_channel
+
         channel_ids = await self.config.guild(guild).vc_channels()
         role = guild.default_role
         for voice_channel in guild.channels:
@@ -852,7 +852,7 @@ class LockItUp(commands.Cog):
             )
         guild = ctx.guild
         author = ctx.author
-        channel = ctx.guild.get_channel
+
         channel_ids = await self.config.guild(guild).vc_channels()
         role = guild.default_role
         for voice_channel in guild.channels:

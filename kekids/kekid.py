@@ -80,10 +80,6 @@ class KekIDs(commands.Cog):
         if not guild.me.guild_permissions.kick_members:
             return await ctx.send("I lack the permissions to do this.")
 
-        if not user_ids:
-            await show_results()
-            return
-
         for user_id in user_ids:
             user = discord.Object(id=user_id)
             audit_reason = get_audit_reason(author, reason)

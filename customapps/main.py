@@ -3,10 +3,9 @@ from datetime import datetime, timedelta
 from typing import Any, Literal
 
 import discord
-from discord.ext.commands import errors
+
 from discord.utils import get
 from redbot.core import Config, checks, commands
-from redbot.core.bot import Red
 from redbot.core.utils.antispam import AntiSpam
 from redbot.core.utils.predicates import MessagePredicate
 
@@ -84,7 +83,7 @@ class CustomApps(Cog):
         role_add = get(ctx.guild.roles, name="Staff Applicant")
         app_data = await self.config.guild(ctx.guild).app_questions.all()
         user_data = self.config.member(ctx.author)
-        answers = []
+
         channel = get(ctx.guild.text_channels, name="staff-applications")
         if ctx.guild not in self.antispam:
             self.antispam[ctx.guild] = {}
