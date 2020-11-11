@@ -896,3 +896,25 @@ class CustomApps(Cog):
             await ctx.send(f"Denied {target.mention}'s application.")
         else:
             await ctx.send(f"Uh oh. Looks like {target.mention} hasn't applied for anything.")
+
+    @app_questions.command(name="reset")
+    async def clear_config(self, ctx: commands.Context):
+        """
+        Fully resets server configuation to default, and clears all custom app questions
+        """
+
+        def check(m):
+            return m.author == ctx.author and m.channel == ctx.channel
+
+        await ctx.send(
+            "Are you certain about this? This will wipe all settings/custom questions in your server's configuration\nType: `RESET THIS GUILD` to continue (must be typed exact)"
+        )
+        try:
+            confirm_reset = await ctx.bot.wait_for("message", check=check, timeout=30)
+            if confirm_reset.content != "RESET THIS GUILD":
+                return await ctx.send("Okay, not resetting today")
+        except asyncio.TimeoutError:
+            return await ctx.send("You took too long to reply")
+        await self.config.guild(ctx.guild).app_questions.clear_raw()
+        await ctx.send("Guild Reset, goodluck")
+

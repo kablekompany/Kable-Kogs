@@ -14,7 +14,6 @@ from redbot.core.utils.predicates import ReactionPredicate
 
 from .randomnames import adjectives, nouns, properNouns
 
-BaseCog = getattr(commands, "Cog", object)
 
 
 async def enabled_global(ctx: commands.Context):
@@ -22,7 +21,7 @@ async def enabled_global(ctx: commands.Context):
 
 
 # originally from https://github.com/PumPum7/PumCogs repo which has a en masse version of this
-class Decancer(BaseCog):
+class Decancer(commands.Cog):
     """Decancer users' names removing special and accented chars.
 
     `[p]decancerset` to get started if you're already using redbot core modlog."""
@@ -40,7 +39,7 @@ class Decancer(BaseCog):
         self.config.register_global(**default_global)
 
     __author__ = ["KableKompany#0001", "PhenoM4n4n"]
-    __version__ = "1.7.1"
+    __version__ = "1.8.1"
 
     async def red_delete_data_for_user(self, **kwargs):
         """This cog does not store user data"""
