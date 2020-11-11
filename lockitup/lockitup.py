@@ -162,6 +162,10 @@ class LockItUp(commands.Cog):
         If you pass true, your @everyone role will also be denied permissions from within the role menu
         """
         guild = ctx.guild
+        config_check = await self.config.guild(guild).channels()
+        if not config_check:
+            await ctx.send("You need to set this up by running `{}lockdownset`, first and stepping through those configuration subcommands".format(ctx.prefix))
+            return
 
         def check(m):
             return m.author == ctx.author and m.channel == ctx.channel
