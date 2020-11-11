@@ -129,7 +129,6 @@ class LockItUp(commands.Cog):
                         guild,
                         error=f"Error on lock for {guild_channel.mention} in securing bot overrides. Make sure I have the ability to send messages in these channels so I can manage this permission for others. ERROR: {er}\nLockdown will not resume",
                     )
-                    
 
                 role = discord.utils.get(guild.roles, id=spec_role)
                 spec_overwrite = guild_channel.overwrites_for(role)
