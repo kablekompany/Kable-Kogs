@@ -60,11 +60,9 @@ class KekIDs(commands.Cog):
         errors = {}
 
         async def show_results():
-            text = ("Kicked {num} users from the server.").format(
-                num=humanize_number(len(kicked))
-            )
+            text = ("Kicked {num} users from the server.").format(num=humanize_number(len(kicked)))
             if errors:
-                text += ("\nErrors:\n")
+                text += "\nErrors:\n"
                 text += "\n".join(errors.values())
 
             for p in pagify(text):
