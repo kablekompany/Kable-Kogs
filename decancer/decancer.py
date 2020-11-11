@@ -8,7 +8,6 @@ import discord
 import stringcase
 import unidecode
 from redbot.core import Config, checks, commands, modlog
-from redbot.core.commands import errors
 from redbot.core.utils.chat_formatting import box, humanize_timedelta
 from redbot.core.utils.menus import start_adding_reactions
 from redbot.core.utils.predicates import ReactionPredicate

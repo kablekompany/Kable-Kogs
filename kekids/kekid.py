@@ -2,7 +2,7 @@ import logging
 import re
 
 import discord
-from redbot.core import checks, commands, i18n, modlog
+from redbot.core import checks, commands
 from redbot.core.commands import BadArgument, Converter
 from redbot.core.utils.chat_formatting import humanize_number, pagify
 from redbot.core.utils.mod import get_audit_reason, is_allowed_by_hierarchy
