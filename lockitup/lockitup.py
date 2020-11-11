@@ -59,9 +59,7 @@ class LockItUp(commands.Cog):
                     await guild_channel.send(embed=e)
                     await asyncio.sleep(1)
                 except discord.Forbidden:
-                    self.log.info(
-                            "Could not send message to {}".format(guild_channel.name)
-                    )
+                    self.log.info("Could not send message to {}".format(guild_channel.name))
                     await self.loggerhook(
                         guild,
                         error=f"Can't send messages in {guild_channel.mention} after lock down. Check bot perms.",
@@ -83,7 +81,7 @@ class LockItUp(commands.Cog):
                             overwrite=overwrite1,
                             reason="Securing bot overrides for lockdown",
                         )
-                        await asyncio.sleep(.5)
+                        await asyncio.sleep(0.5)
                 except Exception:
                     return await ctx.send(
                         "You'll need to give me permissions to send messages so I can manage that permissions for others. I failed trying to secure my own overrides. This lockdown will not resume"
@@ -99,7 +97,7 @@ class LockItUp(commands.Cog):
                             author.name, author.id
                         ),
                     )
-                    await asyncio.sleep(.5)
+                    await asyncio.sleep(0.5)
                 except discord.Forbidden:
                     self.log.info("Could not lockdown {}".format(guild_channel.name))
 
@@ -125,7 +123,7 @@ class LockItUp(commands.Cog):
                             overwrite=overwrite1,
                             reason="Securing bot overrides for lockdown",
                         )
-                        await asyncio.sleep(.5)
+                        await asyncio.sleep(0.5)
                 except Exception as er:
                     return await self.loggerhook(
                         guild,
@@ -143,11 +141,9 @@ class LockItUp(commands.Cog):
                             author.name, author.id
                         ),
                     )
-                    await asyncio.sleep(.5)
+                    await asyncio.sleep(0.5)
                 except discord.Forbidden as er:
-                    self.log.info(
-                        "In {}, could not lock {}".format(guild.id, guild_channel.name)
-                    )
+                    self.log.info("In {}, could not lock {}".format(guild.id, guild_channel.name))
                     await self.loggerhook(
                         guild,
                         error=f"Error on locking for {guild_channel.mention}. ERROR: {er}",
@@ -243,9 +239,7 @@ class LockItUp(commands.Cog):
                     await guild_channel.send(embed=e)
                     await asyncio.sleep(1)
                 except discord.Forbidden:
-                    self.log.info(
-                            "Could not send message to {}".format(guild_channel.name)
-                    )
+                    self.log.info("Could not send message to {}".format(guild_channel.name))
                     await self.loggerhook(
                         guild,
                         error=f"Can't send messages in {guild_channel.mention} after lock down. Check bot perms.",
@@ -267,7 +261,7 @@ class LockItUp(commands.Cog):
                             author.name, author.id
                         ),
                     )
-                    await asyncio.sleep(.5)
+                    await asyncio.sleep(0.5)
                 except discord.Forbidden:
                     self.log.info("Could not unlock {}".format(guild_channel.name))
 
@@ -294,7 +288,7 @@ class LockItUp(commands.Cog):
                             author.name, author.id
                         ),
                     )
-                    await asyncio.sleep(.5)
+                    await asyncio.sleep(0.5)
                 except discord.Forbidden as er:
                     self.log.info(
                         "In {}, could not unlock {}".format(guild.id, guild_channel.name)
@@ -359,11 +353,12 @@ class LockItUp(commands.Cog):
 
         # finalize
         try:
-            await ctx.send(
-                "Server is unlocked"
-            )
+            await ctx.send("Server is unlocked")
         except discord.Forbidden:
-            await self.loggerhook(guild, error="I lack perms to successfully unlock this server — please verify I have the send messagees permissions myself in the role menu")
+            await self.loggerhook(
+                guild,
+                error="I lack perms to successfully unlock this server — please verify I have the send messagees permissions myself in the role menu",
+            )
             return
 
         await self.config.guild(guild).locked.set(False)  # write it to configs
