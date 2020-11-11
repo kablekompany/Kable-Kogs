@@ -336,7 +336,7 @@ class LockItUp(commands.Cog):
 
         if lockrole:
             perms = ctx.guild.get_role(ctx.guild.id).permissions
-            perms.send_messages = False
+            perms.send_messages = True
             if not ctx.me.guild_permissions.manage_roles:
                 await ctx.send(
                     "I'm missing the ability to manage roles so we will skip making changes to roles in the server settings"
