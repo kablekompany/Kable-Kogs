@@ -132,22 +132,19 @@ Distributed under the MIT License. See [LICENSE](https://github.com/kablekompany
 >Project Link:
 [https://github.com/kablekompany/Kable-Kogs](https://github.com/kablekompany/Kable-Kogs)
 
-      *click the cool badge things at the top to join my discord server and shit*
-
 ## Acknowledgements
 
 Many have contributed to this repo either by proxy, direct interaction, or by some cosmic interference. The contributors in full can be found standalone, and includes __all__ authors that influenced, authored, or has core code within my bot and cogs.
 
 * [Contributors](.github/CONTRIBUTORS)
   * Shows global contribs and Core Contributions to Kronos
-* [KRONOS](https://kable.lol/kronos)
+* [Kronos](https://kable.lol/kronos)
   * *my modified instance of Red, contains these and many more features*
 * [Melmsie](https://github.com/melmsie)
-  * Easily my best-friend and continuing push in learning development
-* [Aetheryx](https://github.com/aetheryx)
-  * uwu qt big brain bitch
 
-Join [The Kompound](https://kable.lol/discord) to get insulted, and ask for assistance if you need.
+* [Aetheryx](https://github.com/aetheryx)
+
+Join [The Kompound](https://kable.lol/discord) for support
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
