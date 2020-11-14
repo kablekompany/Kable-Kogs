@@ -259,7 +259,8 @@ def update_class_docstrings(cogs: dict, repo_info: dict) -> int:
                 source = fp.read()
                 tree = parso.parse(source)
             class_node = next(
-                (node for node in tree.iter_classdefs() if node.name.value == class_name), None,
+                (node for node in tree.iter_classdefs() if node.name.value == class_name),
+                None,
             )
             if class_node is not None:
                 break
@@ -543,7 +544,9 @@ def main() -> int:
     for python_version, reqs in requirements.items():
         folder_name = f"py{''.join(map(str, python_version))}"
         with open(
-            ROOT_PATH / f".ci/{folder_name}/requirements/all_cogs.txt", "w", encoding="utf-8",
+            ROOT_PATH / f".ci/{folder_name}/requirements/all_cogs.txt",
+            "w",
+            encoding="utf-8",
         ) as fp:
             fp.write("Red-DiscordBot\n")
             for req in sorted(reqs):
@@ -553,7 +556,9 @@ def main() -> int:
         ) as fp:
             fp.write(" ".join(sorted(black_file_list[python_version])))
         with open(
-            ROOT_PATH / f".ci/{folder_name}/compileall_file_list.txt", "w", encoding="utf-8",
+            ROOT_PATH / f".ci/{folder_name}/compileall_file_list.txt",
+            "w",
+            encoding="utf-8",
         ) as fp:
             fp.write(" ".join(sorted(compileall_file_list[python_version])))
 
