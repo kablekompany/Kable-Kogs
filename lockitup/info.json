@@ -1,9 +1,9 @@
 {
     "name": "LockItUp",
-    "short": "`[p]lds` to get started on configuration",
-    "description": "`[p]lds` to get started on configuration",
+    "short": "Lockdown a list of channels and output a lock message in each of those channels as well as an unlock message when that lockdown is rescinded. For a second level of configuration, you can add a special role to take denied overrides on lockdown and give positive overrides on unlock. Webhook error logging in server for debugging, and role toggle for everyone role perms for message sending. Lock voice channels, and singular channels too. Based on [SharkyTheKing](https://github.com/sharky-the-king)'s Lockdown cog.",
+    "description": "Lockdown a list of channels and output a lock message in each of those channels as well as an unlock message when that lockdown is rescinded. For a second level of configuration, you can add a special role to take denied overrides on lockdown and give positive overrides on unlock. Webhook error logging in server for debugging, and role toggle for everyone role perms for message sending. Lock voice channels, and singular channels too. Based on [SharkyTheKing](https://github.com/sharky-the-king)'s Lockdown cog.",
     "end_user_data_statement": "This cog does not persistently store data or metadata about users.",
-    "install_msg": "Hey, thanks for trying this dress on, hope it fits.",
+    "install_msg": "Thanks for installing. This is from an unapproved repository. Your responsible for any mishaps LOL",
     "author": [
         "kablekompany (KableKompany#0001)"
     ],

@@ -21,17 +21,11 @@ async def enabled_global(ctx: commands.Context):
 
 # originally from https://github.com/PumPum7/PumCogs repo which has a en masse version of this
 class Decancer(commands.Cog):
-    """Decancer users' names removing special and accented chars.
-
-    `[p]decancerset` to get started if you're already using redbot core modlog."""
+    """Decancer users names removing special and accented chars. `[p]decancerset` to get started if you're already using redbot core modlog"""
 
     def __init__(self, bot):
         self.bot = bot
-        self.config = Config.get_conf(
-            self,
-            identifier=7778847744,
-            force_registration=True,
-        )
+        self.config = Config.get_conf(self, identifier=7778847744, force_registration=True,)
         default_guild = {"modlogchannel": None, "new_custom_nick": "simp name", "auto": False}
         default_global = {"auto": True}
         self.config.register_guild(**default_guild)
@@ -160,8 +154,7 @@ class Decancer(commands.Cog):
             values.append(f"**Auto-Decancer:** `{auto}`")
         e = discord.Embed(colour=await ctx.embed_colour())
         e.add_field(
-            name=f"{ctx.guild.name} Settings",
-            value="\n".join(values),
+            name=f"{ctx.guild.name} Settings", value="\n".join(values),
         )
         e.set_footer(text="To change these, pass [p]decancerset modlog|defaultname")
         e.set_image(url=ctx.guild.icon_url)

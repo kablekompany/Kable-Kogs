@@ -26,7 +26,7 @@ class RawUserIds(Converter):
 
 
 class KekIDs(commands.Cog):
-    """Kick a list of IDs from your server"""
+    """Kick a list of IDs from your server. EzPz"""
 
     def __init__(self, bot):
         self.bot = bot
@@ -43,11 +43,7 @@ class KekIDs(commands.Cog):
     @commands.bot_has_permissions(kick_members=True)
     @checks.admin_or_permissions(kick_members=True)
     async def idkick(
-        self,
-        ctx: commands.Context,
-        user_ids: commands.Greedy[RawUserIds],
-        *,
-        reason: str = None,
+        self, ctx: commands.Context, user_ids: commands.Greedy[RawUserIds], *, reason: str = None,
     ):
         """Kick a list of users. Rekt™
 

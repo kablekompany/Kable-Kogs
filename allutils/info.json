@@ -1,0 +1,20 @@
+{
+    "name": "AllUtils",
+    "short": "Grab meta, make polls. Bitchin'",
+    "description": "Various utility functions and commands from R.Danny. Grab meta,  make polls, FDB.",
+    "end_user_data_statement": "This cog does not persistently store data or metadata about users.",
+    "install_msg": "Thanks for installing. This is from an unapproved repository. Your responsible for any mishaps LOL",
+    "author": [
+        "kablekompany (KableKompany#0001)"
+    ],
+    "required_cogs": {},
+    "requirements": [],
+    "tags": [
+        "utility",
+        "poll"
+    ],
+    "min_bot_version": "3.3.10",
+    "hidden": false,
+    "disabled": false,
+    "type": "COG"
+}
