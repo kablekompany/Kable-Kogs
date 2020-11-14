@@ -1,4 +1,4 @@
-from redbot.core.commands import BadArgument, Converter
+from redbot.core.commands import BadArgument
 from redbot.core.utils.chat_formatting import inline
 
 

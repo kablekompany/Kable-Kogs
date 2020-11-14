@@ -339,7 +339,7 @@ class AllUtils(commands.Cog):
 
         try:
             await ctx.channel.delete_messages(messages)
-        except:
+        except Exception:
             pass  # oh well
 
         answer = "\n".join(f"{keycap}: {content}" for keycap, content in answers)
@@ -374,7 +374,7 @@ class AllUtils(commands.Cog):
 
         try:
             await ctx.message.delete()
-        except:
+        except Exception:
             pass
 
         body = "\n".join(f"{key}: {c}" for key, c in choices)
