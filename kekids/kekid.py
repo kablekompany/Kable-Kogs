@@ -26,7 +26,7 @@ class RawUserIds(Converter):
 
 
 class KekIDs(commands.Cog):
-    """Kick a list of IDs from your server. EzPz"""
+    """Kick users en masse by mention or ID"""
 
     def __init__(self, bot):
         self.bot = bot

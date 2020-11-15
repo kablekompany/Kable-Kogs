@@ -2,18 +2,18 @@
     "name": "CustomApps",
     "short": "Customize Staff apps for your server",
     "description": "Add additional questions of your choice to staff applications making them specific to your server. Can retrieve filled in apps that users have completed. Responses are sent back to server via webhook. AIO Setup.",
-    "end_user_data_statement": "This cog stores user respones to applications which can be removed at request",
-    "install_msg": "Thanks for installing. This is from an unapproved repository. Your responsible for any mishaps LOL",
+    "end_user_data_statement": "This cog stores application response that can be deleted at request",
+    "install_msg": "Thanks for installing CustomApps. If anything doesn't work, you can report it at <https://github.com/KableKompany/Kable-Kogs/issues>.",
     "author": [
-        "kablekompany (KableKompany#0001)"
+        "KableKompany (KableKompany#0001)"
     ],
     "required_cogs": {},
     "requirements": [],
     "tags": [
-        "applications",
-        "custom"
+        "staff-apps",
+        "tools",
+        "utility"
     ],
-    "min_bot_version": "3.3.10",
     "hidden": false,
     "disabled": false,
     "type": "COG"

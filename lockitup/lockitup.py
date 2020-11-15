@@ -11,11 +11,7 @@ from redbot.core.utils.menus import DEFAULT_CONTROLS, menu
 
 # core functioning from Sharky-Cogs @https://github.com/SharkyTheKing/Sharky
 class LockItUp(commands.Cog):
-    """
-    Lockdown a list of channels and output a lock message in each of those channels as well as an unlock message when that lockdown is rescinded. For a second level of configuration, you can add a special role to take denied overrides on lockdown and give positive overrides on unlock. Webhook error logging in server for debugging, and role toggle for everyone role perms for message sending. Lock voice channels, and singular channels too.
-
-    Based on [SharkyTheKing](https://github.com/sharky-the-king)'s Lockdown cog.
-    """
+    """Lockdown a list of channels, a channel, or the whole server."""
 
     def __init__(self, bot):
         self.bot = bot
