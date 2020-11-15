@@ -3,20 +3,16 @@
     "short": "Decancer users names removing special and accented chars. `[p]decancerset` to get started if you're already using redbot core modlog",
     "description": "Clears special characters, and accented characters from usernames. Customize default fallback name on unsuccessful decancer and translates glyphs",
     "end_user_data_statement": "This cog does not persistently store data or metadata about users.",
-    "install_msg": "Hey, thanks for trying this dress on, hope it fits.",
+    "install_msg": "Thanks for installing. This is from an unapproved repository. Your responsible for any mishaps LOL",
     "author": [
-        "kablekompany (KableKompany#0001)",
-        "PhenoM4n4n#0578"
+        "kablekompany (KableKompany#0001)"
     ],
     "required_cogs": {},
-    "requirements": [
-        "stringcase",
-        "unidecode"
-    ],
+    "requirements": [],
     "tags": [
-        "utility",
+        "decancer",
         "moderation",
-        "dehoist"
+        "decancer"
     ],
     "min_bot_version": "3.3.10",
     "hidden": false,

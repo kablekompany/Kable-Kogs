@@ -135,7 +135,6 @@ lockitup/sharkylock.py
 httpkount/
 info.yaml
 .ci/
-.tools
 
 # macOS shit
 .DS_Store

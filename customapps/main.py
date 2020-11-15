@@ -56,9 +56,7 @@ guild_defaults = {
 
 
 class CustomApps(Cog):
-    """
-    Custom staff applications
-    """
+    """Customize Staff apps for your server"""
 
     def __init__(self, bot):
         self.bot = bot
