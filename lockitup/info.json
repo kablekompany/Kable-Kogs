@@ -1,20 +1,18 @@
 {
     "name": "LockItUp",
-    "short": "Lockdown a list of channels and output a lock message in each of those channels as well as an unlock message when that lockdown is rescinded. For a second level of configuration, you can add a special role to take denied overrides on lockdown and give positive overrides on unlock. Webhook error logging in server for debugging, and role toggle for everyone role perms for message sending. Lock voice channels, and singular channels too. Based on [SharkyTheKing](https://github.com/sharky-the-king)'s Lockdown cog.",
-    "description": "Lockdown a list of channels and output a lock message in each of those channels as well as an unlock message when that lockdown is rescinded. For a second level of configuration, you can add a special role to take denied overrides on lockdown and give positive overrides on unlock. Webhook error logging in server for debugging, and role toggle for everyone role perms for message sending. Lock voice channels, and singular channels too. Based on [SharkyTheKing](https://github.com/sharky-the-king)'s Lockdown cog.",
+    "short": "Lockdown a list of channels, a channel, or the whole server.",
+    "description": "Lockdown a list of channels and output a lock message in each of those channels as well as an unlock message when that lockdown is rescinded. For a second level of configuration, you can add a special role to take denied overrides on lockdown and give positive overrides on unlock. Webhook error logging in server for debugging, and role toggle for everyone role perms for message sending. Lock voice channels, and singular channels too.",
     "end_user_data_statement": "This cog does not persistently store data or metadata about users.",
-    "install_msg": "Thanks for installing. This is from an unapproved repository. Your responsible for any mishaps LOL",
+    "install_msg": "Thanks for installing LockItUp. If anything doesn't work, you can report it at <https://github.com/KableKompany/Kable-Kogs/issues>.",
     "author": [
-        "kablekompany (KableKompany#0001)"
+        "KableKompany (KableKompany#0001)"
     ],
     "required_cogs": {},
     "requirements": [],
     "tags": [
-        "lockdown",
-        "serverlock",
-        "utility"
+        "moderation",
+        "lockdown"
     ],
-    "min_bot_version": "3.3.10",
     "hidden": false,
     "disabled": false,
     "type": "COG"

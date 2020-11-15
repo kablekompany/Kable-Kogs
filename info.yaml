@@ -1,0 +1,79 @@
+repo:
+  name: Kable-Kogs
+  short: Cogs by KableKompany (KableKompany#0001).
+  description: Cogs requested by others and those that I wanted for Red myself.
+  install_msg: >-
+    Thanks for using {repo_name}. Please note this repo is unapproved — some features may be missing. Report issues at https://github.com/KableKompany/Kable-Kogs
+  author:
+    - KableKompany (KableKompany#0001)
+
+shared_fields:
+  install_msg: >-
+    Thanks for installing {cog_name}. If anything doesn't work, you can report it
+    at <https://github.com/KableKompany/Kable-Kogs/issues>.
+  author:
+    - KableKompany (KableKompany#0001)
+  hidden: false
+  disabled: false
+  type: COG
+
+cogs:
+  allutils:
+    name: AllUtils
+    short: Grab meta, make polls. Bitchin'
+    description: Various utility functions and commands from R.Danny. Grab meta,  make polls, FDB.
+    end_user_data_statement: >-
+      This cog stores application response that can be deleted at request
+    install_msg: >-
+      {shared_fields.install_msg}
+    tags:
+      - banmessage
+      - tools
+      - utility
+  customapps:
+    name: CustomApps
+    short: Customize Staff apps for your server
+    description: Add additional questions of your choice to staff applications making them specific to your server. Can retrieve filled in apps that users have completed. Responses are sent back to server via webhook. AIO Setup.
+    end_user_data_statement: >-
+      This cog stores application response that can be deleted at request
+    tags:
+      - staff-apps
+      - tools
+      - utility
+  decancer:
+    name: Decancer
+    short: Decancer users names removing special and accented chars. `[p]decancerset` to get started if you're already using redbot core modlog
+    description: Clears special characters, and accented characters from usernames. Customize default fallback name on unsuccessful decancer and translates glyphs
+    end_user_data_statement: >-
+      This cog does not persistently store data or metadata about users.
+    install_msg: >-
+      {shared_fields.install_msg}
+
+    tags:
+      - utility
+      - moderation
+      - dehoist
+  kekids:
+    name: KekIDs
+    short: >-
+      Walk confidently and wear big shoes. Kick a list of users from your server. EzPz
+    description: >-
+      Masskick users by ID
+    end_user_data_statement: >-
+      This cog does not persistently store data or metadata about users.
+    class_docstring: Kick users en masse by mention or ID
+    tags:
+      - moderation
+      - tools
+      - utility
+  lockitup:
+    name: LockItUp
+    short: Lockdown a list of channels, a channel, or the whole server.
+    description: Lockdown a list of channels and output a lock message in each of those channels as well as an unlock message when that lockdown is rescinded. For a second level of configuration, you can add a special role to take denied overrides on lockdown and give positive overrides on unlock. Webhook error logging in server for debugging, and role toggle for everyone role perms for message sending. Lock voice channels, and singular channels too.
+    end_user_data_statement: >-
+      This cog does not persistently store data or metadata about users.
+    install_msg: >-
+      {shared_fields.install_msg}
+    tags:
+      - moderation
+      - lockdown

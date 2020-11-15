@@ -133,7 +133,7 @@ lockitup/sharkylock.py
 .venv/
 .vscode
 httpkount/
-info.yaml
+!info.yaml
 .ci/
 
 # macOS shit

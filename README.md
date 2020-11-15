@@ -104,8 +104,8 @@ pip install Red-Discordbot[postgres]
 | allutils | Grab meta, make polls. Bitchin' |
 | customapps | Customize Staff apps for your server |
 | decancer | Decancer users names removing special and accented chars. `[p]decancerset` to get started if you're already using redbot core modlog |
-| kekids | Kick a list of IDs from your server. EzPz |
-| lockitup | Lockdown a list of channels and output a lock message in each of those channels as well as an unlock message when that lockdown is rescinded. For a second level of configuration, you can add a special role to take denied overrides on lockdown and give positive overrides on unlock. Webhook error logging in server for debugging, and role toggle for everyone role perms for message sending. Lock voice channels, and singular channels too. Based on [SharkyTheKing](https://github.com/sharky-the-king)'s Lockdown cog. |
+| kekids | Walk confidently and wear big shoes. |
+| lockitup | Lockdown a list of channels, a channel, or the whole server. |
 
 ## Contributing
 
