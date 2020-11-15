@@ -54,7 +54,7 @@ guild_defaults = {
     "positions_available": ["this position", "that position"],
 }
 
-
+# Originally from https://github.com/elijabesu/SauriCogs
 class CustomApps(Cog):
     """Customize Staff apps for your server"""
 
