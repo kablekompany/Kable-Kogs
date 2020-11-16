@@ -1,8 +1,8 @@
 {
     "name": "AllUtils",
-    "short": "Grab meta, make polls. Bitchin'",
+    "short": "Grab meta, make polls. Bitchin",
     "description": "Various utility functions and commands from R.Danny. Grab meta,  make polls, FDB.",
-    "end_user_data_statement": "This cog stores application response that can be deleted at request",
+    "end_user_data_statement": "This cog does not store meta data",
     "install_msg": "Thanks for installing AllUtils. If anything doesn't work, you can report it at <https://github.com/KableKompany/Kable-Kogs/issues>.",
     "author": [
         "KableKompany (KableKompany#0001)"
@@ -10,7 +10,6 @@
     "required_cogs": {},
     "requirements": [],
     "tags": [
-        "banmessage",
         "tools",
         "utility"
     ],
