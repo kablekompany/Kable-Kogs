@@ -1,4 +1,3 @@
-import asyncio
 from collections import Counter
 from typing import Union
 
@@ -6,7 +5,6 @@ import discord
 from redbot.core import checks, commands
 
 from . import formats, time
-
 
 
 class FetchedUser(commands.Converter):
@@ -299,4 +297,3 @@ class AllUtils(commands.Cog):
             return await ctx.send("Member not found?")
 
         await self.say_permissions(ctx, member, channel)
-
