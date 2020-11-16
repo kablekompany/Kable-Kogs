@@ -13,7 +13,7 @@
         "tools",
         "utility"
     ],
-    "hidden": false,
-    "disabled": false,
+    "hidden": true,
+    "disabled": true,
     "type": "COG"
 }
