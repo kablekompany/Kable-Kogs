@@ -1,7 +1,7 @@
 {
     "name": "Kable-Kogs",
     "short": "Cogs by KableKompany (KableKompany#0001).",
-    "description": "Cogs requested by others and those that I wanted for Red myself.",
+    "description": "culmination of rewrites and combination cogs for use with Red.",
     "install_msg": "Thanks for using Kable-Kogs. Please note this repo is unapproved \u2014 some features may be missing. Report issues at https://github.com/KableKompany/Kable-Kogs",
     "author": [
         "KableKompany (KableKompany#0001)"
