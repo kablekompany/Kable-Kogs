@@ -76,10 +76,10 @@ class LockItUp(commands.Cog):
                 overwrite1.update(send_messages=True, embed_links=True)
                 try:
                     await guild_channel.set_permissions(
-                            bot_override,
-                            overwrite=overwrite1,
-                            reason="Securing bot overrides for lockdown",
-                        )
+                        bot_override,
+                        overwrite=overwrite1,
+                        reason="Securing bot overrides for lockdown",
+                    )
                     await asyncio.sleep(0.3)
                 except Exception:
                     return await ctx.send(
@@ -99,7 +99,10 @@ class LockItUp(commands.Cog):
                     await asyncio.sleep(0.2)
                 except discord.Forbidden:
                     self.log.info("Could not lockdown {}".format(guild_channel.name))
-                    await self.loggerhook(guild, error=f"Could not lockdown {guild_channel.name}. Check my permissions and make sure I can manage the channel")
+                    await self.loggerhook(
+                        guild,
+                        error=f"Could not lockdown {guild_channel.name}. Check my permissions and make sure I can manage the channel",
+                    )
 
         msg = await self.config.guild(guild).lockdown_message()
         if msg:
