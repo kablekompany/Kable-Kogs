@@ -26,11 +26,11 @@ class AllUtils(commands.Cog):
         self.bot = bot
 
     @commands.group(name="get", cooldown_after_parsing=True)
-    @commands.cooldown(1, 5, commands.BucketType.user)
     async def get_that(self, ctx: commands.Context):
         """Group commands for fetching various information"""
 
     @get_that.command(aliases=["av"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.guild_only()
     async def avatar(self, ctx, *, user: Union[discord.Member, FetchedUser] = None):
         """Shows a user's enlarged avatar (if possible).
@@ -46,6 +46,7 @@ class AllUtils(commands.Cog):
         await ctx.send(embed=embed)
 
     @get_that.command(hidden=True, aliases=["ui"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def userinfo(self, ctx, *, user: Union[discord.Member, FetchedUser] = None):
         """Shows info about a user.
 
@@ -104,6 +105,7 @@ class AllUtils(commands.Cog):
         await ctx.send(embed=e)
 
     @get_that.command(aliases=["guildinfo", "si"], usage="")
+    @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.guild_only()
     async def serverinfo(self, ctx, *, guild_id: int = None):
         """Shows info about the current server."""
@@ -245,6 +247,7 @@ class AllUtils(commands.Cog):
         await ctx.send(embed=e)
 
     @get_that.command(aliases=["up"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.guild_only()
     async def userperms(
         self, ctx, member: discord.Member = None, channel: discord.TextChannel = None
@@ -263,6 +266,7 @@ class AllUtils(commands.Cog):
 
     @get_that.command(aliases=["bp"])
     @commands.guild_only()
+    @commands.cooldown(1, 5, commands.BucketType.user)
     @checks.admin_or_permissions(manage_roles=True)
     async def botperms(self, ctx, *, channel: discord.TextChannel = None):
         """Shows the bot's permissions in a specific channel.
