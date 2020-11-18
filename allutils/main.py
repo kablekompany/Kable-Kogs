@@ -25,11 +25,13 @@ class AllUtils(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(name="get")
+    @commands.group(name="get", cooldown_after_parsing=True)
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def get_that(self, ctx: commands.Context):
         """Group commands for fetching various information"""
 
     @get_that.command(aliases=["av"])
+    @commands.guild_only()
     async def avatar(self, ctx, *, user: Union[discord.Member, FetchedUser] = None):
         """Shows a user's enlarged avatar (if possible).
 
