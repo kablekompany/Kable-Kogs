@@ -316,7 +316,7 @@ class Decancer(commands.Cog):
     @checks.mod_or_permissions(manage_nicknames=True)
     @checks.bot_has_permissions(manage_nicknames=True)
     @commands.guild_only()
-    @commands.command()
+    @commands.command(cooldown_after_parsing=True)
     async def dehoist(self, ctx: commands.Context, *, role: discord.Role = None):
         """Decancer all members of the targeted role.
 
