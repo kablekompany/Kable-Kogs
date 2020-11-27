@@ -1,4 +1,4 @@
-from .kekid import KekIDs
+from .kekid import IDKick
 
 __red_end_user_data_statement__ = (
     "This cog does not persistently store data or metadata about users."
@@ -6,4 +6,4 @@ __red_end_user_data_statement__ = (
 
 
 def setup(bot):
-    bot.add_cog(KekIDs(bot))
+    bot.add_cog(IDKick(bot))
