@@ -1,10 +1,5 @@
-import asyncio
-import contextlib
 import logging
 import re
-from collections import namedtuple
-from datetime import datetime, timedelta
-from typing import Optional, Union, cast
 
 import discord
 from redbot.core import checks, commands, i18n, modlog
@@ -85,9 +80,7 @@ class IDKick(commands.Cog):
         for entry in kick_list:
             for user_id in user_ids:
                 if entry.user.id == user_id:
-                    errors[user_id] = _("User {user_id} is not in guild.").format(
-                         user_id=user_id
-                         )
+                    errors[user_id] = _("User {user_id} is not in guild.").format(user_id=user_id)
 
         user_ids = remove_processed(user_ids)
 
@@ -99,18 +92,16 @@ class IDKick(commands.Cog):
             user = guild.get_member(user_id)
             if user is not None:
                 try:
-                    result = await guild.kick(
-                    user=user, reason=reason
-                    )
+                    result = await guild.kick(user=user, reason=reason)
                     if result is True:
                         kicked.append(user_id)
                     else:
                         errors[user_id] = _("Failed to kick user {user_id}: {reason}").format(
-                        user_id=user_id, reason=result
+                            user_id=user_id, reason=result
                         )
                 except Exception as e:
                     errors[user_id] = _("Failed to kick user {user_id}: {reason}").format(
-                    user_id=user_id, reason=e
+                        user_id=user_id, reason=e
                     )
 
         user_ids = remove_processed(user_ids)
