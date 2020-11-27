@@ -1,5 +1,10 @@
+import asyncio
+import contextlib
 import logging
 import re
+from collections import namedtuple
+from datetime import datetime, timedelta
+from typing import Optional, Union, cast
 
 import discord
 from redbot.core import checks, commands, i18n, modlog
@@ -42,10 +47,10 @@ class IDKick(commands.Cog):
         *,
         reason: str = None,
     ):
-        """Kick a list of users by ID
+        """Kick a list of users.
 
         If a reason is specified, it will be the reason that shows up
-        in the audit log
+        in the audit log.
         """
         kicked = []
         errors = {}
@@ -75,40 +80,6 @@ class IDKick(commands.Cog):
 
         if not guild.me.guild_permissions.kick_members:
             return await ctx.send(_("I lack the permissions to do this."))
-
-        kick_list = [RawUserIds]
-        for entry in kick_list:
-            for user_id in user_ids:
-                if entry.user.id == user_id:
-                    errors[user_id] = _("User {user_id} is not in guild.").format(user_id=user_id)
-
-        user_ids = remove_processed(user_ids)
-
-        if not user_ids:
-            await show_results()
-            return
-
-        for user_id in user_ids:
-            user = guild.get_member(user_id)
-            if user is not None:
-                try:
-                    result = await guild.kick(user=user, reason=reason)
-                    if result is True:
-                        kicked.append(user_id)
-                    else:
-                        errors[user_id] = _("Failed to kick user {user_id}: {reason}").format(
-                            user_id=user_id, reason=result
-                        )
-                except Exception as e:
-                    errors[user_id] = _("Failed to kick user {user_id}: {reason}").format(
-                        user_id=user_id, reason=e
-                    )
-
-        user_ids = remove_processed(user_ids)
-
-        if not user_ids:
-            await show_results()
-            return
 
         for user_id in user_ids:
             user = discord.Object(id=user_id)
