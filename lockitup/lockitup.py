@@ -892,7 +892,7 @@ class LockItUp(commands.Cog):
                     )
                 )
 
-    async voice_channel_lock(self, author: discord.Member, guild: discord.Guild):
+    async def voice_channel_lock(self, author: discord.Member, guild: discord.Guild):
         """Lock function for voice/music channels"""
         voice_channels = await self.config.guild(guild).vc_channels()
         music_channels = await self.config.guild(guild).music_channels()
@@ -949,7 +949,7 @@ class LockItUp(commands.Cog):
                         )
         await message.edit(content="Music Channels are locked, too.")
 
-    async voice_channel_unlock(self, author: discord.Member, guild: discord.Guild):
+    async def voice_channel_unlock(self, author: discord.Member, guild: discord.Guild):
         """Unlock function for voice/music channels"""
         voice_channels = await self.config.guild(guild).vc_channels()
         music_channels = await self.config.guild(guild).music_channels()
