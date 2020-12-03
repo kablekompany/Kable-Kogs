@@ -892,12 +892,16 @@ class LockItUp(commands.Cog):
                     )
                 )
 
-    async def voice_channel_lock(self, ctx: commands.Context, author: discord.Member, guild: discord.Guild):
+    async def voice_channel_lock(
+        self, ctx: commands.Context, author: discord.Member, guild: discord.Guild
+    ):
         """Lock function for voice/music channels"""
         voice_channels = await self.config.guild(guild).vc_channels()
         music_channels = await self.config.guild(guild).music_channels()
         if not voice_channels or not music_channels:
-            return await ctx.send("You need to add some channels to your configuration using `{}lds setvc|setmusic` to use this")
+            return await ctx.send(
+                "You need to add some channels to your configuration using `{}lds setvc|setmusic` to use this"
+            )
         role = guild.default_role
         if voice_channels is not None:
             for voice_channel in guild.channels:
@@ -915,21 +919,28 @@ class LockItUp(commands.Cog):
                     except discord.Forbidden:
                         await self.loggerhook.send(
                             guild=guild,
-                            error="You gotta give me permissions to manage {} so I can lock it properly".format(voice_channel.mention),
+                            error="You gotta give me permissions to manage {} so I can lock it properly".format(
+                                voice_channel.mention
+                            ),
                         )
             await ctx.send("Voice channels locked :mute:")
 
         # roll on with music channels for lock down
         def check(m):
             return m.author == ctx.author and m.channel == ctx.channel
+
         if music_channels is not None:
-            message = await ctx.send("Detected music channels in your configuration, do you want to lock those too?")
+            message = await ctx.send(
+                "Detected music channels in your configuration, do you want to lock those too?"
+            )
             try:
                 confirm_music_too = await ctx.bot.wait_for("message", check=check, timeout=30)
                 if confirm_music_too.content.lower() != "yes":
                     return await ctx.send("Okay, won't bother locking those")
             except asyncio.TimeoutError:
-                return await ctx.send("You took too long to reply, won't lock your music channels. You can lock those independently. Not sure why they're in your configuration in this case though.")
+                return await ctx.send(
+                    "You took too long to reply, won't lock your music channels. You can lock those independently. Not sure why they're in your configuration in this case though."
+                )
             for voice_channel in guild.channels:
                 if voice_channel.id in music_channels:
                     overwrite = voice_channel.overwrites_for(role)
@@ -945,16 +956,22 @@ class LockItUp(commands.Cog):
                     except discord.Forbidden:
                         await self.loggerhook.send(
                             guild=guild,
-                            error="You gotta give me permissions to manage {} so I can lock it properly".format(voice_channel.mention),
+                            error="You gotta give me permissions to manage {} so I can lock it properly".format(
+                                voice_channel.mention
+                            ),
                         )
         await message.edit(content="Music Channels are locked, too.")
 
-    async def voice_channel_unlock(self, ctx: commands.Context, author: discord.Member, guild: discord.Guild):
+    async def voice_channel_unlock(
+        self, ctx: commands.Context, author: discord.Member, guild: discord.Guild
+    ):
         """Unlock function for voice/music channels"""
         voice_channels = await self.config.guild(guild).vc_channels()
         music_channels = await self.config.guild(guild).music_channels()
         if not voice_channels or not music_channels:
-            return await ctx.send("You need to add some channels to your configuration using `{}lds setvc|setmusic` to use this")
+            return await ctx.send(
+                "You need to add some channels to your configuration using `{}lds setvc|setmusic` to use this"
+            )
         role = guild.default_role
         if voice_channels is not None:
             for voice_channel in guild.channels:
@@ -972,21 +989,28 @@ class LockItUp(commands.Cog):
                     except discord.Forbidden:
                         await self.loggerhook.send(
                             guild=guild,
-                            error="You gotta give me permissions to manage {} so I can lock it properly".format(voice_channel.mention),
+                            error="You gotta give me permissions to manage {} so I can lock it properly".format(
+                                voice_channel.mention
+                            ),
                         )
             await ctx.send("Voice channels unlocked :unmute:")
 
         # roll on with music channels for lock down
         def check(m):
             return m.author == ctx.author and m.channel == ctx.channel
+
         if music_channels is not None:
-            message = await ctx.send("Detected music channels in your configuration, do you want to unlock those too?")
+            message = await ctx.send(
+                "Detected music channels in your configuration, do you want to unlock those too?"
+            )
             try:
                 confirm_music_too = await ctx.bot.wait_for("message", check=check, timeout=30)
                 if confirm_music_too.content.lower() != "yes":
                     return await ctx.send("Okay, won't bother unlocking those")
             except asyncio.TimeoutError:
-                return await ctx.send("You took too long to reply, won't unlock your music channels. You can unlock those independently. Not sure why they're in your configuration in this case though.")
+                return await ctx.send(
+                    "You took too long to reply, won't unlock your music channels. You can unlock those independently. Not sure why they're in your configuration in this case though."
+                )
             for voice_channel in guild.channels:
                 if voice_channel.id in music_channels:
                     overwrite = voice_channel.overwrites_for(role)
@@ -1002,7 +1026,9 @@ class LockItUp(commands.Cog):
                     except discord.Forbidden:
                         await self.loggerhook.send(
                             guild=guild,
-                            error="You gotta give me permissions to manage {} so I can unlock it properly".format(voice_channel.mention),
+                            error="You gotta give me permissions to manage {} so I can unlock it properly".format(
+                                voice_channel.mention
+                            ),
                         )
             await message.edit(content="Music Channels are unlocked, too.")
 
