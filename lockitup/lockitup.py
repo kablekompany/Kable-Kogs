@@ -1042,7 +1042,7 @@ class LockItUp(commands.Cog):
             )
         guild = ctx.guild
         author = ctx.author
-        await self.voice_channel_lock(guild=guild, author=author)
+        await self.voice_channel_lock(ctx=ctx, guild=guild, author=author)
 
     @checks.mod_or_permissions(manage_channels=True)
     @commands.command()
@@ -1059,7 +1059,7 @@ class LockItUp(commands.Cog):
         guild = ctx.guild
         author = ctx.author
 
-        await self.voice_channel_unlock(guild=guild, author=author)
+        await self.voice_channel_unlock(ctx=ctx, guild=guild, author=author)
 
     @commands.command(name="lockit", aliases=["lockchan"])
     @checks.mod_or_permissions(manage_messages=True)
