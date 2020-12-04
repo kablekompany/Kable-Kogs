@@ -804,7 +804,7 @@ class LockItUp(commands.Cog):
             if chan in vc_chans:
                 vc_chans.remove(chan)
                 await self.config.guild(guild).vc_channels.set(vc_chans)
-        await ctx.send(f"Added {vc_channel.name} to the list")
+        await ctx.send(f"Removed from the list")
 
     @lockdownset.command(name="remusic")
     async def music_remove(
