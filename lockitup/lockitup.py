@@ -752,7 +752,7 @@ class LockItUp(commands.Cog):
         """
         Adds channel to list of voice chats to lock/unlock
         """
-        if vc_channel is None:
+        if not vc_channel:
             return await ctx.send_help()
         guild = ctx.guild
         vc_chans = await self.config.guild(guild).vc_channels()
@@ -774,7 +774,7 @@ class LockItUp(commands.Cog):
 
         Music channels are treated with different perms on unlock (forcing negative overrides for @everyone role to speak)
         """
-        if vc_channel is None:
+        if not vc_channel:
             return await ctx.send_help()
         guild = ctx.guild
         music_chans = await self.config.guild(guild).music_channels()
@@ -796,7 +796,7 @@ class LockItUp(commands.Cog):
 
         Must use ID
         """
-        if vc_channel is None:
+        if not vc_channel:
             return await ctx.send_help()
         guild = ctx.guild
         vc_chans = await self.config.guild(guild).vc_channels()
@@ -817,13 +817,13 @@ class LockItUp(commands.Cog):
 
         Music channels are treated with different perms on unlock (forcing negative overrides for @everyone role to speak)
         """
-        if vc_channel is None:
+        if not vc_channel:
             return await ctx.send_help()
         guild = ctx.guild
         music_chans = await self.config.guild(guild).music_channels()
         for chan in vc_channel:
-            if chan.id in music_chans:
-                music_chans.remove(chan.id)
+            if chan in music_chans:
+                music_chans.remove(chan)
                 await self.config.guild(guild).music_channels.set(music_chans)
 
         await ctx.send(f"Removed from the list")
