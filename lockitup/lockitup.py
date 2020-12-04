@@ -747,7 +747,6 @@ class LockItUp(commands.Cog):
     async def vc_setter(
         self,
         ctx: commands.Context,
-        *,
         vc_channel: Greedy[discord.VoiceChannel],
     ):
         """
@@ -768,7 +767,6 @@ class LockItUp(commands.Cog):
     async def music_setter(
         self,
         ctx: commands.Context,
-        *,
         vc_channel: Greedy[discord.VoiceChannel],
     ):
         """
@@ -791,7 +789,6 @@ class LockItUp(commands.Cog):
     async def vc_remove(
         self,
         ctx: commands.Context,
-        *,
         vc_channel: Greedy[int],
     ):
         """
@@ -813,7 +810,6 @@ class LockItUp(commands.Cog):
     async def music_remove(
         self,
         ctx: commands.Context,
-        *,
         vc_channel: Greedy[int],
     ):
         """
