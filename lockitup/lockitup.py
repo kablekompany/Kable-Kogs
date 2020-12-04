@@ -989,7 +989,7 @@ class LockItUp(commands.Cog):
                                 voice_channel.mention
                             ),
                         )
-            await ctx.send("Voice channels unlocked :unmute:")
+            await ctx.send("Voice channels unlocked :speaker:")
 
         # roll on with music channels for lock down
         def check(m):
