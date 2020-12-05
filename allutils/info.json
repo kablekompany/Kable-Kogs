@@ -8,7 +8,9 @@
         "KableKompany (KableKompany#0001)"
     ],
     "required_cogs": {},
-    "requirements": [],
+    "requirements": [
+        "parsedatetime"
+    ],
     "tags": [
         "tools",
         "utility"
