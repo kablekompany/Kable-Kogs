@@ -245,7 +245,7 @@ class Decancer(commands.Cog):
         else:
             await ctx.send("Automatic decancering has been disabled globally.")
 
-    @commands.command(name="decancer", aliases=["dc"])
+    @commands.command(name="decancer")
     @checks.mod_or_permissions(manage_nicknames=True)
     @checks.bot_has_permissions(manage_nicknames=True)
     @commands.guild_only()
