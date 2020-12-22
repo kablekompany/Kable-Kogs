@@ -11,16 +11,16 @@ _id_regex = re.compile(r"([0-9]{15,21})$")
 _mention_regex = re.compile(r"<@!?([0-9]{15,21})>$")
 
 
-log = logging.getLogger("red.mod")
-_ = i18n.Translator("Mod", __file__)
+log = logging.getLogger("red.kko-kogs.idkick")
 
 
+# from Red-DiscordBot Core Mod cog
 class RawUserIds(Converter):
     async def convert(self, ctx, argument):
         if match := _id_regex.match(argument) or _mention_regex.match(argument):
             return int(match.group(1))
 
-        raise BadArgument(_("{} doesn't look like a valid user ID.").format(argument))
+        raise BadArgument("{} doesn't look like a valid user ID.").format(argument)
 
 
 class IDKick(commands.Cog):
@@ -51,18 +51,16 @@ class IDKick(commands.Cog):
         errors = {}
 
         async def show_results():
-            text = _("Kicked {num} users from the server.").format(
-                num=humanize_number(len(kicked))
-            )
+            text = "Kicked {num} users from the server.".format(num=humanize_number(len(kicked)))
             if errors:
-                text += _("\nErrors:\n")
+                text += "\nErrors:\n"
                 text += "\n".join(errors.values())
 
             for p in pagify(text):
                 await ctx.send(p)
 
-        def remove_processed(ids):
-            return [_id for _id in ids if _id not in kicked and _id not in errors]
+        # def remove_processed(ids):
+        #     return [_id for _id in ids if _id not in kicked and _id not in errors]
 
         user_ids = list(set(user_ids))  # No dupes
 
@@ -74,7 +72,7 @@ class IDKick(commands.Cog):
             return
 
         if not guild.me.guild_permissions.kick_members:
-            return await ctx.send(_("I lack the permissions to do this."))
+            return await ctx.send("I lack the permissions to do this.")
 
         for user_id in user_ids:
             user = discord.Object(id=user_id)
@@ -84,10 +82,10 @@ class IDKick(commands.Cog):
                 await guild.kick(user, reason=audit_reason)
                 log.info("{}({}) kicked {}".format(author.name, author.id, user_id))
             except discord.NotFound:
-                errors[user_id] = _("User {user_id} does not exist.").format(user_id=user_id)
+                errors[user_id] = "User {user_id} does not exist.".format(user_id=user_id)
                 continue
             except discord.Forbidden:
-                errors[user_id] = _("Could not kick {user_id}: missing permissions.").format(
+                errors[user_id] = "Could not kick {user_id}: missing permissions.".format(
                     user_id=user_id
                 )
                 continue
