@@ -443,6 +443,8 @@ class LockItUp(commands.Cog):
         get_sec_role = fetch_all["secondary_role"]
         get_sec_chans = fetch_all["secondary_channels"]
         check_silent = fetch_all["send_alert"]
+        get_vc = fetch_all["vc_channels"]
+        get_music = fetch_all["music_channels"]
 
         chan_count = len(get_channel)
         if not get_channel:
@@ -511,6 +513,19 @@ class LockItUp(commands.Cog):
                     value=f"{spec_msg}" if get_sec_chans else "**None**",
                     inline=False,
                 )
+            if get_vc:
+                vc_list = ""
+                for c in get_vc:
+                    c_name = ctx.guild.get_channel(c)
+                    vc_list += f"{c_name}\n"
+                e.add_field(name="Voice Channels", value=f"{vc_list}", inline=False)
+
+            if get_music:
+                music_list = ""
+                for mc in get_music:
+                    mc_name = ctx.guild.get_channel(mc)
+                    music_list += f"{mc_name}\n"
+                e.add_field(name="Voice Channels", value=f"{music_list}", inline=False)
 
             e.add_field(
                 name="Channel Notification:",
