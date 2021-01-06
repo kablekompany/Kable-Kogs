@@ -86,7 +86,7 @@ class CustomApps(Cog):
         async with self.config.guild(ctx.guild).all() as wait_list:
             grab_waiters["overflow_count"] += 1
             wait_list.update(grab_waiters)
-    
+
     # @commands.Cog.listener()
     # async def on_command_error(self, ctx, error):
     #     if not isinstance(commands.MaxConcurrencyReached):
