@@ -488,12 +488,12 @@ class CustomApps(Cog):
         if not available_positions:
             await ctx.send_help()
 
-        grab_guild_data = self.config.guild(ctx.guild)
-        meta = await grab_guild_data.positions_available()
+        grab_guild_data = self.config.guild(ctx.guild).positions_available
+        meta = await grab_guild_data()
         for r in available_positions:
             if r.id not in meta:
                 meta.append(r.id)
-                await grab_guild_data.positions_available.set(meta)
+                await grab_guild_data.set(meta)
             else:
                 continue
 
