@@ -51,7 +51,7 @@ guild_defaults = {
     "applicant_id": None,
     "accepter_id": None,
     "channel_id": None,
-    "positions_available": ["this position", "that position"],
+    "positions_available": [],
 }
 
 # Originally from https://github.com/elijabesu/SauriCogs
@@ -69,8 +69,8 @@ class CustomApps(Cog):
         self.config.register_guild(**guild_defaults)
         self.antispam = {}
 
-    async def red_delete_data_for_user(self, *, requester: RequestType, user_id: int):
-        await self.config.member_from_ids(user_id).clear()
+    async def red_delete_data_for_user(self, *, requester: RequestType, guild_id: int, user_id: int):
+        await self.config.member_from_ids(guild_id=guild_id, member_id=user_id).clear()
 
     @commands.command()
     @commands.guild_only()
@@ -85,24 +85,36 @@ class CustomApps(Cog):
         if ctx.guild not in self.antispam:
             self.antispam[ctx.guild] = {}
         if ctx.author not in self.antispam[ctx.guild]:
-            self.antispam[ctx.guild][ctx.author] = AntiSpam([(timedelta(days=2), 1)])
+            self.antispam[ctx.guild][ctx.author] = AntiSpam([(timedelta(days=1), 1)])
         if self.antispam[ctx.guild][ctx.author].spammy:
-            return await ctx.send("Uh oh, you're doing this way too frequently.")
+            return await ctx.send("Uh oh, you're doing this way too frequently. Give it a day or so.", delete_after=10)
+        grab_user_meta = await user_data.app_check()
+        if grab_user_meta is True:
+            return await ctx.send("You've already applied for a position in this server. Don't call us, we will call you...")
         if role_add is None:
             return await ctx.send("Uh oh. Looks like your Admins haven't added the required role.")
         if channel is None:
             return await ctx.send(
                 "Uh oh. Looks like your Admins haven't added the required channel."
             )
+        available_positions = await self.config.guild(ctx.guild).positions_available()
+        if available_positions is None:
+            fill_this = "Reply with the position you are applying for to continue."
+        else:
+            list_positions = "\n".join(available_positions)
+            fill_this = "Reply with the desired position from this list `{}` to continue".format(list_positions)
+        grab_owner_for_disclaimer = self.bot.owner_ids
+        for i in grab_owner_for_disclaimer:
+            bot_owner = i
         try:
-            # available_positions = await self.config.guild(ctx.guild).positions_available()
-            # TODO - ALLOW SETTING OF POSITIONS
             await ctx.author.send(
-                f"Let's start right away! You have maximum of 5 minutes for each question.\n\nReply with the position you are applying for to continue. To cancel at anytime respond with `cancel`"
+                f"Let's do this! You have maximum of __5 minutes__ for each question.\n{fill_this}\n\n*To cancel at anytime respond with `cancel`*\n*Your responses are stored for proper function of this feature, however it can be removed at request by contacting {await self.bot.get_or_fetch_user(user_id=bot_owner)}"
             )
         except discord.Forbidden:
-            return await ctx.send(f"{ctx.author.mention} I can't DM you. Do you have them closed?")
-        await ctx.send(f"Okay, {ctx.author.mention}, I've sent you a DM.")
+            return await ctx.send(f"{ctx.author.mention} I can't DM you. Do you have them closed?", delete_after=10)
+        except Exception as e:
+            return await ctx.send(f"I'm unable to send you a dm. Discord is giving the following error:\n```diff\n- {e}\n```", delete_after=10)
+        await ctx.send(f"Okay, {ctx.author.mention}, I've sent you a DM.", delete_after=7)
 
         def check(m):
             return m.author == ctx.author and m.channel == ctx.author.dm_channel
@@ -285,28 +297,33 @@ class CustomApps(Cog):
         except asyncio.TimeoutError:
             return await ctx.author.send("You took too long. Try again, please.")
         a = age.content
-        b = 2020
+        b = datetime.today()
+        c = str(b)
+        d = c[:4]
+        if a is int:
+            yearmath = int(d)-a
+            total_age = f"YOB: {a}\n{yearmath} years old"
+        else:
+            total_age = f"Recorded response of `{a}`. Could not calculate age."
         try:
-            yearmath = b - int(a)
-            total_age = f"{yearmath} years old"
             await user_data.age.set(total_age)
-        except Exception:
+        except Exception as e:
             return await ctx.author.send(
-                "Something fucked up. Make sure you answer only what is asked (Year of Birth usually)"
+                f"Something fucked up. Getting Error:\n```diff\n- {e}\n```"
             )  # TODO: make less hacky
         # else:
         #     return
-
+        e = []
         embed = discord.Embed(color=await ctx.embed_colour(), timestamp=datetime.utcnow())
-        embed.set_author(name="New application!", icon_url=ctx.author.avatar_url)
+        embed.set_author(name=f"Applicant: {ctx.author.name} | ID: {ctx.author.id}", icon_url=ctx.author.id)
         embed.set_footer(
-            text=f"{ctx.author.name}#{ctx.author.discriminator} UserID: {ctx.author.id})"
+            text=f"Applicant: {ctx.author.name}#{ctx.author.discriminator} UserID: {ctx.author.id})"
         )
-        embed.title = f"User: {ctx.author.name}#{ctx.author.discriminator} | ID: ({ctx.author.id})"
-        embed.add_field(name="Name:", value=f"{ctx.author.mention}\n" + name.content, inline=True)
+        embed.title = f"Application for {position.content}"
+        embed.add_field(name="Applicant Name:", value=f"Mention: {ctx.author.mention}\nPreferred: " + name.content, inline=True)
         embed.add_field(
-            name="Year of Birth:",
-            value=age.content + f"\n{yearmath} years old",
+            name="Age",
+            value=total_age,
             inline=True,
         )
         embed.add_field(name="Timezone:", value=timezone.content, inline=True)
@@ -335,7 +352,7 @@ class CustomApps(Cog):
                 value=answer12.content,
                 inline=False,
             )
-        embed.add_field(name="Final Comments", value=finalcomments.content, inline=False)
+        embed.add_field(name="Final Comments", value=finalcomments.content, inline=False)        
         try:
             webhook = None
             for hook in await channel.webhooks():
@@ -435,6 +452,34 @@ class CustomApps(Cog):
         )
         await ctx.send(embed=e)
 
+    @app_questions.command(name="positions")
+    async def set_positions(self, ctx: commands.Context, available_positions: str):
+        """Seperate with double quotes if the position is more than one word"""
+        if not available_positions:
+            await ctx.send_help()
+        grab_guild_data = await self.config.guild(ctx.guild)
+        form_dictionary = available_positions.split()
+        meta = grab_guild_data.positions_available()
+
+        def check(m):
+            return m.author == ctx.author and m.channel == ctx.channel
+
+        if grab_guild_data is None:
+            grab_guild_data.positions_available.set(form_dictionary)
+            await ctx.send("Positions are now set!")
+        else:
+            meta_list = "\n".join(meta)
+            await ctx.send("You previously had positions for :{}\nAre you sure you want to change these?".format(meta_list))
+            try:
+                confirm = await ctx.bot.wait_for("message", check=check, timeout=20)
+                if confirm.content.lower() != "yes":
+                    return await ctx.send("Alright, won't change them for now")
+                else:
+                    grab_guild_data.positions_available.set(form_dictionary)
+                    await ctx.send("Changed your position requests to the new options")
+            except asyncio.TimeoutError:
+                return await ctx.send("Today, junior. Will leave it as is I guess.")
+            
     @app_questions.command(name="set")
     async def set_questions(self, ctx: commands.Context):
         """Set up custom questions for your server"""
