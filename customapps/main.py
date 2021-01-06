@@ -986,4 +986,5 @@ class CustomApps(Cog):
         except asyncio.TimeoutError:
             return await ctx.send("You took too long to reply")
         await self.config.guild(ctx.guild).app_questions.clear_raw()
+        await self.config.guild(ctx.guild).positions_available.clear_raw()
         await ctx.send("Guild Reset, goodluck")
