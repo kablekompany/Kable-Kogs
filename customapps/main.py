@@ -377,21 +377,22 @@ class CustomApps(Cog):
             name=app_data["reasonforinterest"], value=reasonforinterest.content, inline=False
         )
         embed.add_field(name="Previous experience:", value=experience.content, inline=False)
+        
         if check_8 is not None:
-            embed.add_field(name=app_data["question8"], value=answer8.content, inline=False)
+            embed.add_field(name="{}...".format(app_data["question8"][:17]).replace("$", "\\$"), value=answer8.content, inline=False)
         if check_9 is not None:
-            embed.add_field(name=app_data["question9"], value=answer9.content, inline=False)
+            embed.add_field(name="{}...".format(app_data["question9"][:17]).replace("$", "\\$"), value=answer9.content, inline=False)
         if check_10 is not None:
-            embed.add_field(name=app_data["question10"], value=answer10.content, inline=False)
+            embed.add_field(name="{}...".format(app_data["question10"][:17]).replace("$", "\\$"), value=answer10.content, inline=False)
         if check_11 is not None:
             embed.add_field(
-                name=app_data["question11"],
+                name="{}...".format(app_data["question11"][:17]).replace("$", "\\$"),
                 value=answer11.content,
                 inline=False,
             )
         if check_12 is not None:
             embed.add_field(
-                name=app_data["question12"],
+                name="{}...".format(app_data["question12"][:17]).replace("$", "\\$"),
                 value=answer12.content,
                 inline=False,
             )
