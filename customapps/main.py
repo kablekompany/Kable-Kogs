@@ -457,7 +457,7 @@ class CustomApps(Cog):
         """Seperate with double quotes if the position is more than one word"""
         if not available_positions:
             await ctx.send_help()
-        grab_guild_data = await self.config.guild(ctx.guild)
+        grab_guild_data = self.config.guild(ctx.guild)
         form_dictionary = available_positions.split()
         meta = grab_guild_data.positions_available()
 
@@ -465,7 +465,7 @@ class CustomApps(Cog):
             return m.author == ctx.author and m.channel == ctx.channel
 
         if grab_guild_data is None:
-            grab_guild_data.positions_available.set(form_dictionary)
+            await grab_guild_data.positions_available.set(form_dictionary)
             await ctx.send("Positions are now set!")
         else:
             meta_list = "\n".join(meta)
@@ -475,7 +475,7 @@ class CustomApps(Cog):
                 if confirm.content.lower() != "yes":
                     return await ctx.send("Alright, won't change them for now")
                 else:
-                    grab_guild_data.positions_available.set(form_dictionary)
+                    await grab_guild_data.positions_available.set(form_dictionary)
                     await ctx.send("Changed your position requests to the new options")
             except asyncio.TimeoutError:
                 return await ctx.send("Today, junior. Will leave it as is I guess.")
