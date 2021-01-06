@@ -86,6 +86,7 @@ class CustomApps(Cog):
         async with self.config.guild(ctx.guild).all() as wait_list:
             grab_waiters["overflow_count"] += 1
             wait_list.update(grab_waiters)
+<<<<<<< HEAD
     
     # @commands.Cog.listener()
     # async def on_command_error(self, ctx, error):
@@ -93,6 +94,17 @@ class CustomApps(Cog):
     #         return
     #     # wait_line = await self.config.guild(ctx.guild).all()
     #     await ctx.send(f"{ctx.author.mention}, I'll DM you to start this once I finish up with the list of users ahead of you. Be looking for my DM.") # There are {wait_line["overflow_count"]} currently in queue.
+=======
+
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx, error):
+        if not isinstance(commands.MaxConcurrencyReached):
+            return
+        # wait_line = await self.config.guild(ctx.guild).all()
+        await ctx.send(
+            f"{ctx.author.mention}, I'll DM you to start this once I finish up with the list of users ahead of you. Be looking for my DM."
+        )  # There are {wait_line["overflow_count"]} currently in queue.
+>>>>>>> ec32de83fb2b85f7b8ad603fb8a69ac667dfcc4a
 
     @commands.command()
     @commands.guild_only()
