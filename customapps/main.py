@@ -421,9 +421,9 @@ class CustomApps(Cog):
                 embed=embed, username=ctx.guild.me.display_name, avatar_url=ctx.guild.me.avatar_url
             )
 
-        except discord.HTTPException:
+        except Exception as e:
             return await ctx.author.send(
-                "Your final application was too long to resolve as an embed. Give this another shot, keeping answers a bit shorter."
+                f"{e}"
             )
         except commands.CommandInvokeError:
             return await ctx.author.send(
