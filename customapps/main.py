@@ -9,7 +9,6 @@ from redbot.core.commands import Greedy
 from redbot.core.utils.antispam import AntiSpam
 from redbot.core.utils.predicates import MessagePredicate
 
-
 Cog: Any = getattr(commands, "Cog", object)
 
 
@@ -53,7 +52,10 @@ guild_defaults = {
     "applicant_id": None,
     "accepter_id": None,
     "channel_id": None,
-    "positions_available": ["Moderator", "Giveaway Manager"], # for the sake of saving time for now. add agnostic before merge
+    "positions_available": [
+        "Moderator",
+        "Giveaway Manager",
+    ],  # for the sake of saving time for now. add agnostic before merge
 }
 
 # Originally from https://github.com/elijabesu/SauriCogs
@@ -181,7 +183,7 @@ class CustomApps(Cog):
             except discord.HTTPException:
                 return await ctx.send(f"Thanks for nothing, {ctx.author.mention}")
             return
-    
+
         await ctx.author.send(app_data["days"])
         try:
             days = await self.bot.wait_for("message", timeout=300, check=check)
