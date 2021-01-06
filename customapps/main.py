@@ -86,6 +86,9 @@ class CustomApps(Cog):
     @commands.max_concurrency(1,per=commands.BucketType.guild, wait=True)
     async def apply(self, ctx: commands.Context):
         """Apply to be a staff member."""
+        if commands.MaxConcurrencyReached:
+            await ctx.send(f"{ctx.author.mention}, I'll DM you to start this once I finish up with the list of users ahead of you. Be looking for my DM")
+        
         role_add = get(ctx.guild.roles, name="Staff Applicant")
         app_data = await self.config.guild(ctx.guild).app_questions.all()
         user_data = self.config.member(ctx.author)
