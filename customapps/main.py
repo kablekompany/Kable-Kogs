@@ -54,7 +54,10 @@ guild_defaults = {
     "applicant_id": None,
     "accepter_id": None,
     "channel_id": None,
-    "positions_available": ["Moderator", "Giveaway Manager"], # for the sake of saving time for now. add agnostic before merge
+    "positions_available": [
+        "Moderator",
+        "Giveaway Manager",
+    ],  # for the sake of saving time for now. add agnostic before merge
 }
 
 # Originally from https://github.com/elijabesu/SauriCogs
