@@ -422,9 +422,7 @@ class CustomApps(Cog):
             )
 
         except Exception as e:
-            return await ctx.author.send(
-                f"{e}"
-            )
+            return await ctx.author.send(f"{e}")
         except commands.CommandInvokeError:
             return await ctx.author.send(
                 "You need to start over but this time when it asks for year of birth, respond only with a 4 digit year i.e `1999`"
