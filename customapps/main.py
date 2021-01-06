@@ -87,17 +87,17 @@ class CustomApps(Cog):
             grab_waiters["overflow_count"] += 1
             wait_list.update(grab_waiters)
     
-    @commands.Cog.listener()
-    async def on_command_error(self, ctx, error):
-        if not isinstance(commands.MaxConcurrencyReached):
-            return
-        # wait_line = await self.config.guild(ctx.guild).all()
-        await ctx.send(f"{ctx.author.mention}, I'll DM you to start this once I finish up with the list of users ahead of you. Be looking for my DM.") # There are {wait_line["overflow_count"]} currently in queue.
+    # @commands.Cog.listener()
+    # async def on_command_error(self, ctx, error):
+    #     if not isinstance(commands.MaxConcurrencyReached):
+    #         return
+    #     # wait_line = await self.config.guild(ctx.guild).all()
+    #     await ctx.send(f"{ctx.author.mention}, I'll DM you to start this once I finish up with the list of users ahead of you. Be looking for my DM.") # There are {wait_line["overflow_count"]} currently in queue.
 
     @commands.command()
     @commands.guild_only()
     @checks.bot_has_permissions(manage_roles=True, manage_channels=True, manage_webhooks=True)
-    @commands.max_concurrency(1, per=commands.BucketType.guild, wait=True)
+    @commands.max_concurrency(15, per=commands.BucketType.guild, wait=True)
     async def apply(self, ctx: commands.Context):
         """Apply to be a staff member."""
         role_add = get(ctx.guild.roles, name="Staff Applicant")
