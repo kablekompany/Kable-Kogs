@@ -54,7 +54,7 @@ guild_defaults = {
     "applicant_id": None,
     "accepter_id": None,
     "channel_id": None,
-    "positions_available": [],
+    "positions_available": ["Moderator", "Giveaway Manager"], # for the sake of saving time for now. add agnostic before merge
 }
 
 # Originally from https://github.com/elijabesu/SauriCogs
@@ -479,33 +479,33 @@ class CustomApps(Cog):
             r_name = f"<@&{i}>"
             show_roles += f"{r_name}\n"
 
-        e.add_field(
-            name="Positions requested",
-            value=f"{show_roles}" if requested_positions else "Not Set",
-            inline=False,
-        )
+        # e.add_field(
+        #     name="Positions requested",
+        #     value=f"{show_roles}" if requested_positions else "Not Set",
+        #     inline=False,
+        # )
         await ctx.send(embed=e)
 
-    @app_questions.command(name="positions")
-    async def set_positions(self, ctx: commands.Context, *available_positions: StrictRole):
-        """Accepts only actual roles within your server (by ID, or name)"""
-        if not available_positions:
-            raise commands.BadArgument
+    # @app_questions.command(name="positions")
+    # async def set_positions(self, ctx: commands.Context, *available_positions: StrictRole):
+    #     """Accepts only actual roles within your server (by ID, or name)"""
+    #     if not available_positions:
+    #         raise commands.BadArgument
 
-        grab_guild_data = self.config.guild(ctx.guild).positions_available
-        meta = await grab_guild_data()
-        for r in available_positions:
-            if r.id not in meta:
-                meta.append(r.id)
-                await grab_guild_data.set(meta)
-            else:
-                continue
+    #     grab_guild_data = self.config.guild(ctx.guild).positions_available
+    #     meta = await grab_guild_data()
+    #     for r in available_positions:
+    #         if r.id not in meta:
+    #             meta.append(r.id)
+    #             await grab_guild_data.set(meta)
+    #         else:
+    #             continue
 
-        r_content = ""
-        for r_id in meta:
-            role_name = f"<@&{r_id}>"
-            r_content += f"{role_name}\n"
-        await ctx.send(f"Your available positions are set to:\n{r_content}")
+    #     r_content = ""
+    #     for r_id in meta:
+    #         role_name = f"<@&{r_id}>"
+    #         r_content += f"{role_name}\n"
+    #     await ctx.send(f"Your available positions are set to:\n{r_content}")
 
     @app_questions.command(name="set")
     async def set_questions(self, ctx: commands.Context):
