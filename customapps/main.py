@@ -353,7 +353,7 @@ class CustomApps(Cog):
         e = []
         embed = discord.Embed(color=await ctx.embed_colour(), timestamp=datetime.utcnow())
         embed.set_author(
-            name=f"Applicant: {ctx.author.name} | ID: {ctx.author.id}", icon_url=ctx.author.id
+            name=f"Applicant: {ctx.author.name} | ID: {ctx.author.id}", icon_url=ctx.author.avatar_url
         )
         embed.set_footer(
             text=f"Applicant: {ctx.author.name}#{ctx.author.discriminator} UserID: {ctx.author.id})"
