@@ -31,6 +31,7 @@ default = {
     "answer11": [],
     "answer12": [],
     "finalcomments": [],
+    "raw_app": {}
 }
 
 guild_defaults = {
@@ -77,6 +78,10 @@ class CustomApps(Cog):
         self, *, requester: RequestType, guild_id: int, user_id: int
     ):
         await self.config.member_from_ids(guild_id=guild_id, member_id=user_id).clear()
+    
+    async def save_application(self, embed: discord.Embed, applicant: discord.Member):
+        e = embed
+        await self.config.member(applicant).raw_app.set(e.to_dict())
 
     @commands.command()
     @commands.guild_only()
@@ -408,7 +413,7 @@ class CustomApps(Cog):
             )
         self.antispam[ctx.guild][ctx.author].stamp()
         # lets save the embed instead of calling on it again
-        # user_application = await save_embed(embed=embed)
+        user_application = await self.save_application(embed=embed, applicant=ctx.author)
 
         await self.config.member(ctx.author).app_check.set(True)
 
