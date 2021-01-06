@@ -83,7 +83,7 @@ class CustomApps(Cog):
     @commands.command()
     @commands.guild_only()
     @checks.bot_has_permissions(manage_roles=True, manage_channels=True, manage_webhooks=True)
-    @commands.max_concurrency(1,per=commands.BucketType.guild, wait=True)
+    @commands.max_concurrency(1, per=commands.BucketType.guild, wait=True)
     async def apply(self, ctx: commands.Context):
         """Apply to be a staff member."""
         if commands.MaxConcurrencyReached:
@@ -119,8 +119,10 @@ class CustomApps(Cog):
             fill_this = "Reply with the position you are applying for to continue."
         else:
             list_positions = "\n".join(available_positions)
-            fill_this = "Reply with the desired position from the below list to continue\n`{}`".format(
-                list_positions
+            fill_this = (
+                "Reply with the desired position from the below list to continue\n`{}`".format(
+                    list_positions
+                )
             )
         grab_owner_for_disclaimer = self.bot.owner_ids
         for i in grab_owner_for_disclaimer:
