@@ -80,6 +80,7 @@ class CustomApps(Cog):
     @commands.command()
     @commands.guild_only()
     @checks.bot_has_permissions(manage_roles=True, manage_channels=True, manage_webhooks=True)
+    @commands.max_concurrency(1,per=commands.BucketType.guild, wait=True)
     async def apply(self, ctx: commands.Context):
         """Apply to be a staff member."""
         role_add = get(ctx.guild.roles, name="Staff Applicant")
@@ -112,7 +113,7 @@ class CustomApps(Cog):
             fill_this = "Reply with the position you are applying for to continue."
         else:
             list_positions = "\n".join(available_positions)
-            fill_this = "Reply with the desired position from this list `{}` to continue".format(
+            fill_this = "Reply with the desired position from the below list to continue\n`{}`".format(
                 list_positions
             )
         grab_owner_for_disclaimer = self.bot.owner_ids
@@ -120,7 +121,7 @@ class CustomApps(Cog):
             bot_owner = i
         try:
             await ctx.author.send(
-                f"Let's do this! You have maximum of __5 minutes__ for each question.\n{fill_this}\n\n*To cancel at anytime respond with `cancel`*\n*Your responses are stored for proper function of this feature, however it can be removed at request by contacting {await self.bot.get_or_fetch_user(user_id=bot_owner)}"
+                f"Let's do this! You have maximum of __5 minutes__ for each question.\n{fill_this}\n\n*To cancel at anytime respond with `cancel`*\n*Your responses are stored for proper function of this feature, however it can be removed at request by contacting {await self.bot.get_or_fetch_user(user_id=bot_owner)}*"
             )
         except discord.Forbidden:
             return await ctx.send(
