@@ -9,7 +9,6 @@ from redbot.core.commands import Greedy
 from redbot.core.utils.antispam import AntiSpam
 from redbot.core.utils.predicates import MessagePredicate
 
-from .converters import FuzzyRole, StrictRole
 
 Cog: Any = getattr(commands, "Cog", object)
 
@@ -182,10 +181,7 @@ class CustomApps(Cog):
             except discord.HTTPException:
                 return await ctx.send(f"Thanks for nothing, {ctx.author.mention}")
             return
-        # try:
-        #     a = int(age.content)
-        # except commands.CommandInvokeError:
-        #     return await ctx.author.send("Start over, and this time make sure the response for this question is what's asked for, LOL")
+    
         await ctx.author.send(app_data["days"])
         try:
             days = await self.bot.wait_for("message", timeout=300, check=check)
@@ -317,7 +313,11 @@ class CustomApps(Cog):
         b = datetime.today()
         c = str(b)
         d = c[:4]
-        if a is int:
+        try:
+            int(a)
+        except Exception:
+            pass
+        if type(a) is int:
             yearmath = int(d) - a
             total_age = f"YOB: {a}\n{yearmath} years old"
         else:
@@ -328,9 +328,7 @@ class CustomApps(Cog):
             return await ctx.author.send(
                 f"Something fucked up. Getting Error:\n```diff\n- {e}\n```"
             )  # TODO: make less hacky
-        # else:
-        #     return
-        e = []
+
         embed = discord.Embed(color=await ctx.embed_colour(), timestamp=datetime.utcnow())
         embed.set_author(
             name=f"Applicant: {ctx.author.name} | ID: {ctx.author.id}", icon_url=ctx.author.id
@@ -407,6 +405,8 @@ class CustomApps(Cog):
                 f"{ctx.author.mention} I sent your app to the admins. Thanks for closing dms early tho rude ass"
             )
         self.antispam[ctx.guild][ctx.author].stamp()
+        # lets save the embed instead of calling on it again
+        # user_application = await save_embed(embed=embed)
 
         await self.config.member(ctx.author).app_check.set(True)
 
@@ -474,38 +474,7 @@ class CustomApps(Cog):
         e.add_field(
             name="Question 13", value=f"{question_13}" if question_13 else "Not Set", inline=False
         )
-        show_roles = ""
-        for i in requested_positions:
-            r_name = f"<@&{i}>"
-            show_roles += f"{r_name}\n"
-
-        # e.add_field(
-        #     name="Positions requested",
-        #     value=f"{show_roles}" if requested_positions else "Not Set",
-        #     inline=False,
-        # )
         await ctx.send(embed=e)
-
-    # @app_questions.command(name="positions")
-    # async def set_positions(self, ctx: commands.Context, *available_positions: StrictRole):
-    #     """Accepts only actual roles within your server (by ID, or name)"""
-    #     if not available_positions:
-    #         raise commands.BadArgument
-
-    #     grab_guild_data = self.config.guild(ctx.guild).positions_available
-    #     meta = await grab_guild_data()
-    #     for r in available_positions:
-    #         if r.id not in meta:
-    #             meta.append(r.id)
-    #             await grab_guild_data.set(meta)
-    #         else:
-    #             continue
-
-    #     r_content = ""
-    #     for r_id in meta:
-    #         role_name = f"<@&{r_id}>"
-    #         r_content += f"{role_name}\n"
-    #     await ctx.send(f"Your available positions are set to:\n{r_content}")
 
     @app_questions.command(name="set")
     async def set_questions(self, ctx: commands.Context):
@@ -730,14 +699,14 @@ class CustomApps(Cog):
     @commands.command()
     @commands.guild_only()
     @checks.bot_has_permissions(embed_links=True)
-    async def appcheck(self, ctx: commands.Context, user_id: discord.Member):
+    async def appcheck(self, ctx: commands.Context, member: discord.Member):
         """
         Pull an application that was completed by a user
         """
-        if not user_id:
+        if not member:
             return await ctx.send_help()
 
-        load_data = await self.config.member(user_id).all()
+        load_data = await self.config.member(member).all()
         app_data = await self.config.guild(ctx.guild).app_questions.all()
         check_8 = app_data["question8"]
         check_9 = app_data["question9"]
@@ -748,7 +717,7 @@ class CustomApps(Cog):
         if not app_check_user:
             return await ctx.send("That user hasn't filled out an application here")
 
-        applicant_user = self.bot.get_user(user_id.id)
+        applicant_user = ctx.guild.get_member(member.id)
         embed = discord.Embed(color=await ctx.embed_colour(), timestamp=datetime.utcnow())
         embed.set_author(name="Member Application", icon_url=applicant_user.avatar_url)
         embed.set_footer(
