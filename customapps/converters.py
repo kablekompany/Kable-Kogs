@@ -14,7 +14,7 @@ from redbot.core.commands import (
 from redbot.core.utils.chat_formatting import inline
 from unidecode import unidecode
 
-from .utils import is_allowed_by_hierarchy, is_allowed_by_role_hierarchy
+# from .utils import is_allowed_by_hierarchy, is_allowed_by_role_hierarchy
 
 
 # original converter from https://github.com/TrustyJAID/Trusty-cogs/blob/master/serverstats/converters.py#L19
