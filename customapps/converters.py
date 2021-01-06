@@ -1,18 +1,18 @@
 # from https://github.com/phenom4n4n/phen-cogs/blob/master/roleutils/converters.py
-from typing import Tuple, Union, List
+
 import discord
-from unidecode import unidecode
-from redbot.core import commands
 from rapidfuzz import process
+from redbot.core import commands
 from redbot.core.commands import (
     BadArgument,
     Converter,
-    MemberConverter,
-    RoleConverter,
     EmojiConverter,
     IDConverter,
+    MemberConverter,
+    RoleConverter,
 )
 from redbot.core.utils.chat_formatting import inline
+from unidecode import unidecode
 
 from .utils import is_allowed_by_hierarchy, is_allowed_by_role_hierarchy
 

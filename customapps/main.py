@@ -5,10 +5,12 @@ from typing import Any, Literal
 import discord
 from discord.utils import get
 from redbot.core import Config, checks, commands
+from redbot.core.commands import Greedy
 from redbot.core.utils.antispam import AntiSpam
 from redbot.core.utils.predicates import MessagePredicate
-from redbot.core.commands import Greedy
+
 from .converters import FuzzyRole, StrictRole
+
 Cog: Any = getattr(commands, "Cog", object)
 
 
@@ -478,7 +480,9 @@ class CustomApps(Cog):
             show_roles += f"{r_name}\n"
 
         e.add_field(
-            name="Positions requested", value=f"{show_roles}" if requested_positions else "Not Set", inline= False
+            name="Positions requested",
+            value=f"{show_roles}" if requested_positions else "Not Set",
+            inline=False,
         )
         await ctx.send(embed=e)
 
