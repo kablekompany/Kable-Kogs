@@ -69,7 +69,9 @@ class CustomApps(Cog):
         self.config.register_guild(**guild_defaults)
         self.antispam = {}
 
-    async def red_delete_data_for_user(self, *, requester: RequestType, guild_id: int, user_id: int):
+    async def red_delete_data_for_user(
+        self, *, requester: RequestType, guild_id: int, user_id: int
+    ):
         await self.config.member_from_ids(guild_id=guild_id, member_id=user_id).clear()
 
     @commands.command()
@@ -87,10 +89,15 @@ class CustomApps(Cog):
         if ctx.author not in self.antispam[ctx.guild]:
             self.antispam[ctx.guild][ctx.author] = AntiSpam([(timedelta(days=1), 1)])
         if self.antispam[ctx.guild][ctx.author].spammy:
-            return await ctx.send("Uh oh, you're doing this way too frequently. Give it a day or so.", delete_after=10)
+            return await ctx.send(
+                "Uh oh, you're doing this way too frequently. Give it a day or so.",
+                delete_after=10,
+            )
         grab_user_meta = await user_data.app_check()
         if grab_user_meta is True:
-            return await ctx.send("You've already applied for a position in this server. Don't call us, we will call you...")
+            return await ctx.send(
+                "You've already applied for a position in this server. Don't call us, we will call you..."
+            )
         if role_add is None:
             return await ctx.send("Uh oh. Looks like your Admins haven't added the required role.")
         if channel is None:
@@ -102,7 +109,9 @@ class CustomApps(Cog):
             fill_this = "Reply with the position you are applying for to continue."
         else:
             list_positions = "\n".join(available_positions)
-            fill_this = "Reply with the desired position from this list `{}` to continue".format(list_positions)
+            fill_this = "Reply with the desired position from this list `{}` to continue".format(
+                list_positions
+            )
         grab_owner_for_disclaimer = self.bot.owner_ids
         for i in grab_owner_for_disclaimer:
             bot_owner = i
@@ -111,9 +120,14 @@ class CustomApps(Cog):
                 f"Let's do this! You have maximum of __5 minutes__ for each question.\n{fill_this}\n\n*To cancel at anytime respond with `cancel`*\n*Your responses are stored for proper function of this feature, however it can be removed at request by contacting {await self.bot.get_or_fetch_user(user_id=bot_owner)}"
             )
         except discord.Forbidden:
-            return await ctx.send(f"{ctx.author.mention} I can't DM you. Do you have them closed?", delete_after=10)
+            return await ctx.send(
+                f"{ctx.author.mention} I can't DM you. Do you have them closed?", delete_after=10
+            )
         except Exception as e:
-            return await ctx.send(f"I'm unable to send you a dm. Discord is giving the following error:\n```diff\n- {e}\n```", delete_after=10)
+            return await ctx.send(
+                f"I'm unable to send you a dm. Discord is giving the following error:\n```diff\n- {e}\n```",
+                delete_after=10,
+            )
         await ctx.send(f"Okay, {ctx.author.mention}, I've sent you a DM.", delete_after=7)
 
         def check(m):
@@ -301,7 +315,7 @@ class CustomApps(Cog):
         c = str(b)
         d = c[:4]
         if a is int:
-            yearmath = int(d)-a
+            yearmath = int(d) - a
             total_age = f"YOB: {a}\n{yearmath} years old"
         else:
             total_age = f"Recorded response of `{a}`. Could not calculate age."
@@ -315,12 +329,18 @@ class CustomApps(Cog):
         #     return
         e = []
         embed = discord.Embed(color=await ctx.embed_colour(), timestamp=datetime.utcnow())
-        embed.set_author(name=f"Applicant: {ctx.author.name} | ID: {ctx.author.id}", icon_url=ctx.author.id)
+        embed.set_author(
+            name=f"Applicant: {ctx.author.name} | ID: {ctx.author.id}", icon_url=ctx.author.id
+        )
         embed.set_footer(
             text=f"Applicant: {ctx.author.name}#{ctx.author.discriminator} UserID: {ctx.author.id})"
         )
         embed.title = f"Application for {position.content}"
-        embed.add_field(name="Applicant Name:", value=f"Mention: {ctx.author.mention}\nPreferred: " + name.content, inline=True)
+        embed.add_field(
+            name="Applicant Name:",
+            value=f"Mention: {ctx.author.mention}\nPreferred: " + name.content,
+            inline=True,
+        )
         embed.add_field(
             name="Age",
             value=total_age,
@@ -352,7 +372,7 @@ class CustomApps(Cog):
                 value=answer12.content,
                 inline=False,
             )
-        embed.add_field(name="Final Comments", value=finalcomments.content, inline=False)        
+        embed.add_field(name="Final Comments", value=finalcomments.content, inline=False)
         try:
             webhook = None
             for hook in await channel.webhooks():
@@ -469,7 +489,11 @@ class CustomApps(Cog):
             await ctx.send("Positions are now set!")
         else:
             meta_list = "\n".join(meta)
-            await ctx.send("You previously had positions for :{}\nAre you sure you want to change these?".format(meta_list))
+            await ctx.send(
+                "You previously had positions for :{}\nAre you sure you want to change these?".format(
+                    meta_list
+                )
+            )
             try:
                 confirm = await ctx.bot.wait_for("message", check=check, timeout=20)
                 if confirm.content.lower() != "yes":
@@ -479,7 +503,7 @@ class CustomApps(Cog):
                     await ctx.send("Changed your position requests to the new options")
             except asyncio.TimeoutError:
                 return await ctx.send("Today, junior. Will leave it as is I guess.")
-            
+
     @app_questions.command(name="set")
     async def set_questions(self, ctx: commands.Context):
         """Set up custom questions for your server"""
