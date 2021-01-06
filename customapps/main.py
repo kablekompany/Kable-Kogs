@@ -333,7 +333,7 @@ class CustomApps(Cog):
             await user_data.finalcomments.set(finalcomments.content)
         except asyncio.TimeoutError:
             return await ctx.author.send("You took too long. Try again, please.")
-        a = age.content
+        a = int(age.content)
         b = datetime.today()
         c = str(b)
         d = c[:4]
@@ -380,31 +380,31 @@ class CustomApps(Cog):
 
         if check_8 is not None:
             embed.add_field(
-                name="{}...".format(app_data["question8"][:17]).replace("$", "\\$"),
+                name="{}...".format(app_data["question8"][:27]).replace("$", "\\$"),
                 value=answer8.content,
                 inline=False,
             )
         if check_9 is not None:
             embed.add_field(
-                name="{}...".format(app_data["question9"][:17]).replace("$", "\\$"),
+                name="{}...".format(app_data["question9"][:27]).replace("$", "\\$"),
                 value=answer9.content,
                 inline=False,
             )
         if check_10 is not None:
             embed.add_field(
-                name="{}...".format(app_data["question10"][:17]).replace("$", "\\$"),
+                name="{}...".format(app_data["question10"][:27]).replace("$", "\\$"),
                 value=answer10.content,
                 inline=False,
             )
         if check_11 is not None:
             embed.add_field(
-                name="{}...".format(app_data["question11"][:17]).replace("$", "\\$"),
+                name="{}...".format(app_data["question11"][:27]).replace("$", "\\$"),
                 value=answer11.content,
                 inline=False,
             )
         if check_12 is not None:
             embed.add_field(
-                name="{}...".format(app_data["question12"][:17]).replace("$", "\\$"),
+                name="{}...".format(app_data["question12"][:27]).replace("$", "\\$"),
                 value=answer12.content,
                 inline=False,
             )
