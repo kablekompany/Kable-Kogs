@@ -7,6 +7,7 @@ from discord.utils import get
 from redbot.core import Config, checks, commands
 from redbot.core.utils.antispam import AntiSpam
 from redbot.core.utils.predicates import MessagePredicate
+from redbot.core.commands import Greedy
 
 Cog: Any = getattr(commands, "Cog", object)
 
@@ -426,6 +427,7 @@ class CustomApps(Cog):
         question_11 = app_questions["question11"]
         question_12 = app_questions["question12"]
         question_13 = app_questions["finalcomments"]
+        requested_positions = await self.config.guild(ctx.guild).positions_available()
 
         await ctx.send(
             "There are 13 questions in this application feature, with a few preloaded already for you.\nHere is the current configuration:"
@@ -470,39 +472,36 @@ class CustomApps(Cog):
         e.add_field(
             name="Question 13", value=f"{question_13}" if question_13 else "Not Set", inline=False
         )
+        show_roles = ""
+        for i in requested_positions:
+            r_name = f"<@&{i}>"
+            show_roles += f"{r_name}\n"
+
+        e.add_field(
+            name="Positions requested", value=f"{show_roles}" if requested_positions else "Not Set", inline= False
+        )
         await ctx.send(embed=e)
 
     @app_questions.command(name="positions")
-    async def set_positions(self, ctx: commands.Context, available_positions: str):
-        """Seperate with double quotes if the position is more than one word"""
+    async def set_positions(self, ctx: commands.Context, available_positions: Greedy[discord.Role]):
+        """Accepts only actual roles within your server (by ID, or name)"""
         if not available_positions:
             await ctx.send_help()
+
         grab_guild_data = self.config.guild(ctx.guild)
-        form_dictionary = available_positions.split()
-        meta = grab_guild_data.positions_available()
+        meta = await grab_guild_data.positions_available()
+        for r in available_positions:
+            if r.id not in meta:
+                meta.append(r.id)
+                await grab_guild_data.positions_available.set(meta)
+            else:
+                continue
 
-        def check(m):
-            return m.author == ctx.author and m.channel == ctx.channel
-
-        if grab_guild_data is None:
-            await grab_guild_data.positions_available.set(form_dictionary)
-            await ctx.send("Positions are now set!")
-        else:
-            meta_list = "\n".join(meta)
-            await ctx.send(
-                "You previously had positions for :{}\nAre you sure you want to change these?".format(
-                    meta_list
-                )
-            )
-            try:
-                confirm = await ctx.bot.wait_for("message", check=check, timeout=20)
-                if confirm.content.lower() != "yes":
-                    return await ctx.send("Alright, won't change them for now")
-                else:
-                    await grab_guild_data.positions_available.set(form_dictionary)
-                    await ctx.send("Changed your position requests to the new options")
-            except asyncio.TimeoutError:
-                return await ctx.send("Today, junior. Will leave it as is I guess.")
+        r_content = ""
+        for r_id in meta:
+            role_name = f"<@&{r_id}>"
+            r_content += f"{role_name}\n"
+        await ctx.send(f"Your available positions are set to:\n{r_content}")
 
     @app_questions.command(name="set")
     async def set_questions(self, ctx: commands.Context):
