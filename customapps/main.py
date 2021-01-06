@@ -8,7 +8,7 @@ from redbot.core import Config, checks, commands
 from redbot.core.utils.antispam import AntiSpam
 from redbot.core.utils.predicates import MessagePredicate
 from redbot.core.commands import Greedy
-
+from .converters import FuzzyRole, StrictRole
 Cog: Any = getattr(commands, "Cog", object)
 
 
@@ -483,10 +483,10 @@ class CustomApps(Cog):
         await ctx.send(embed=e)
 
     @app_questions.command(name="positions")
-    async def set_positions(self, ctx: commands.Context, available_positions: Greedy[discord.Role]):
+    async def set_positions(self, ctx: commands.Context, *available_positions: StrictRole):
         """Accepts only actual roles within your server (by ID, or name)"""
         if not available_positions:
-            await ctx.send_help()
+            raise commands.BadArgument
 
         grab_guild_data = self.config.guild(ctx.guild).positions_available
         meta = await grab_guild_data()
