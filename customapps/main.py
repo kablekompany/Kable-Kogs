@@ -203,7 +203,7 @@ class CustomApps(Cog):
                 total_age = f"YOB: {a}\n{yearmath} years old"
             except Exception:
                 total_age = f"Recorded response of `{a}`. Could not calculate age."
-            
+
             await user_data.age.set(total_age)
 
         except asyncio.TimeoutError:
