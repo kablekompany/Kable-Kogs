@@ -372,7 +372,8 @@ class CustomApps(Cog):
             await webhook.send(
                 embed=embed, username=ctx.guild.me.display_name, avatar_url=ctx.guild.me.avatar_url
             )
-
+        except Exception as e:
+            return await ctx.send(f"{e}")
         except discord.HTTPException:
             return await ctx.author.send(
                 "Your final application was too long to resolve as an embed. Give this another shot, keeping answers a bit shorter."
