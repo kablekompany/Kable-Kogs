@@ -191,6 +191,19 @@ class CustomApps(Cog):
             age = await self.bot.wait_for("message", timeout=300, check=check)
             if age.content.lower() == "cancel":
                 return await ctx.author.send("Application has been canceled.")
+            a = age.content
+            b = datetime.today()
+            c = str(b)
+            d = c[:4]
+            try:
+                int(a)
+                yearmath = int(d) - a
+                total_age = f"YOB: {a}\n{yearmath} years old"
+                await user_data.age.set(total_age)
+            except Exception:
+                total_age = f"Recorded response of `{a}`. Could not calculate age."
+                await user_data.age.set(total_age)
+
         except asyncio.TimeoutError:
             try:
                 await ctx.author.send("You took too long. Try again, please.")
@@ -325,18 +338,6 @@ class CustomApps(Cog):
             await user_data.finalcomments.set(finalcomments.content)
         except asyncio.TimeoutError:
             return await ctx.author.send("You took too long. Try again, please.")
-        a = age.content
-        b = datetime.today()
-        c = str(b)
-        d = c[:4]
-        try:
-            int(a)
-            yearmath = int(d) - a
-            total_age = f"YOB: {a}\n{yearmath} years old"
-            await user_data.age.set(total_age)
-        except Exception:
-            total_age = f"Recorded response of `{a}`. Could not calculate age."
-            await user_data.age.set(total_age)
 
         embed = discord.Embed(color=await ctx.embed_colour(), timestamp=datetime.utcnow())
         embed.set_author(
