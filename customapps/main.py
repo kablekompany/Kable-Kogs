@@ -2,6 +2,7 @@ import asyncio
 from datetime import datetime, timedelta
 from typing import Any, Literal
 
+import logging
 import discord
 from discord.utils import get
 from redbot.core import Config, checks, commands
@@ -9,6 +10,8 @@ from redbot.core.utils.antispam import AntiSpam
 from redbot.core.utils.predicates import MessagePredicate
 
 Cog: Any = getattr(commands, "Cog", object)
+
+log = logging.getLogger("red.kablekogs.customapps")
 
 
 RequestType = Literal["discord_deleted_user", "owner", "user", "user_strict"]
@@ -60,9 +63,10 @@ class CustomApps(Cog):
     """Customize Staff apps for your server"""
 
     async def red_delete_data_for_user(self, *, requester: RequestType, user_id: int):
+        # pylint: disable=E1120
         await self.config.member_from_ids(
-            user_id
-        ).clear()  # pylint: disable=no-value-for-parameter
+            user_id 
+        ).clear() 
 
     def __init__(self, bot):
         self.bot = bot
@@ -373,15 +377,15 @@ class CustomApps(Cog):
                 embed=embed, username=ctx.guild.me.display_name, avatar_url=ctx.guild.me.avatar_url
             )
         except Exception as e:
-            return await ctx.send(f"{e}")
-        except discord.HTTPException:
-            return await ctx.author.send(
-                "Your final application was too long to resolve as an embed. Give this another shot, keeping answers a bit shorter."
-            )
-        except commands.CommandInvokeError:
-            return await ctx.author.send(
-                "You need to start over but this time when it asks for year of birth, respond only with a 4 digit year i.e `1999`"
-            )
+            log.info(f"{e} occurred in {ctx.author.name} | {ctx.author.id} application")
+        # except discord.HTTPException:
+        #     return await ctx.author.send(
+        #         "Your final application was too long to resolve as an embed. Give this another shot, keeping answers a bit shorter."
+        #     )
+        # except commands.CommandInvokeError:
+        #     return await ctx.author.send(
+        #         "You need to start over but this time when it asks for year of birth, respond only with a 4 digit year i.e `1999`"
+        #     )
         await ctx.author.add_roles(role_add)
 
         try:
