@@ -5,7 +5,6 @@ from typing import Any, Literal
 import discord
 from discord.utils import get
 from redbot.core import Config, checks, commands
-from redbot.core.commands import Greedy
 from redbot.core.utils.antispam import AntiSpam
 from redbot.core.utils.predicates import MessagePredicate
 
@@ -31,7 +30,7 @@ default = {
     "answer11": [],
     "answer12": [],
     "finalcomments": [],
-    "raw_app": {}
+    "raw_app": {},
 }
 
 guild_defaults = {
@@ -53,15 +52,17 @@ guild_defaults = {
     "applicant_id": None,
     "accepter_id": None,
     "channel_id": None,
-    "positions_available": [
-        "Moderator",
-        "Giveaway Manager",
-    ],  # for the sake of saving time for now. add agnostic before merge
-}
+    "positions_available": ["Moderator", "Giveaway Manager"],
+}  # for the sake of saving time for now. add agnostic before merge
 
 # Originally from https://github.com/elijabesu/SauriCogs
 class CustomApps(Cog):
     """Customize Staff apps for your server"""
+
+    async def red_delete_data_for_user(self, *, requester: RequestType, user_id: int):
+        await self.config.member_from_ids(
+            user_id
+        ).clear()  # pylint: disable=no-value-for-parameter
 
     def __init__(self, bot):
         self.bot = bot
@@ -74,11 +75,6 @@ class CustomApps(Cog):
         self.config.register_guild(**guild_defaults)
         self.antispam = {}
 
-    async def red_delete_data_for_user(
-        self, *, requester: RequestType, guild_id: int, user_id: int
-    ):
-        await self.config.member_from_ids(guild_id=guild_id, member_id=user_id).clear()
-    
     async def save_application(self, embed: discord.Embed, applicant: discord.Member):
         e = embed
         await self.config.member(applicant).raw_app.set(e.to_dict())
@@ -96,16 +92,11 @@ class CustomApps(Cog):
         if ctx.guild not in self.antispam:
             self.antispam[ctx.guild] = {}
         if ctx.author not in self.antispam[ctx.guild]:
-            self.antispam[ctx.guild][ctx.author] = AntiSpam([(timedelta(days=1), 1)])
+            self.antispam[ctx.guild][ctx.author] = AntiSpam([(timedelta(days=2), 1)])
         if self.antispam[ctx.guild][ctx.author].spammy:
             return await ctx.send(
                 "Uh oh, you're doing this way too frequently. Give it a day or so.",
                 delete_after=10,
-            )
-        grab_user_meta = await user_data.app_check()
-        if grab_user_meta is True:
-            return await ctx.send(
-                "You've already applied for a position in this server. Don't call us, we will call you..."
             )
         if role_add is None:
             return await ctx.send("Uh oh. Looks like your Admins haven't added the required role.")
@@ -131,11 +122,6 @@ class CustomApps(Cog):
         except discord.Forbidden:
             return await ctx.send(
                 f"{ctx.author.mention} I can't DM you. Do you have them closed?", delete_after=10
-            )
-        except Exception as e:
-            return await ctx.send(
-                f"I'm unable to send you a dm. Discord is giving the following error:\n```diff\n- {e}\n```",
-                delete_after=10,
             )
         await ctx.send(f"Okay, {ctx.author.mention}, I've sent you a DM.", delete_after=7)
 
@@ -322,19 +308,12 @@ class CustomApps(Cog):
         d = c[:4]
         try:
             int(a)
-        except Exception:
-            pass
-        if type(a) is int:
             yearmath = int(d) - a
             total_age = f"YOB: {a}\n{yearmath} years old"
-        else:
-            total_age = f"Recorded response of `{a}`. Could not calculate age."
-        try:
             await user_data.age.set(total_age)
-        except Exception as e:
-            return await ctx.author.send(
-                f"Something fucked up. Getting Error:\n```diff\n- {e}\n```"
-            )  # TODO: make less hacky
+        except Exception:
+            total_age = f"Recorded response of `{a}`. Could not calculate age."
+            await user_data.age.set(total_age)
 
         embed = discord.Embed(color=await ctx.embed_colour(), timestamp=datetime.utcnow())
         embed.set_author(
@@ -342,7 +321,7 @@ class CustomApps(Cog):
             icon_url=ctx.author.avatar_url,
         )
         embed.set_footer(
-            text=f"Applicant: {ctx.author.name}#{ctx.author.discriminator} UserID: {ctx.author.id})"
+            text=f"{ctx.author.name}#{ctx.author.discriminator} UserID: {ctx.author.id}"
         )
         embed.title = f"Application for {position.content}"
         embed.add_field(
@@ -414,7 +393,7 @@ class CustomApps(Cog):
             )
         self.antispam[ctx.guild][ctx.author].stamp()
         # lets save the embed instead of calling on it again
-        user_application = await self.save_application(embed=embed, applicant=ctx.author)
+        await self.save_application(embed=embed, applicant=ctx.author)
 
         await self.config.member(ctx.author).app_check.set(True)
 
@@ -437,7 +416,6 @@ class CustomApps(Cog):
         question_11 = app_questions["question11"]
         question_12 = app_questions["question12"]
         question_13 = app_questions["finalcomments"]
-        requested_positions = await self.config.guild(ctx.guild).positions_available()
 
         await ctx.send(
             "There are 13 questions in this application feature, with a few preloaded already for you.\nHere is the current configuration:"
@@ -707,14 +685,14 @@ class CustomApps(Cog):
     @commands.command()
     @commands.guild_only()
     @checks.bot_has_permissions(embed_links=True)
-    async def appcheck(self, ctx: commands.Context, member: discord.Member):
+    async def appcheck(self, ctx: commands.Context, user_id: discord.Member):
         """
         Pull an application that was completed by a user
         """
-        if not member:
+        if not user_id:
             return await ctx.send_help()
 
-        load_data = await self.config.member(member).all()
+        load_data = await self.config.member(user_id).all()
         app_data = await self.config.guild(ctx.guild).app_questions.all()
         check_8 = app_data["question8"]
         check_9 = app_data["question9"]
@@ -725,7 +703,7 @@ class CustomApps(Cog):
         if not app_check_user:
             return await ctx.send("That user hasn't filled out an application here")
 
-        applicant_user = ctx.guild.get_member(member.id)
+        applicant_user = self.bot.get_user(user_id.id)
         embed = discord.Embed(color=await ctx.embed_colour(), timestamp=datetime.utcnow())
         embed.set_author(name="Member Application", icon_url=applicant_user.avatar_url)
         embed.set_footer(
@@ -963,5 +941,4 @@ class CustomApps(Cog):
         except asyncio.TimeoutError:
             return await ctx.send("You took too long to reply")
         await self.config.guild(ctx.guild).app_questions.clear_raw()
-        await self.config.guild(ctx.guild).positions_available.clear_raw()
         await ctx.send("Guild Reset, goodluck")
