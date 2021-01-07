@@ -415,7 +415,9 @@ class CustomApps(Cog):
         except Exception as e:
             log.info(f"{e} occurred in {ctx.author.name} | {ctx.author.id} application")
             try:
-                return await ctx.author.send("Seems your responses were to verbose. Let's try again, but without the life stories.")
+                return await ctx.author.send(
+                    "Seems your responses were to verbose. Let's try again, but without the life stories."
+                )
             except Exception:
                 return
         # except discord.HTTPException:
