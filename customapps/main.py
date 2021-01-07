@@ -194,17 +194,17 @@ class CustomApps(Cog):
             if age.content.lower() == "cancel":
                 return await ctx.author.send("Application has been canceled.")
             a = age.content
-            b = datetime.today()
-            c = str(b)
-            d = c[:4]
+            b = str(datetime.today())
+            c = b[:4]
+            d = int(c)
             try:
-                int(a)
-                yearmath = int(d) - a
+                e = int(a)
+                yearmath = d - e
                 total_age = f"YOB: {a}\n{yearmath} years old"
-                await user_data.age.set(total_age)
             except Exception:
                 total_age = f"Recorded response of `{a}`. Could not calculate age."
-                await user_data.age.set(total_age)
+            
+            await user_data.age.set(total_age)
 
         except asyncio.TimeoutError:
             try:
