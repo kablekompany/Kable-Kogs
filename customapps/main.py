@@ -120,7 +120,7 @@ class CustomApps(Cog):
             self.antispam[ctx.guild][ctx.author] = AntiSpam([(timedelta(days=2), 1)])
         if self.antispam[ctx.guild][ctx.author].spammy:
             return await ctx.send(
-                "Uh oh, you're doing this way too frequently. Give it a day or so.",
+                f"{ctx.author.mention} uh you're doing this way too frequently, and we don't need more than one application from you. Don't call us, we will maybe call you...LOL",
                 delete_after=10,
             )
         if role_add is None:
@@ -414,6 +414,10 @@ class CustomApps(Cog):
             )
         except Exception as e:
             log.info(f"{e} occurred in {ctx.author.name} | {ctx.author.id} application")
+            try:
+                return await ctx.author.send("Seems your responses were to verbose. Let's try again, but without the life stories.")
+            except Exception:
+                return
         # except discord.HTTPException:
         #     return await ctx.author.send(
         #         "Your final application was too long to resolve as an embed. Give this another shot, keeping answers a bit shorter."
