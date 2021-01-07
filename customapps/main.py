@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime, timedelta
 from typing import Any, Literal
-
+import datetime as dt
 import logging
 import discord
 from discord.utils import get
@@ -78,14 +78,33 @@ class CustomApps(Cog):
         self.config.register_member(**default)
         self.config.register_guild(**guild_defaults)
         self.antispam = {}
+        self.spam_control = commands.CooldownMapping.from_cooldown(1, 300, commands.BucketType.user)
 
     async def save_application(self, embed: discord.Embed, applicant: discord.Member):
         e = embed
         await self.config.member(applicant).raw_app.set(e.to_dict())
 
-    @commands.command()
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx, error):
+        if not isinstance(error, commands.MaxConcurrencyReached):
+            return # don't care about other errors
+
+        bucket = self.spam_control.get_bucket(ctx.message)
+        current = ctx.message.created_at.replace(tzinfo=dt.timezone.utc).timestamp()
+        retry_after = bucket.update_rate_limit(current)
+        author_id = ctx.message.author.id
+        if (
+            retry_after and author_id != self.bot.owner_ids
+        ):
+            return # don't care about users spamming the shit 
+
+        await ctx.send(f"{ctx.author.mention} this command is at it's max allowed processing queue. Try again in 5 min. Any invocations before then will be ignored.", delete_after=20)
+        # insight
+
+    @commands.command(cooldown_after_parsing=True)
     @commands.guild_only()
     @checks.bot_has_permissions(manage_roles=True, manage_channels=True, manage_webhooks=True)
+    @commands.max_concurrency(20, per=commands.BucketType.guild, wait=False)
     async def apply(self, ctx: commands.Context):
         """Apply to be a staff member."""
         role_add = get(ctx.guild.roles, name="Staff Applicant")
