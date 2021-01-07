@@ -1,8 +1,8 @@
 import asyncio
+import logging
 from datetime import datetime, timedelta
 from typing import Any, Literal
 
-import logging
 import discord
 from discord.utils import get
 from redbot.core import Config, checks, commands
@@ -64,9 +64,7 @@ class CustomApps(Cog):
 
     async def red_delete_data_for_user(self, *, requester: RequestType, user_id: int):
         # pylint: disable=E1120
-        await self.config.member_from_ids(
-            user_id 
-        ).clear() 
+        await self.config.member_from_ids(user_id).clear()
 
     def __init__(self, bot):
         self.bot = bot
