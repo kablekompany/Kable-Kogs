@@ -106,7 +106,7 @@ class CustomApps(Cog):
     @commands.command(cooldown_after_parsing=True)
     @commands.guild_only()
     @checks.bot_has_permissions(manage_roles=True, manage_channels=True, manage_webhooks=True)
-    @commands.max_concurrency(2, per=commands.BucketType.guild, wait=False)
+    @commands.max_concurrency(20, per=commands.BucketType.guild, wait=False)
     async def apply(self, ctx: commands.Context):
         """Apply to be a staff member."""
         role_add = get(ctx.guild.roles, name="Staff Applicant")
