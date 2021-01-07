@@ -343,7 +343,7 @@ class CustomApps(Cog):
         )
         embed.add_field(name="Previous experience:", value=experience.content, inline=False)
         if check_8 is not None:
-            embed.add_field(name="{}...".format(app_data["question8"][:197]).replace("$", "\\$"):200], value=answer8.content, inline=False)
+            embed.add_field(name="{}...".format(app_data["question8"][:197]).replace("$", "\\$"), value=answer8.content, inline=False)
         if check_9 is not None:
             embed.add_field(name="{}...".format(app_data["question9"][:197]).replace("$", "\\$"), value=answer9.content, inline=False)
         if check_10 is not None:
