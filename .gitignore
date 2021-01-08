@@ -138,3 +138,5 @@ httpkount/
 
 # macOS shit
 .DS_Store
+
+**/diff.py

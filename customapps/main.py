@@ -1,17 +1,18 @@
 import asyncio
+import datetime as dt
+import logging
 from datetime import datetime, timedelta
 from typing import Any, Literal
 
 import discord
 from discord.utils import get
 from redbot.core import Config, checks, commands
-from redbot.core.commands import Greedy
 from redbot.core.utils.antispam import AntiSpam
 from redbot.core.utils.predicates import MessagePredicate
 
-from .converters import FuzzyRole, StrictRole
-
 Cog: Any = getattr(commands, "Cog", object)
+
+log = logging.getLogger("red.kablekogs.customapps")
 
 
 RequestType = Literal["discord_deleted_user", "owner", "user", "user_strict"]
@@ -33,6 +34,7 @@ default = {
     "answer11": [],
     "answer12": [],
     "finalcomments": [],
+    "raw_app": {},
 }
 
 guild_defaults = {
@@ -54,16 +56,16 @@ guild_defaults = {
     "applicant_id": None,
     "accepter_id": None,
     "channel_id": None,
-    "overflow_count": int,
-    "positions_available": [
-        "Moderator",
-        "Giveaway Manager",
-    ],  # for the sake of saving time for now. add agnostic before merge
-}
+    "positions_available": ["Moderator", "Giveaway Manager"],
+}  # for the sake of saving time for now. add agnostic before merge
 
 # Originally from https://github.com/elijabesu/SauriCogs
 class CustomApps(Cog):
     """Customize Staff apps for your server"""
+
+    async def red_delete_data_for_user(self, *, requester: RequestType, user_id: int):
+        # pylint: disable=E1120
+        await self.config.member_from_ids(user_id).clear()
 
     def __init__(self, bot):
         self.bot = bot
@@ -75,29 +77,36 @@ class CustomApps(Cog):
         self.config.register_member(**default)
         self.config.register_guild(**guild_defaults)
         self.antispam = {}
+        self.spam_control = commands.CooldownMapping.from_cooldown(
+            1, 300, commands.BucketType.user
+        )
 
-    async def red_delete_data_for_user(
-        self, *, requester: RequestType, guild_id: int, user_id: int
-    ):
-        await self.config.member_from_ids(guild_id=guild_id, member_id=user_id).clear()
+    async def save_application(self, embed: discord.Embed, applicant: discord.Member):
+        e = embed
+        await self.config.member(applicant).raw_app.set(e.to_dict())
 
-    async def register_applicant(self, ctx):
-        grab_waiters = await self.config.guild(ctx.guild).all()
-        async with self.config.guild(ctx.guild).all() as wait_list:
-            grab_waiters["overflow_count"] += 1
-            wait_list.update(grab_waiters)
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx, error):
+        if not isinstance(error, commands.MaxConcurrencyReached):
+            return  # don't care about other errors
 
-    # @commands.Cog.listener()
-    # async def on_command_error(self, ctx, error):
-    #     if not isinstance(commands.MaxConcurrencyReached):
-    #         return
-    #     # wait_line = await self.config.guild(ctx.guild).all()
-    #     await ctx.send(f"{ctx.author.mention}, I'll DM you to start this once I finish up with the list of users ahead of you. Be looking for my DM.") # There are {wait_line["overflow_count"]} currently in queue.
+        bucket = self.spam_control.get_bucket(ctx.message)
+        current = ctx.message.created_at.replace(tzinfo=dt.timezone.utc).timestamp()
+        retry_after = bucket.update_rate_limit(current)
+        author_id = ctx.message.author.id
+        if retry_after and author_id != self.bot.owner_ids:
+            return  # don't care about users spamming the shit
 
-    @commands.command()
+        await ctx.send(
+            f"{ctx.author.mention} this command is at it's max allowed processing queue. Try again in 5 min. Any invocations before then will be ignored.",
+            delete_after=20,
+        )
+        # insight
+
+    @commands.command(cooldown_after_parsing=True)
     @commands.guild_only()
     @checks.bot_has_permissions(manage_roles=True, manage_channels=True, manage_webhooks=True)
-    @commands.max_concurrency(15, per=commands.BucketType.guild, wait=True)
+    @commands.max_concurrency(20, per=commands.BucketType.guild, wait=False)
     async def apply(self, ctx: commands.Context):
         """Apply to be a staff member."""
         role_add = get(ctx.guild.roles, name="Staff Applicant")
@@ -108,16 +117,11 @@ class CustomApps(Cog):
         if ctx.guild not in self.antispam:
             self.antispam[ctx.guild] = {}
         if ctx.author not in self.antispam[ctx.guild]:
-            self.antispam[ctx.guild][ctx.author] = AntiSpam([(timedelta(days=1), 1)])
+            self.antispam[ctx.guild][ctx.author] = AntiSpam([(timedelta(days=2), 1)])
         if self.antispam[ctx.guild][ctx.author].spammy:
             return await ctx.send(
-                "Uh oh, you're doing this way too frequently. Give it a day or so.",
+                f"{ctx.author.mention} uh you're doing this way too frequently, and we don't need more than one application from you. Don't call us, we will maybe call you...LOL",
                 delete_after=10,
-            )
-        grab_user_meta = await user_data.app_check()
-        if grab_user_meta is True:
-            return await ctx.send(
-                "You've already applied for a position in this server. Don't call us, we will call you..."
             )
         if role_add is None:
             return await ctx.send("Uh oh. Looks like your Admins haven't added the required role.")
@@ -130,10 +134,8 @@ class CustomApps(Cog):
             fill_this = "Reply with the position you are applying for to continue."
         else:
             list_positions = "\n".join(available_positions)
-            fill_this = (
-                "Reply with the desired position from the below list to continue\n`{}`".format(
-                    list_positions
-                )
+            fill_this = "Reply with the desired position from this list to continue\n`{}`".format(
+                list_positions
             )
         grab_owner_for_disclaimer = self.bot.owner_ids
         for i in grab_owner_for_disclaimer:
@@ -145,11 +147,6 @@ class CustomApps(Cog):
         except discord.Forbidden:
             return await ctx.send(
                 f"{ctx.author.mention} I can't DM you. Do you have them closed?", delete_after=10
-            )
-        except Exception as e:
-            return await ctx.send(
-                f"I'm unable to send you a dm. Discord is giving the following error:\n```diff\n- {e}\n```",
-                delete_after=10,
             )
         await ctx.send(f"Okay, {ctx.author.mention}, I've sent you a DM.", delete_after=7)
 
@@ -196,16 +193,26 @@ class CustomApps(Cog):
             age = await self.bot.wait_for("message", timeout=300, check=check)
             if age.content.lower() == "cancel":
                 return await ctx.author.send("Application has been canceled.")
+            a = age.content
+            b = str(datetime.today())
+            c = b[:4]
+            d = int(c)
+            try:
+                e = int(a)
+                yearmath = d - e
+                total_age = f"YOB: {a}\n{yearmath} years old"
+            except Exception:
+                total_age = f"Recorded response of `{a}`. Could not calculate age."
+
+            await user_data.age.set(total_age)
+
         except asyncio.TimeoutError:
             try:
                 await ctx.author.send("You took too long. Try again, please.")
             except discord.HTTPException:
                 return await ctx.send(f"Thanks for nothing, {ctx.author.mention}")
             return
-        # try:
-        #     a = int(age.content)
-        # except commands.CommandInvokeError:
-        #     return await ctx.author.send("Start over, and this time make sure the response for this question is what's asked for, LOL")
+
         await ctx.author.send(app_data["days"])
         try:
             days = await self.bot.wait_for("message", timeout=300, check=check)
@@ -333,31 +340,14 @@ class CustomApps(Cog):
             await user_data.finalcomments.set(finalcomments.content)
         except asyncio.TimeoutError:
             return await ctx.author.send("You took too long. Try again, please.")
-        a = int(age.content)
-        b = datetime.today()
-        c = str(b)
-        d = c[:4]
-        if a is int:
-            yearmath = int(d) - a
-            total_age = f"YOB: {a}\n{yearmath} years old"
-        else:
-            total_age = f"Recorded response of `{a}`. Could not calculate age."
-        try:
-            await user_data.age.set(total_age)
-        except Exception as e:
-            return await ctx.author.send(
-                f"Something fucked up. Getting Error:\n```diff\n- {e}\n```"
-            )  # TODO: make less hacky
-        # else:
-        #     return
-        e = []
+
         embed = discord.Embed(color=await ctx.embed_colour(), timestamp=datetime.utcnow())
         embed.set_author(
             name=f"Applicant: {ctx.author.name} | ID: {ctx.author.id}",
             icon_url=ctx.author.avatar_url,
         )
         embed.set_footer(
-            text=f"Applicant: {ctx.author.name}#{ctx.author.discriminator} UserID: {ctx.author.id})"
+            text=f"{ctx.author.name}#{ctx.author.discriminator} UserID: {ctx.author.id}"
         )
         embed.title = f"Application for {position.content}"
         embed.add_field(
@@ -375,37 +365,39 @@ class CustomApps(Cog):
         embed.add_field(name="Active days/week:", value=days.content, inline=True)
         embed.add_field(name="Active hours/day:", value=hours.content, inline=True)
         embed.add_field(
-            name=app_data["reasonforinterest"], value=reasonforinterest.content, inline=False
+            name="{}...".format(app_data["reasonforinterest"][:197]).replace("$", "\\$"),
+            value=reasonforinterest.content,
+            inline=False,
         )
         embed.add_field(name="Previous experience:", value=experience.content, inline=False)
 
         if check_8 is not None:
             embed.add_field(
-                name="{}...".format(app_data["question8"][:27]).replace("$", "\\$"),
+                name="{}...".format(app_data["question8"][:197]).replace("$", "\\$"),
                 value=answer8.content,
                 inline=False,
             )
         if check_9 is not None:
             embed.add_field(
-                name="{}...".format(app_data["question9"][:27]).replace("$", "\\$"),
+                name="{}...".format(app_data["question9"][:197]).replace("$", "\\$"),
                 value=answer9.content,
                 inline=False,
             )
         if check_10 is not None:
             embed.add_field(
-                name="{}...".format(app_data["question10"][:27]).replace("$", "\\$"),
+                name="{}...".format(app_data["question10"][:197]).replace("$", "\\$"),
                 value=answer10.content,
                 inline=False,
             )
         if check_11 is not None:
             embed.add_field(
-                name="{}...".format(app_data["question11"][:27]).replace("$", "\\$"),
+                name="{}...".format(app_data["question11"][:197]).replace("$", "\\$"),
                 value=answer11.content,
                 inline=False,
             )
         if check_12 is not None:
             embed.add_field(
-                name="{}...".format(app_data["question12"][:27]).replace("$", "\\$"),
+                name="{}...".format(app_data["question12"][:197]).replace("$", "\\$"),
                 value=answer12.content,
                 inline=False,
             )
@@ -421,13 +413,22 @@ class CustomApps(Cog):
             await webhook.send(
                 embed=embed, username=ctx.guild.me.display_name, avatar_url=ctx.guild.me.avatar_url
             )
-
         except Exception as e:
-            return await ctx.author.send(f"{e}")
-        except commands.CommandInvokeError:
-            return await ctx.author.send(
-                "You need to start over but this time when it asks for year of birth, respond only with a 4 digit year i.e `1999`"
-            )
+            log.info(f"{e} occurred in {ctx.author.name} | {ctx.author.id} application")
+            try:
+                return await ctx.author.send(
+                    "Seems your responses were to verbose. Let's try again, but without the life stories."
+                )
+            except Exception:
+                return
+        # except discord.HTTPException:
+        #     return await ctx.author.send(
+        #         "Your final application was too long to resolve as an embed. Give this another shot, keeping answers a bit shorter."
+        #     )
+        # except commands.CommandInvokeError:
+        #     return await ctx.author.send(
+        #         "You need to start over but this time when it asks for year of birth, respond only with a 4 digit year i.e `1999`"
+        #     )
         await ctx.author.add_roles(role_add)
 
         try:
@@ -439,6 +440,8 @@ class CustomApps(Cog):
                 f"{ctx.author.mention} I sent your app to the admins. Thanks for closing dms early tho rude ass"
             )
         self.antispam[ctx.guild][ctx.author].stamp()
+        # lets save the embed instead of calling on it again
+        await self.save_application(embed=embed, applicant=ctx.author)
 
         await self.config.member(ctx.author).app_check.set(True)
 
@@ -461,7 +464,6 @@ class CustomApps(Cog):
         question_11 = app_questions["question11"]
         question_12 = app_questions["question12"]
         question_13 = app_questions["finalcomments"]
-        requested_positions = await self.config.guild(ctx.guild).positions_available()
 
         await ctx.send(
             "There are 13 questions in this application feature, with a few preloaded already for you.\nHere is the current configuration:"
@@ -506,38 +508,7 @@ class CustomApps(Cog):
         e.add_field(
             name="Question 13", value=f"{question_13}" if question_13 else "Not Set", inline=False
         )
-        show_roles = ""
-        for i in requested_positions:
-            r_name = f"<@&{i}>"
-            show_roles += f"{r_name}\n"
-
-        # e.add_field(
-        #     name="Positions requested",
-        #     value=f"{show_roles}" if requested_positions else "Not Set",
-        #     inline=False,
-        # )
         await ctx.send(embed=e)
-
-    # @app_questions.command(name="positions")
-    # async def set_positions(self, ctx: commands.Context, *available_positions: StrictRole):
-    #     """Accepts only actual roles within your server (by ID, or name)"""
-    #     if not available_positions:
-    #         raise commands.BadArgument
-
-    #     grab_guild_data = self.config.guild(ctx.guild).positions_available
-    #     meta = await grab_guild_data()
-    #     for r in available_positions:
-    #         if r.id not in meta:
-    #             meta.append(r.id)
-    #             await grab_guild_data.set(meta)
-    #         else:
-    #             continue
-
-    #     r_content = ""
-    #     for r_id in meta:
-    #         role_name = f"<@&{r_id}>"
-    #         r_content += f"{role_name}\n"
-    #     await ctx.send(f"Your available positions are set to:\n{r_content}")
 
     @app_questions.command(name="set")
     async def set_questions(self, ctx: commands.Context):
@@ -1018,5 +989,4 @@ class CustomApps(Cog):
         except asyncio.TimeoutError:
             return await ctx.send("You took too long to reply")
         await self.config.guild(ctx.guild).app_questions.clear_raw()
-        await self.config.guild(ctx.guild).positions_available.clear_raw()
         await ctx.send("Guild Reset, goodluck")
