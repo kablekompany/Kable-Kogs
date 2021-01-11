@@ -58,7 +58,7 @@ guild_defaults = {
     "channel_id": None,
     "positions_available": None,
 }  # for the sake of saving time for now. add agnostic before merge
-# TODO- 
+# TODO-
 
 # Originally from https://github.com/elijabesu/SauriCogs
 class CustomApps(Cog):
@@ -112,7 +112,9 @@ class CustomApps(Cog):
         """Apply to be a staff member."""
         role_add = get(ctx.guild.roles, name="Staff Applicant")
         if role_add.position > ctx.guild.me.top_role.position:
-            return await ctx.send("The staff applicant role is above me, and I need it below me if I am to assign it on completion. Tell your admins")
+            return await ctx.send(
+                "The staff applicant role is above me, and I need it below me if I am to assign it on completion. Tell your admins"
+            )
         app_data = await self.config.guild(ctx.guild).app_questions.all()
         user_data = self.config.member(ctx.author)
 
@@ -741,7 +743,9 @@ class CustomApps(Cog):
         *Not Functioning*
         Pull an application that was completed by a user
         """
-        return await ctx.send("This command is currently being reworked, follow updates in The Kompound")
+        return await ctx.send(
+            "This command is currently being reworked, follow updates in The Kompound"
+        )
 
         if not user_id:
             return await ctx.send_help()
