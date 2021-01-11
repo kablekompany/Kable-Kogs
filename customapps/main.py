@@ -113,10 +113,6 @@ class CustomApps(Cog):
     async def apply(self, ctx: commands.Context):
         """Apply to be a staff member."""
         role_add = get(ctx.guild.roles, name="Staff Applicant")
-        if role_add.position > ctx.guild.me.top_role.position:
-            return await ctx.send(
-                "The staff applicant role is above me, and I need it below me if I am to assign it on completion. Tell your admins"
-            )
         app_data = await self.config.guild(ctx.guild).app_questions.all()
         user_data = self.config.member(ctx.author)
 
@@ -132,6 +128,11 @@ class CustomApps(Cog):
             )
         if role_add is None:
             return await ctx.send("Uh oh. Looks like your Admins haven't added the required role.")
+        if role_add.position > ctx.guild.me.top_role.position:
+            return await ctx.send(
+                "The staff applicant role is above me, and I need it below me if I am to assign it on completion. Tell your admins"
+            )
+
         if channel is None:
             return await ctx.send(
                 "Uh oh. Looks like your Admins haven't added the required channel."
