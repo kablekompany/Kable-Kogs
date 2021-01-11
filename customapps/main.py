@@ -56,8 +56,9 @@ guild_defaults = {
     "applicant_id": None,
     "accepter_id": None,
     "channel_id": None,
-    "positions_available": ["Moderator", "Giveaway Manager"],
+    "positions_available": None,
 }  # for the sake of saving time for now. add agnostic before merge
+# TODO- 
 
 # Originally from https://github.com/elijabesu/SauriCogs
 class CustomApps(Cog):
@@ -106,10 +107,12 @@ class CustomApps(Cog):
     @commands.command(cooldown_after_parsing=True)
     @commands.guild_only()
     @checks.bot_has_permissions(manage_roles=True, manage_channels=True, manage_webhooks=True)
-    @commands.max_concurrency(20, per=commands.BucketType.guild, wait=False)
+    @commands.max_concurrency(10, per=commands.BucketType.guild, wait=False)
     async def apply(self, ctx: commands.Context):
         """Apply to be a staff member."""
         role_add = get(ctx.guild.roles, name="Staff Applicant")
+        if role_add.position > ctx.guild.me.top_role.position:
+            return await ctx.send("The staff applicant role is above me, and I need it below me if I am to assign it on completion. Tell your admins")
         app_data = await self.config.guild(ctx.guild).app_questions.all()
         user_data = self.config.member(ctx.author)
 
@@ -417,7 +420,7 @@ class CustomApps(Cog):
             log.info(f"{e} occurred in {ctx.author.name} | {ctx.author.id} application")
             try:
                 return await ctx.author.send(
-                    "Seems your responses were to verbose. Let's try again, but without the life stories."
+                    "Seems your responses were too verbose. Let's try again, but without the life stories."
                 )
             except Exception:
                 return
@@ -735,8 +738,11 @@ class CustomApps(Cog):
     @checks.bot_has_permissions(embed_links=True)
     async def appcheck(self, ctx: commands.Context, user_id: discord.Member):
         """
+        *Not Functioning*
         Pull an application that was completed by a user
         """
+        return await ctx.send("This command is currently being reworked, follow updates in The Kompound")
+
         if not user_id:
             return await ctx.send_help()
 
