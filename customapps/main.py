@@ -1,4 +1,8 @@
 import asyncio
+import datetime as dt  # lgtm [py/import-and-import-from]
+
+# silencing this flag will rework at final
+import logging
 from datetime import datetime, timedelta
 from typing import Any, Literal
 
@@ -9,6 +13,8 @@ from redbot.core.utils.antispam import AntiSpam
 from redbot.core.utils.predicates import MessagePredicate
 
 Cog: Any = getattr(commands, "Cog", object)
+
+log = logging.getLogger("red.kablekogs.customapps")
 
 
 RequestType = Literal["discord_deleted_user", "owner", "user", "user_strict"]
@@ -30,6 +36,7 @@ default = {
     "answer11": [],
     "answer12": [],
     "finalcomments": [],
+    "raw_app": {},
 }
 
 guild_defaults = {
@@ -51,12 +58,17 @@ guild_defaults = {
     "applicant_id": None,
     "accepter_id": None,
     "channel_id": None,
-    "positions_available": ["this position", "that position"],
-}
+    "positions_available": None,
+}  # for the sake of saving time for now. add agnostic before merge
+# TODO-
 
 # Originally from https://github.com/elijabesu/SauriCogs
 class CustomApps(Cog):
     """Customize Staff apps for your server"""
+
+    async def red_delete_data_for_user(self, *, requester: RequestType, user_id: int):
+        # pylint: disable=E1120
+        await self.config.member_from_ids(user_id).clear()
 
     def __init__(self, bot):
         self.bot = bot
@@ -68,16 +80,43 @@ class CustomApps(Cog):
         self.config.register_member(**default)
         self.config.register_guild(**guild_defaults)
         self.antispam = {}
+        self.spam_control = commands.CooldownMapping.from_cooldown(
+            1, 300, commands.BucketType.user
+        )
 
-    async def red_delete_data_for_user(self, *, requester: RequestType, user_id: int):
-        await self.config.member_from_ids(user_id).clear()
+    async def save_application(self, embed: discord.Embed, applicant: discord.Member):
+        e = embed
+        await self.config.member(applicant).raw_app.set(e.to_dict())
 
-    @commands.command()
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx, error):
+        if not isinstance(error, commands.MaxConcurrencyReached):
+            return  # don't care about other errors
+
+        bucket = self.spam_control.get_bucket(ctx.message)
+        current = ctx.message.created_at.replace(tzinfo=dt.timezone.utc).timestamp()
+        retry_after = bucket.update_rate_limit(current)
+        author_id = ctx.message.author.id
+        if retry_after and author_id != self.bot.owner_ids:
+            return  # don't care about users spamming the shit
+
+        await ctx.send(
+            f"{ctx.author.mention} this command is at it's max allowed processing queue. Try again in 5 min. Any invocations before then will be ignored.",
+            delete_after=20,
+        )
+        # insight
+
+    @commands.command(cooldown_after_parsing=True)
     @commands.guild_only()
     @checks.bot_has_permissions(manage_roles=True, manage_channels=True, manage_webhooks=True)
+    @commands.max_concurrency(10, per=commands.BucketType.guild, wait=False)
     async def apply(self, ctx: commands.Context):
         """Apply to be a staff member."""
         role_add = get(ctx.guild.roles, name="Staff Applicant")
+        if role_add.position > ctx.guild.me.top_role.position:
+            return await ctx.send(
+                "The staff applicant role is above me, and I need it below me if I am to assign it on completion. Tell your admins"
+            )
         app_data = await self.config.guild(ctx.guild).app_questions.all()
         user_data = self.config.member(ctx.author)
 
@@ -87,22 +126,36 @@ class CustomApps(Cog):
         if ctx.author not in self.antispam[ctx.guild]:
             self.antispam[ctx.guild][ctx.author] = AntiSpam([(timedelta(days=2), 1)])
         if self.antispam[ctx.guild][ctx.author].spammy:
-            return await ctx.send("Uh oh, you're doing this way too frequently.")
+            return await ctx.send(
+                f"{ctx.author.mention} uh you're doing this way too frequently, and we don't need more than one application from you. Don't call us, we will maybe call you...LOL",
+                delete_after=10,
+            )
         if role_add is None:
             return await ctx.send("Uh oh. Looks like your Admins haven't added the required role.")
         if channel is None:
             return await ctx.send(
                 "Uh oh. Looks like your Admins haven't added the required channel."
             )
+        available_positions = await self.config.guild(ctx.guild).positions_available()
+        if available_positions is None:
+            fill_this = "Reply with the position you are applying for to continue."
+        else:
+            list_positions = "\n".join(available_positions)
+            fill_this = "Reply with the desired position from this list to continue\n`{}`".format(
+                list_positions
+            )
+        grab_owner_for_disclaimer = self.bot.owner_ids
+        for i in grab_owner_for_disclaimer:
+            bot_owner = i
         try:
-            # available_positions = await self.config.guild(ctx.guild).positions_available()
-            # TODO - ALLOW SETTING OF POSITIONS
             await ctx.author.send(
-                f"Let's start right away! You have maximum of 5 minutes for each question.\n\nReply with the position you are applying for to continue. To cancel at anytime respond with `cancel`"
+                f"Let's do this! You have maximum of __5 minutes__ for each question.\n{fill_this}\n\n*To cancel at anytime respond with `cancel`*\n*Your responses are stored for proper function of this feature, however it can be removed at request by contacting {await self.bot.get_or_fetch_user(user_id=bot_owner)}*"
             )
         except discord.Forbidden:
-            return await ctx.send(f"{ctx.author.mention} I can't DM you. Do you have them closed?")
-        await ctx.send(f"Okay, {ctx.author.mention}, I've sent you a DM.")
+            return await ctx.send(
+                f"{ctx.author.mention} I can't DM you. Do you have them closed?", delete_after=10
+            )
+        await ctx.send(f"Okay, {ctx.author.mention}, I've sent you a DM.", delete_after=7)
 
         def check(m):
             return m.author == ctx.author and m.channel == ctx.author.dm_channel
@@ -147,16 +200,26 @@ class CustomApps(Cog):
             age = await self.bot.wait_for("message", timeout=300, check=check)
             if age.content.lower() == "cancel":
                 return await ctx.author.send("Application has been canceled.")
+            a = age.content
+            b = str(datetime.today())
+            c = b[:4]
+            d = int(c)
+            try:
+                e = int(a)
+                yearmath = d - e
+                total_age = f"YOB: {a}\n{yearmath} years old"
+            except Exception:
+                total_age = f"Recorded response of `{a}`. Could not calculate age."
+
+            await user_data.age.set(total_age)
+
         except asyncio.TimeoutError:
             try:
                 await ctx.author.send("You took too long. Try again, please.")
             except discord.HTTPException:
                 return await ctx.send(f"Thanks for nothing, {ctx.author.mention}")
             return
-        # try:
-        #     a = int(age.content)
-        # except commands.CommandInvokeError:
-        #     return await ctx.author.send("Start over, and this time make sure the response for this question is what's asked for, LOL")
+
         await ctx.author.send(app_data["days"])
         try:
             days = await self.bot.wait_for("message", timeout=300, check=check)
@@ -284,29 +347,24 @@ class CustomApps(Cog):
             await user_data.finalcomments.set(finalcomments.content)
         except asyncio.TimeoutError:
             return await ctx.author.send("You took too long. Try again, please.")
-        a = age.content
-        b = 2020
-        try:
-            yearmath = b - int(a)
-            total_age = f"{yearmath} years old"
-            await user_data.age.set(total_age)
-        except Exception:
-            return await ctx.author.send(
-                "Something fucked up. Make sure you answer only what is asked (Year of Birth usually)"
-            )  # TODO: make less hacky
-        # else:
-        #     return
 
         embed = discord.Embed(color=await ctx.embed_colour(), timestamp=datetime.utcnow())
-        embed.set_author(name="New application!", icon_url=ctx.author.avatar_url)
-        embed.set_footer(
-            text=f"{ctx.author.name}#{ctx.author.discriminator} UserID: {ctx.author.id})"
+        embed.set_author(
+            name=f"Applicant: {ctx.author.name} | ID: {ctx.author.id}",
+            icon_url=ctx.author.avatar_url,
         )
-        embed.title = f"User: {ctx.author.name}#{ctx.author.discriminator} | ID: ({ctx.author.id})"
-        embed.add_field(name="Name:", value=f"{ctx.author.mention}\n" + name.content, inline=True)
+        embed.set_footer(
+            text=f"{ctx.author.name}#{ctx.author.discriminator} UserID: {ctx.author.id}"
+        )
+        embed.title = f"Application for {position.content}"
         embed.add_field(
-            name="Year of Birth:",
-            value=age.content + f"\n{yearmath} years old",
+            name="Applicant Name:",
+            value=f"Mention: {ctx.author.mention}\nPreferred: " + name.content,
+            inline=True,
+        )
+        embed.add_field(
+            name="Age",
+            value=total_age,
             inline=True,
         )
         embed.add_field(name="Timezone:", value=timezone.content, inline=True)
@@ -314,24 +372,39 @@ class CustomApps(Cog):
         embed.add_field(name="Active days/week:", value=days.content, inline=True)
         embed.add_field(name="Active hours/day:", value=hours.content, inline=True)
         embed.add_field(
-            name=app_data["reasonforinterest"], value=reasonforinterest.content, inline=False
+            name="{}...".format(app_data["reasonforinterest"][:197]).replace("$", "\\$"),
+            value=reasonforinterest.content,
+            inline=False,
         )
         embed.add_field(name="Previous experience:", value=experience.content, inline=False)
+
         if check_8 is not None:
-            embed.add_field(name=app_data["question8"], value=answer8.content, inline=False)
+            embed.add_field(
+                name="{}...".format(app_data["question8"][:197]).replace("$", "\\$"),
+                value=answer8.content,
+                inline=False,
+            )
         if check_9 is not None:
-            embed.add_field(name=app_data["question9"], value=answer9.content, inline=False)
+            embed.add_field(
+                name="{}...".format(app_data["question9"][:197]).replace("$", "\\$"),
+                value=answer9.content,
+                inline=False,
+            )
         if check_10 is not None:
-            embed.add_field(name=app_data["question10"], value=answer10.content, inline=False)
+            embed.add_field(
+                name="{}...".format(app_data["question10"][:197]).replace("$", "\\$"),
+                value=answer10.content,
+                inline=False,
+            )
         if check_11 is not None:
             embed.add_field(
-                name=app_data["question11"],
+                name="{}...".format(app_data["question11"][:197]).replace("$", "\\$"),
                 value=answer11.content,
                 inline=False,
             )
         if check_12 is not None:
             embed.add_field(
-                name=app_data["question12"],
+                name="{}...".format(app_data["question12"][:197]).replace("$", "\\$"),
                 value=answer12.content,
                 inline=False,
             )
@@ -347,15 +420,22 @@ class CustomApps(Cog):
             await webhook.send(
                 embed=embed, username=ctx.guild.me.display_name, avatar_url=ctx.guild.me.avatar_url
             )
-
-        except discord.HTTPException:
-            return await ctx.author.send(
-                "Your final application was too long to resolve as an embed. Give this another shot, keeping answers a bit shorter."
-            )
-        except commands.CommandInvokeError:
-            return await ctx.author.send(
-                "You need to start over but this time when it asks for year of birth, respond only with a 4 digit year i.e `1999`"
-            )
+        except Exception as e:
+            log.info(f"{e} occurred in {ctx.author.name} | {ctx.author.id} application")
+            try:
+                return await ctx.author.send(
+                    "Seems your responses were too verbose. Let's try again, but without the life stories."
+                )
+            except Exception:
+                return
+        # except discord.HTTPException:
+        #     return await ctx.author.send(
+        #         "Your final application was too long to resolve as an embed. Give this another shot, keeping answers a bit shorter."
+        #     )
+        # except commands.CommandInvokeError:
+        #     return await ctx.author.send(
+        #         "You need to start over but this time when it asks for year of birth, respond only with a 4 digit year i.e `1999`"
+        #     )
         await ctx.author.add_roles(role_add)
 
         try:
@@ -367,6 +447,8 @@ class CustomApps(Cog):
                 f"{ctx.author.mention} I sent your app to the admins. Thanks for closing dms early tho rude ass"
             )
         self.antispam[ctx.guild][ctx.author].stamp()
+        # lets save the embed instead of calling on it again
+        await self.save_application(embed=embed, applicant=ctx.author)
 
         await self.config.member(ctx.author).app_check.set(True)
 
@@ -660,72 +742,12 @@ class CustomApps(Cog):
     @checks.bot_has_permissions(embed_links=True)
     async def appcheck(self, ctx: commands.Context, user_id: discord.Member):
         """
+        *Not Functioning*
         Pull an application that was completed by a user
         """
-        if not user_id:
-            return await ctx.send_help()
-
-        load_data = await self.config.member(user_id).all()
-        app_data = await self.config.guild(ctx.guild).app_questions.all()
-        check_8 = app_data["question8"]
-        check_9 = app_data["question9"]
-        check_10 = app_data["question10"]
-        check_11 = app_data["question11"]
-        check_12 = app_data["question12"]
-        app_check_user = load_data["app_check"]
-        if not app_check_user:
-            return await ctx.send("That user hasn't filled out an application here")
-
-        applicant_user = self.bot.get_user(user_id.id)
-        embed = discord.Embed(color=await ctx.embed_colour(), timestamp=datetime.utcnow())
-        embed.set_author(name="Member Application", icon_url=applicant_user.avatar_url)
-        embed.set_footer(
-            text=f"{applicant_user.name}#{applicant_user.discriminator} UserID: {applicant_user.id})"
+        return await ctx.send(
+            "This command is currently being reworked, follow updates in The Kompound"
         )
-        embed.title = f"User: {applicant_user.name}#{applicant_user.discriminator} | ID: ({applicant_user.id})"
-        embed = discord.Embed(color=await ctx.embed_colour(), timestamp=datetime.utcnow())
-        embed.set_author(name="New application!", icon_url=ctx.author.avatar_url)
-        embed.set_footer(
-            text=f"{ctx.author.name}#{ctx.author.discriminator} UserID: {ctx.author.id})"
-        )
-        embed.title = f"User: {ctx.author.name}#{ctx.author.discriminator} | ID: ({ctx.author.id})"
-        embed.add_field(
-            name="Name:", value=f"{ctx.author.mention}\n" + load_data["name"], inline=True
-        )
-        embed.add_field(
-            name="Year of Birth:",
-            value=load_data["age"],
-            inline=True,
-        )
-        embed.add_field(name="Timezone:", value=load_data["timezone"], inline=True)
-        embed.add_field(name="Desired position:", value=load_data["position"], inline=True)
-        embed.add_field(name="Active days/week:", value=load_data["days"], inline=True)
-        embed.add_field(name="Active hours/day:", value=load_data["hours"], inline=True)
-        embed.add_field(
-            name=app_data["reasonforinterest"], value=load_data["reasonforinterest"], inline=False
-        )
-        embed.add_field(name="Previous experience:", value=load_data["experience"], inline=False)
-        if check_8 is not None:
-            embed.add_field(name=app_data["question8"], value=load_data["answer8"], inline=False)
-        if check_9 is not None:
-            embed.add_field(name=app_data["question9"], value=load_data["answer9"], inline=False)
-        if check_10 is not None:
-            embed.add_field(name=app_data["question10"], value=load_data["answer10"], inline=False)
-        if check_11 is not None:
-            embed.add_field(
-                name=app_data["question11"],
-                value=load_data["answer11"],
-                inline=False,
-            )
-        if check_12 is not None:
-            embed.add_field(
-                name=app_data["question12"],
-                value=load_data["answer12"],
-                inline=False,
-            )
-        embed.add_field(name="Final Comments", value=load_data["finalcomments"], inline=False)
-
-        await ctx.send(embed=embed)
 
     @checks.admin_or_permissions(administrator=True)
     @commands.command()
