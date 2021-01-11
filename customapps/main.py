@@ -1,5 +1,5 @@
 import asyncio
-import datetime as dt #lgtm [py/import-and-import-from]
+import datetime as dt # lgtm [py/import-and-import-from]
 #silencing this flag will rework at final 
 import logging
 from datetime import datetime, timedelta
@@ -747,71 +747,6 @@ class CustomApps(Cog):
         return await ctx.send(
             "This command is currently being reworked, follow updates in The Kompound"
         )
-
-        if not user_id:
-            return await ctx.send_help()
-
-        load_data = await self.config.member(user_id).all()
-        app_data = await self.config.guild(ctx.guild).app_questions.all()
-        check_8 = app_data["question8"]
-        check_9 = app_data["question9"]
-        check_10 = app_data["question10"]
-        check_11 = app_data["question11"]
-        check_12 = app_data["question12"]
-        app_check_user = load_data["app_check"]
-        if not app_check_user:
-            return await ctx.send("That user hasn't filled out an application here")
-
-        applicant_user = self.bot.get_user(user_id.id)
-        embed = discord.Embed(color=await ctx.embed_colour(), timestamp=datetime.utcnow())
-        embed.set_author(name="Member Application", icon_url=applicant_user.avatar_url)
-        embed.set_footer(
-            text=f"{applicant_user.name}#{applicant_user.discriminator} UserID: {applicant_user.id})"
-        )
-        embed.title = f"User: {applicant_user.name}#{applicant_user.discriminator} | ID: ({applicant_user.id})"
-        embed = discord.Embed(color=await ctx.embed_colour(), timestamp=datetime.utcnow())
-        embed.set_author(name="New application!", icon_url=ctx.author.avatar_url)
-        embed.set_footer(
-            text=f"{ctx.author.name}#{ctx.author.discriminator} UserID: {ctx.author.id})"
-        )
-        embed.title = f"User: {ctx.author.name}#{ctx.author.discriminator} | ID: ({ctx.author.id})"
-        embed.add_field(
-            name="Name:", value=f"{ctx.author.mention}\n" + load_data["name"], inline=True
-        )
-        embed.add_field(
-            name="Year of Birth:",
-            value=load_data["age"],
-            inline=True,
-        )
-        embed.add_field(name="Timezone:", value=load_data["timezone"], inline=True)
-        embed.add_field(name="Desired position:", value=load_data["position"], inline=True)
-        embed.add_field(name="Active days/week:", value=load_data["days"], inline=True)
-        embed.add_field(name="Active hours/day:", value=load_data["hours"], inline=True)
-        embed.add_field(
-            name=app_data["reasonforinterest"], value=load_data["reasonforinterest"], inline=False
-        )
-        embed.add_field(name="Previous experience:", value=load_data["experience"], inline=False)
-        if check_8 is not None:
-            embed.add_field(name=app_data["question8"], value=load_data["answer8"], inline=False)
-        if check_9 is not None:
-            embed.add_field(name=app_data["question9"], value=load_data["answer9"], inline=False)
-        if check_10 is not None:
-            embed.add_field(name=app_data["question10"], value=load_data["answer10"], inline=False)
-        if check_11 is not None:
-            embed.add_field(
-                name=app_data["question11"],
-                value=load_data["answer11"],
-                inline=False,
-            )
-        if check_12 is not None:
-            embed.add_field(
-                name=app_data["question12"],
-                value=load_data["answer12"],
-                inline=False,
-            )
-        embed.add_field(name="Final Comments", value=load_data["finalcomments"], inline=False)
-
-        await ctx.send(embed=embed)
 
     @checks.admin_or_permissions(administrator=True)
     @commands.command()
