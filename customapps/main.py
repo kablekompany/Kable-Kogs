@@ -145,12 +145,9 @@ class CustomApps(Cog):
             fill_this = "Reply with the desired position from this list to continue\n`{}`".format(
                 list_positions
             )
-        grab_owner_for_disclaimer = self.bot.owner_ids
-        for i in grab_owner_for_disclaimer:
-            bot_owner = i
         try:
             await ctx.author.send(
-                f"Let's do this! You have maximum of __5 minutes__ for each question.\n{fill_this}\n\n*To cancel at anytime respond with `cancel`*\n*Your responses are stored for proper function of this feature, however it can be removed at request by contacting {await self.bot.get_or_fetch_user(user_id=bot_owner)}*"
+                f"Let's do this! You have maximum of __5 minutes__ for each question.\n{fill_this}\n\n*To cancel at anytime respond with `cancel`*\n*Your responses are stored for proper function of this feature, however it can be removed at request by running `{ctx.prefix}contact`*"
             )
         except discord.Forbidden:
             return await ctx.send(
