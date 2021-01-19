@@ -101,7 +101,7 @@ class CustomApps(Cog):
             return  # don't care about users spamming the shit
 
         await ctx.send(
-            f"{ctx.author.mention} this command is at it's max allowed processing queue. Try again in 5 min. Any invocations before then will be ignored.",
+            f"{ctx.author.mention} this command is at it's max allowed processing queue.",
             delete_after=20,
         )
         # insight
