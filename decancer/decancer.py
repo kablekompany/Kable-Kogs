@@ -16,12 +16,16 @@ from .randomnames import adjectives, nouns, properNouns
 
 
 async def enabled_global(ctx: commands.Context):
-    return await ctx.bot.get_cog("Decancer").config.auto()
+    return ctx.bot.get_cog("Decancer").enabled_global
 
 
 # originally from https://github.com/PumPum7/PumCogs repo which has a en masse version of this
 class Decancer(commands.Cog):
-    """Decancer users names removing special and accented chars. `[p]decancerset` to get started if you're already using redbot core modlog"""
+    """
+    Decancer users names removing special and accented chars. 
+    
+    `[p]decancerset` to get started if you're already using redbot core modlog
+    """
 
     def __init__(self, bot):
         self.bot = bot
@@ -35,25 +39,29 @@ class Decancer(commands.Cog):
         self.config.register_guild(**default_guild)
         self.config.register_global(**default_global)
 
+        self.enabled_global = None
+        self.enabled_guilds = set()
+
     __author__ = ["KableKompany#0001", "PhenoM4n4n"]
-    __version__ = "1.8.1"
+    __version__ = "1.8.2"
 
     async def red_delete_data_for_user(self, **kwargs):
         """This cog does not store user data"""
         return
 
+    async def initialize(self):
+        self.enabled_global = await self.config.auto()
+        for guild_id, guild_data in (await self.config.all_guilds()).items():
+            if guild_data["auto"]:
+                self.enabled_guilds.add(guild_id)
+
     @staticmethod
     def is_cancerous(text: str) -> bool:
-        cancerous = 0
         for segment in text.split():
             for char in segment:
                 if not (char.isascii() and char.isalnum()):
-                    cancerous += 1
-
-        if cancerous / len(text) <= 1 / 10:
-            return False  # even though decancer output may be different than their current name, there isnt much reason to decancer
-        else:
-            return True
+                    return True
+        return False
 
     # the magic
     @staticmethod
@@ -72,8 +80,7 @@ class Decancer(commands.Cog):
     async def nick_maker(self, guild: discord.Guild, old_shit_nick):
         old_shit_nick = self.strip_accs(old_shit_nick)
         new_cool_nick = re.sub("[^a-zA-Z0-9 \n.]", "", old_shit_nick)
-        new_cool_nick = new_cool_nick.split()
-        new_cool_nick = " ".join(new_cool_nick)
+        new_cool_nick = " ".join(new_cool_nick.split())
         new_cool_nick = stringcase.lowercase(new_cool_nick)
         new_cool_nick = stringcase.titlecase(new_cool_nick)
         default_name = await self.config.guild(guild).new_custom_nick()
@@ -103,10 +110,16 @@ class Decancer(commands.Cog):
             await self.config.guild(guild).modlogchannel.clear()
             return
         color = 0x2FFFFF
+        description = [
+            f"**Offender:** {member} {member.mention}",
+            f"**Reason:** Remove cancerous characters from previous name",
+            f"**New Nickname:** {new_nick}",
+            f"**Responsible Moderator:** {moderator} {moderator.mention}",
+        ]
         embed = discord.Embed(
             color=discord.Color(color),
             title=dc_type,
-            description=f"**Offender:** {str(member)} {member.mention} \n**Reason:** Remove cancerous characters from previous name\n**New Nickname:** {new_nick}\n**Responsible Moderator:** {str(moderator)} {moderator.mention}",
+            description="\n".join(description),
             timestamp=datetime.utcnow(),
         )
         embed.set_footer(text=f"ID: {member.id}")
@@ -228,8 +241,10 @@ class Decancer(commands.Cog):
         )
         await self.config.guild(ctx.guild).auto.set(target_state)
         if target_state:
+            self.enabled_guilds.add(ctx.guild.id)
             await ctx.send("I will now decancer new users.")
         else:
+            self.enabled_guilds.remove(ctx.guild.id)
             await ctx.send("I will no longer decancer new users.")
 
     @checks.is_owner()
@@ -240,6 +255,7 @@ class Decancer(commands.Cog):
             true_or_false if true_or_false is not None else not (await self.config.auto())
         )
         await self.config.auto.set(target_state)
+        self.enabled_global = target_state
         if target_state:
             await ctx.send("Automatic decancering has been re-enabled globally.")
         else:
@@ -265,7 +281,7 @@ class Decancer(commands.Cog):
                 f"Set up a modlog for this server using `{ctx.prefix}decancerset modlog #channel`"
             )
 
-        if user.top_role.position >= ctx.me.top_role.position:
+        if user.top_role >= ctx.me.top_role:
             return await ctx.send(
                 f"I can't decancer that user since they are higher than me in heirarchy."
             )
@@ -335,7 +351,7 @@ class Decancer(commands.Cog):
             for member in role.members
             if not member.bot
             and self.is_cancerous(member.display_name)
-            and ctx.me.top_role.position > member.top_role.position
+            and ctx.me.top_role > member.top_role
         ]
         if not cancerous_list:
             await ctx.send(f"There's no one I can decancer in **`{role}`**.")
@@ -406,16 +422,19 @@ class Decancer(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
-        guild = member.guild
+        if self.enabled_global is False or member.bot:
+            return
+
+        guild: discord.Guild = member.guild
+        if guild.id not in self.enabled_guilds:
+            return
+
         data = await self.config.guild(guild).all()
         if not (
-            await self.config.auto()
-            and data["auto"]
+            data["auto"]
             and data["modlogchannel"]
             and guild.me.guild_permissions.manage_nicknames
         ):
-            return
-        if member.bot:
             return
 
         old_nick = member.display_name
@@ -428,7 +447,7 @@ class Decancer(commands.Cog):
         member = guild.get_member(member.id)
         if not member:
             return
-        if member.top_role.position >= guild.me.top_role.position:
+        if member.top_role >= guild.me.top_role:
             return
         new_cool_nick = await self.nick_maker(guild, old_nick)
         if old_nick.lower() != new_cool_nick.lower():
