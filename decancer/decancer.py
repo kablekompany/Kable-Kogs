@@ -22,8 +22,8 @@ async def enabled_global(ctx: commands.Context):
 # originally from https://github.com/PumPum7/PumCogs repo which has a en masse version of this
 class Decancer(commands.Cog):
     """
-    Decancer users names removing special and accented chars. 
-    
+    Decancer users names removing special and accented chars.
+
     `[p]decancerset` to get started if you're already using redbot core modlog
     """
 
@@ -431,9 +431,7 @@ class Decancer(commands.Cog):
 
         data = await self.config.guild(guild).all()
         if not (
-            data["auto"]
-            and data["modlogchannel"]
-            and guild.me.guild_permissions.manage_nicknames
+            data["auto"] and data["modlogchannel"] and guild.me.guild_permissions.manage_nicknames
         ):
             return
 
