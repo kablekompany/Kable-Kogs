@@ -255,6 +255,7 @@ class Decancer(commands.Cog):
             true_or_false if true_or_false is not None else not (await self.config.auto())
         )
         await self.config.auto.set(target_state)
+        self.enabled_global = target_state
         if target_state:
             await ctx.send("Automatic decancering has been re-enabled globally.")
         else:
