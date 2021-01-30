@@ -7,4 +7,6 @@ __red_end_user_data_statement__ = (
 
 
 def setup(bot):
-    bot.add_cog(Decancer(bot))
+    cog = Decancer(bot)
+    await cog.initialize()
+    bot.add_cog(cog)
