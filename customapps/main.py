@@ -147,7 +147,7 @@ class CustomApps(Cog):
             )
         try:
             await ctx.author.send(
-                f"Let's do this! You have maximum of __5 minutes__ for each question.\n{fill_this}\n\n*To cancel at anytime respond with `cancel`*\n*Your responses are stored for proper function of this feature, however it can be removed at request by running `{ctx.prefix}contact`*"
+                f"Let's do this! You have maximum of __5 minutes__ for each question.\n{fill_this}\n\n*To cancel at anytime respond with `cancel`*\n\n*DISCLAIMER: Your responses are stored for proper function of this feature*"
             )
         except discord.Forbidden:
             return await ctx.send(
