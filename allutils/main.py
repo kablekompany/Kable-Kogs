@@ -161,7 +161,6 @@ class AllUtils(commands.Cog):
             else:
                 channel_info.append(f"{emoji} {total}")
 
-        info = []
         features = set(guild.features)
         all_features = {
             "PARTNERED": "Partnered",
@@ -180,9 +179,11 @@ class AllUtils(commands.Cog):
             "BANNER": "Banner",
         }
 
-        for feature, label in all_features.items():
-            if feature in features:
-                info.append(f"<:agree:749441222954844241>: {label}")
+        info = [
+            f"<:agree:749441222954844241>: {label}"
+            for feature, label in all_features.items()
+            if feature in features
+        ]
 
         if info:
             e.add_field(name="Features", value="\n".join(info))
@@ -294,11 +295,7 @@ class AllUtils(commands.Cog):
         if channel is None:
             return await ctx.send("Channel not found?")
 
-        if author_id is None:
-            member = guild.me
-        else:
-            member = guild.get_member(author_id)
-
+        member = guild.me if author_id is None else guild.get_member(author_id)
         if member is None:
             return await ctx.send("Member not found?")
 

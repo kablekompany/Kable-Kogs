@@ -469,8 +469,8 @@ class LockItUp(commands.Cog):
                     value=f"{spec_msg}" if get_sec_chans else "**None**",
                     inline=False,
                 )
-            e.add_field(name="Lock Message:", value=get_lock if get_lock else "**None**")
-            e.add_field(name="Unlock Message:", value=get_unlock if get_unlock else "**None**")
+            e.add_field(name="Lock Message:", value=get_lock or "**None**")
+            e.add_field(name="Unlock Message:", value=get_unlock or "**None**")
             e.add_field(
                 name="Channel Notification:",
                 value="**Enabled**" if check_silent else "**Disabled**",
@@ -489,14 +489,13 @@ class LockItUp(commands.Cog):
                 title="Lockdown Settings:",
                 description="Channels: {}\n{}".format(chan_count, page),
             )
-            e.add_field(
-                name="Lock Message:", value=get_lock if get_lock else "**None**", inline=False
-            )
+            e.add_field(name="Lock Message:", value=get_lock or "**None**", inline=False)
             e.add_field(
                 name="Unlock Message:",
-                value=get_unlock if get_unlock else "**None**",
+                value=get_unlock or "**None**",
                 inline=False,
             )
+
             check_specs = fetch_all["nondefault"]
             if check_specs:
                 e.add_field(
@@ -590,11 +589,10 @@ class LockItUp(commands.Cog):
         if len(chans) > 25:
             return await ctx.send("Think you've added enough. Keep it under 25 please")
         for chan in channels:
-            if chan not in chans:
-                chans.append(chan.id)
-                await self.config.guild(guild).secondary_channels.set(chans)
-            else:
+            if chan in chans:
                 continue
+            chans.append(chan.id)
+            await self.config.guild(guild).secondary_channels.set(chans)
         chan_count = len(chans)
         msg = ""
         for chan_id in chans:
@@ -666,13 +664,11 @@ class LockItUp(commands.Cog):
         await menu(ctx, e_list, DEFAULT_CONTROLS)
         nondefault = await self.config.guild(guild).nondefault()
         check_role = await self.config.guild(guild).secondary_role()
-        if not chans:
-            if nondefault is True:
-                if not check_role:
-                    await self.config.guild(guild).nondefault.set(value=False)
-                    await ctx.send(
-                        "Removed secondary configurations from this guild as there is no role or channels assigned"
-                    )
+        if not chans and nondefault is True and not check_role:
+            await self.config.guild(guild).nondefault.set(value=False)
+            await ctx.send(
+                "Removed secondary configurations from this guild as there is no role or channels assigned"
+            )
 
     @lockdownset.command()
     async def rmchan(self, ctx: commands.Context, channels: Greedy[int]):
@@ -850,7 +846,7 @@ class LockItUp(commands.Cog):
         """
         guild = ctx.guild
         confirm = await self.config.guild(guild).send_alert()
-        if option is False:
+        if not option:
             await self.config.guild(guild).send_alert.set(value=False)
             await ctx.send("Will silence the channel notifications on lockdown/unlockdown")
             return
