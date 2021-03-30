@@ -549,10 +549,10 @@ class LockItUp(commands.Cog):
             raise commands.BadArgument
         guild = ctx.guild
         chans = await self.config.guild(guild).channels()
-        if len(chans) > 50:
-            return await ctx.send("Think you've added enough. Keep it under 50 please")
+        if len(chans) > 35:
+            return await ctx.send("Think you've added enough. Keep it under 35 please")
         for chan in channels:
-            if chan not in chans:
+            if chan.id not in chans:
                 chans.append(chan.id)
                 await self.config.guild(guild).channels.set(chans)
             else:
@@ -590,7 +590,7 @@ class LockItUp(commands.Cog):
         if len(chans) > 25:
             return await ctx.send("Think you've added enough. Keep it under 25 please")
         for chan in channels:
-            if chan not in chans:
+            if chan.id not in chans:
                 chans.append(chan.id)
                 await self.config.guild(guild).secondary_channels.set(chans)
             else:
