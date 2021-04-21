@@ -185,7 +185,7 @@ class LockItUp(commands.Cog):
         try:
             confirm_lock = await ctx.bot.wait_for("message", check=check, timeout=30)
             if confirm_lock.content.lower() != "yes":
-                return await ctx.send("Looks like we aren't unlocking this thing today")
+                return await ctx.send("Good thing I was made for my time to be wasted - canceling lockdown...")
         except asyncio.TimeoutError:
             return await ctx.send("You took too long to reply!")
 
