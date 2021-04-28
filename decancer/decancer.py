@@ -454,7 +454,9 @@ class Decancer(commands.Cog):
                     reason=f"Auto Decancer | Old name ({old_nick}): contained special characters",
                     nick=new_cool_nick,
                 )
-            except discord.errors.Forbidden:
+            except discord.NotFound:
+                pass
+            except discord.Forbidden:
                 await self.config.guild(guild).auto.set(False)
             else:
                 await self.decancer_log(
