@@ -913,7 +913,7 @@ class LockItUp(commands.Cog):
         music_channels = await self.config.guild(guild).music_channels()
         if not voice_channels or not music_channels:
             return await ctx.send(
-                "You need to add some channels to your configuration using `{}lds setvc|setmusic` to use this"
+                f"You need to add some channels to your configuration using `{ctx.prefix}lds setvc|setmusic` to use this"
             )
         role = guild.default_role
         if voice_channels is not None:
@@ -983,7 +983,7 @@ class LockItUp(commands.Cog):
         music_channels = await self.config.guild(guild).music_channels()
         if not voice_channels or not music_channels:
             return await ctx.send(
-                "You need to add some channels to your configuration using `{}lds setvc|setmusic` to use this"
+                f"You need to add some channels to your configuration using `{ctx.prefix}lds setvc|setmusic` to use this"
             )
         role = guild.default_role
         if voice_channels is not None:
