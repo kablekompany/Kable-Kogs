@@ -1159,7 +1159,7 @@ class LockItUp(commands.Cog):
         elif channel.type == discord.ChannelType.voice:
             if overwrite.connect is None:
                 return await ctx.send(
-                    "{} is already unlocked. To lock, please use `{}channellock {}`".format(
+                    "{} is already unlocked. To lock, please use `{}unlockit {}`".format(
                         channel.mention, ctx.prefix, channel.id
                     )
                 )
