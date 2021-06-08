@@ -1100,7 +1100,7 @@ class LockItUp(commands.Cog):
         if channel.type == discord.ChannelType.text:
             if overwrite.send_messages is False:
                 return await ctx.send(
-                    "{} is already locked. To unlock, please use `{}channelunlock {}`".format(
+                    "{} is already locked. To unlock, please use `{}unlockit {}`".format(
                         channel.mention, ctx.prefix, channel.id
                     )
                 )
@@ -1151,7 +1151,7 @@ class LockItUp(commands.Cog):
         if channel.type == discord.ChannelType.text:
             if overwrite.send_messages is None:
                 return await ctx.send(
-                    "{} is already unlocked. To lock, please use `{}channellock {}`".format(
+                    "{} is already unlocked. To lock, please use `{}lockit {}`".format(
                         channel.mention, ctx.prefix, channel.id
                     )
                 )
