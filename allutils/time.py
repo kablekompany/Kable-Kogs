@@ -138,10 +138,12 @@ class UserFriendlyTime(commands.Converter):
             if argument.endswith("from now"):
                 argument = argument[:-8].strip()
 
-            if argument[0:2] == "me":
-                # starts with "me to", "me in", or "me at "
-                if argument[0:6] in ("me to ", "me in ", "me at "):
-                    argument = argument[6:]
+            if argument[0:2] == "me" and argument[0:6] in (
+                "me to ",
+                "me in ",
+                "me at ",
+            ):
+                argument = argument[6:]
 
             elements = calendar.nlp(argument, sourceTime=now)
             if elements is None or len(elements) == 0:
@@ -190,7 +192,7 @@ class UserFriendlyTime(commands.Converter):
                     if argument[0] != '"':
                         raise commands.BadArgument("Expected quote before time input...")
 
-                    if not (end < len(argument) and argument[end] == '"'):
+                    if end >= len(argument) or argument[end] != '"':
                         raise commands.BadArgument("If the time is quoted, you must unquote it.")
 
                     remaining = argument[end + 1 :].lstrip(" ,.!")
@@ -262,8 +264,7 @@ def human_timedelta(dt, *, source=None, accuracy=3, brief=False, suffix=True):
 
     if len(output) == 0:
         return "now"
+    if not brief:
+        return human_join(output, final="and") + suffix
     else:
-        if not brief:
-            return human_join(output, final="and") + suffix
-        else:
-            return " ".join(output) + suffix
+        return " ".join(output) + suffix
