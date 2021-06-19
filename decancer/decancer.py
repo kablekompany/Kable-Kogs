@@ -297,8 +297,6 @@ class Decancer(commands.Cog):
                     freeze
                 ):  # thanks for this badass cog from Dav@https://github.com/Dav-Git/Dav-Cogs
                     cog_checking = self.bot.get_cog("NickNamer")
-                    if not cog_checking:
-                        pass
                     freeze_it = self.bot.get_command("freezenick")
                     await ctx.invoke(
                         freeze_it,
@@ -365,14 +363,13 @@ class Decancer(commands.Cog):
             ctx.command.reset_cooldown(ctx)
             return
         member_preview = "\n".join(
-            [
-                f"{member} - {member.id}"
-                for index, member in enumerate(cancerous_list, 1)
-                if index <= 10
-            ]
+            f"{member} - {member.id}"
+            for index, member in enumerate(cancerous_list, 1)
+            if index <= 10
         ) + (
             f"\nand {len(cancerous_list) - 10} other members.." if len(cancerous_list) > 10 else ""
         )
+
         case = "" if len(cancerous_list) == 1 else "s"
         msg = await ctx.send(
             f"Are you sure you want me to decancer the following {len(cancerous_list)} member{case}?\n"

@@ -170,8 +170,9 @@ SCHEMA = Map(
 SKIP_COG_KEYS_INFO_JSON = {"class_docstring"}
 # TODO: auto-format to proper key order
 AUTOLINT_REPO_KEYS_ORDER = list(REPO_KEYS.keys())
-AUTOLINT_SHARED_FIELDS_KEYS_ORDER = list(getattr(key, "key", key) for key in SHARED_FIELDS_KEYS)
-AUTOLINT_COG_KEYS_ORDER = list(getattr(key, "key", key) for key in COG_KEYS)
+AUTOLINT_SHARED_FIELDS_KEYS_ORDER = [getattr(key, "key", key) for key in SHARED_FIELDS_KEYS]
+
+AUTOLINT_COG_KEYS_ORDER = [getattr(key, "key", key) for key in COG_KEYS]
 
 
 def check_order(data: dict) -> int:
@@ -204,7 +205,7 @@ def check_order(data: dict) -> int:
 
     for pkg_name, cog_info in data["cogs"].items():
         # strictyaml breaks ordering of keys for some reason
-        original_keys = list((k for k, v in cog_info.items() if v))
+        original_keys = [k for k, v in cog_info.items() if v]
         sorted_keys = sorted(
             (k for k, v in cog_info.items() if v), key=AUTOLINT_COG_KEYS_ORDER.index
         )
@@ -361,8 +362,7 @@ def _scan_recursively(
         if element.type == name:
             yield element
         if element.type in containers:
-            for e in _scan_recursively(element.children, name, containers):
-                yield e
+            yield from _scan_recursively(element.children, name, containers)
 
 
 def check_command_docstrings(cogs: dict) -> int:
@@ -375,14 +375,13 @@ def check_command_docstrings(cogs: dict) -> int:
             for node in _scan_recursively(tree.children, "async_funcdef", CONTAINERS):
                 funcdef = node.children[-1]
                 decorators = funcdef.get_decorators()
-                ignore = False
-                # DEP-WARN: use of private method
-                for prefix_part in decorators[0].children[0]._split_prefix():
-                    if (
+                ignore = any(
+                    (
                         prefix_part.type == "comment"
                         and prefix_part.value == "# geninfo-ignore: missing-docstring"
-                    ):
-                        ignore = True
+                    )
+                    for prefix_part in decorators[0].children[0]._split_prefix()
+                )
                 for deco in decorators:
                     maybe_name = deco.children[1]
                     if maybe_name.type == "dotted_name":
@@ -489,9 +488,8 @@ def main() -> int:
                 min_python_version = python_version
                 break
         python_version = cog_info.get("min_python_version", global_min_python_version)
-        if python_version is not None:
-            if min_python_version < python_version:
-                min_python_version = python_version
+        if python_version is not None and min_python_version < python_version:
+            min_python_version = python_version
         for python_version, reqs in requirements.items():
             if python_version >= min_python_version:
                 reqs.update(cog_info["requirements"])
@@ -510,8 +508,8 @@ def main() -> int:
             value = cog_info.get(key)
             if value is None:
                 value = shared_fields.get(key)
-                if value is None:
-                    continue
+            if value is None:
+                continue
             output[key] = value
         replacements = {
             "repo_name": repo_info["name"],
@@ -570,8 +568,7 @@ def main() -> int:
             print("\033[91m\033[1mERROR:\033[0m Couldn't find cogs sections in README.md!")
             return 1
         start, end = match.span(1)
-        lines = []
-        lines.append("---\n| Name | Description |\n| --- | --- |")
+        lines = ["---\n| Name | Description |\n| --- | --- |"]
         for pkg_name, cog_info in cogs.items():
             replacements = {
                 "repo_name": repo_info["name"],
