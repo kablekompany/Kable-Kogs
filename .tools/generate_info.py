@@ -170,9 +170,7 @@ SCHEMA = Map(
 SKIP_COG_KEYS_INFO_JSON = {"class_docstring"}
 # TODO: auto-format to proper key order
 AUTOLINT_REPO_KEYS_ORDER = list(REPO_KEYS.keys())
-AUTOLINT_SHARED_FIELDS_KEYS_ORDER = [
-    getattr(key, "key", key) for key in SHARED_FIELDS_KEYS
-]
+AUTOLINT_SHARED_FIELDS_KEYS_ORDER = [getattr(key, "key", key) for key in SHARED_FIELDS_KEYS]
 
 AUTOLINT_COG_KEYS_ORDER = [getattr(key, "key", key) for key in COG_KEYS]
 
@@ -377,10 +375,13 @@ def check_command_docstrings(cogs: dict) -> int:
             for node in _scan_recursively(tree.children, "async_funcdef", CONTAINERS):
                 funcdef = node.children[-1]
                 decorators = funcdef.get_decorators()
-                ignore = any((
+                ignore = any(
+                    (
                         prefix_part.type == "comment"
                         and prefix_part.value == "# geninfo-ignore: missing-docstring"
-                    ) for prefix_part in decorators[0].children[0]._split_prefix())
+                    )
+                    for prefix_part in decorators[0].children[0]._split_prefix()
+                )
                 for deco in decorators:
                     maybe_name = deco.children[1]
                     if maybe_name.type == "dotted_name":

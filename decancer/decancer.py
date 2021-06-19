@@ -367,9 +367,7 @@ class Decancer(commands.Cog):
             for index, member in enumerate(cancerous_list, 1)
             if index <= 10
         ) + (
-            f"\nand {len(cancerous_list) - 10} other members.."
-            if len(cancerous_list) > 10
-            else ""
+            f"\nand {len(cancerous_list) - 10} other members.." if len(cancerous_list) > 10 else ""
         )
 
         case = "" if len(cancerous_list) == 1 else "s"
