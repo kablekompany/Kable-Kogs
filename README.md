@@ -136,7 +136,7 @@ Distributed under the MIT License. See [LICENSE](https://github.com/kablekompany
 
 Many have contributed to this repo either by proxy, direct interaction, or by some cosmic interference. The contributors in full can be found standalone, and includes __all__ authors that influenced, authored, or has core code within my bot and cogs.
 
-* [Contributors](.github/CONTRIBUTORS)
+* [Contributors](.github/CONTRIBUTORS.md)
   * Shows global contribs and Core Contributions to Kronos
 * [Kronos](https://kable.lol/kronos)
   * *my modified instance of Red, contains these and many more features*
