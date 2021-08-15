@@ -219,7 +219,7 @@ class LockItUp(commands.Cog):
         # finalize
         try:
             await ctx.send(
-                "We're locked up, fam. Revert this by running `{}unlockdown`".format(ctx.prefix)
+                "We're locked __down__, fam. Revert this by running `{}unlockdown`".format(ctx.prefix)
             )
         except Exception as er:
             self.log.info(
