@@ -181,7 +181,7 @@ class LockItUp(commands.Cog):
         if lock_check is True:
             return await ctx.send("You're already locked")
 
-        await ctx.send("You ready to lock up? `[yes|no]`")
+        await ctx.send(f"Proceed with locking down {guild.name}?\n`[yes|no]`")
         try:
             confirm_lock = await ctx.bot.wait_for("message", check=check, timeout=30)
             if confirm_lock.content.lower() != "yes":
