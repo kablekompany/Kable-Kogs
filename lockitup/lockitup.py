@@ -219,9 +219,7 @@ class LockItUp(commands.Cog):
         # finalize
         try:
             await ctx.send(
-                "Server locked down. Revert this by running `{}unlockdown`".format(
-                    ctx.prefix
-                )
+                "Server locked down. Revert this by running `{}unlockdown`".format(ctx.prefix)
             )
         except Exception as er:
             self.log.info(
