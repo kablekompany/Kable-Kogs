@@ -909,7 +909,7 @@ class LockItUp(commands.Cog):
         """Lock function for voice/music channels"""
         voice_channels = await self.config.guild(guild).vc_channels()
         music_channels = await self.config.guild(guild).music_channels()
-        if not voice_channels or not music_channels:
+        if not voice_channels and not music_channels:
             return await ctx.send(
                 f"You need to add some channels to your configuration using `{ctx.prefix}lds setvc|setmusic` to use this"
             )
