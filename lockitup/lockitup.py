@@ -940,7 +940,7 @@ class LockItUp(commands.Cog):
         def check(m):
             return m.author == ctx.author and m.channel == ctx.channel
 
-        if music_channels is not None:
+        if music_channels:
             message = await ctx.send(
                 "Detected music channels in your configuration, do you want to lock those too?"
             )
@@ -979,7 +979,7 @@ class LockItUp(commands.Cog):
         """Unlock function for voice/music channels"""
         voice_channels = await self.config.guild(guild).vc_channels()
         music_channels = await self.config.guild(guild).music_channels()
-        if not voice_channels or not music_channels:
+        if not voice_channels and not music_channels:
             return await ctx.send(
                 f"You need to add some channels to your configuration using `{ctx.prefix}lds setvc|setmusic` to use this"
             )
@@ -1010,7 +1010,7 @@ class LockItUp(commands.Cog):
         def check(m):
             return m.author == ctx.author and m.channel == ctx.channel
 
-        if music_channels is not None:
+        if music_channels:
             message = await ctx.send(
                 "Detected music channels in your configuration, do you want to unlock those too?"
             )
