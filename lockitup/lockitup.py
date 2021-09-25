@@ -971,7 +971,7 @@ class LockItUp(commands.Cog):
                                 voice_channel.mention
                             ),
                         )
-        await message.edit(content="Music Channels are locked, too.")
+            await message.edit(content="Music Channels are locked, too.")
 
     async def voice_channel_unlock(
         self, ctx: commands.Context, author: discord.Member, guild: discord.Guild
