@@ -911,7 +911,9 @@ class CustomApps(Cog):
                         f"Your application in {ctx.guild.name} has been denied.\n*Reason:* {reason.content}"
                     )
                 except Exception as e:
-                    await ctx.send(f"Getting the following error when trying to send this user a message:\n```\n{e}\n```")
+                    await ctx.send(
+                        f"Getting the following error when trying to send this user a message:\n```\n{e}\n```"
+                    )
             else:
                 await target.send(f"Your application in {ctx.guild.name} has been denied.")
             await target.remove_roles(applicant)
