@@ -906,9 +906,12 @@ class CustomApps(Cog):
                     reason = await self.bot.wait_for("message", timeout=120, check=check)
                 except asyncio.TimeoutError:
                     return await ctx.send("You took too long. Try again, please.")
-                await target.send(
-                    f"Your application in {ctx.guild.name} has been denied.\n*Reason:* {reason.content}"
-                )
+                try:
+                    await target.send(
+                        f"Your application in {ctx.guild.name} has been denied.\n*Reason:* {reason.content}"
+                    )
+                except Exception as e:
+                    await ctx.send(f"Getting the following error when trying to send this user a message:\n```\n{e}\n```")
             else:
                 await target.send(f"Your application in {ctx.guild.name} has been denied.")
             await target.remove_roles(applicant)
