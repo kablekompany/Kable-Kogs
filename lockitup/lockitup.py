@@ -517,14 +517,14 @@ class LockItUp(commands.Cog):
             if get_vc:
                 vc_list = ""
                 for c in get_vc:
-                    c_name = ctx.guild.get_channel(c)
+                    c_name = f"<#{c}>"
                     vc_list += f"{c_name}\n"
                 e.add_field(name="Voice Channels", value=f"{vc_list}", inline=False)
 
             if get_music:
                 music_list = ""
                 for mc in get_music:
-                    mc_name = ctx.guild.get_channel(mc)
+                    mc_name = f"<#{mc}>" #ctx.guild.get_channel(mc)
                     music_list += f"{mc_name}\n"
                 e.add_field(name="Music Channels", value=f"{music_list}", inline=False)
 
