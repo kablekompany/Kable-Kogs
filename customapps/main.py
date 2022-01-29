@@ -120,7 +120,7 @@ class CustomApps(Cog):
         if ctx.guild not in self.antispam:
             self.antispam[ctx.guild] = {}
         if ctx.author not in self.antispam[ctx.guild]:
-            self.antispam[ctx.guild][ctx.author] = AntiSpam([(timedelta(hours=12), 1)])
+            self.antispam[ctx.guild][ctx.author] = AntiSpam([(timedelta(hours=6), 1)])
         if self.antispam[ctx.guild][ctx.author].spammy:
             return await ctx.send(
                 f"{ctx.author.mention} uh you're doing this way too frequently, and we don't need more than one application from you. Don't call us, we will maybe call you...LOL",
@@ -911,7 +911,9 @@ class CustomApps(Cog):
                         f"Your application in {ctx.guild.name} has been denied.\n*Reason:* {reason.content}"
                     )
                 except Exception as e:
-                    await ctx.send(f"Getting the following error when trying to send this user a message:\n```\n{e}\n```")
+                    await ctx.send(
+                        f"Getting the following error when trying to send this user a message:\n```\n{e}\n```"
+                    )
             else:
                 await target.send(f"Your application in {ctx.guild.name} has been denied.")
             await target.remove_roles(applicant)
