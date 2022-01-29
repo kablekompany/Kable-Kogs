@@ -524,7 +524,7 @@ class LockItUp(commands.Cog):
             if get_music:
                 music_list = ""
                 for mc in get_music:
-                    mc_name = f"<#{mc}>" #ctx.guild.get_channel(mc)
+                    mc_name = f"<#{mc}>"  # ctx.guild.get_channel(mc)
                     music_list += f"{mc_name}\n"
                 e.add_field(name="Music Channels", value=f"{music_list}", inline=False)
 
