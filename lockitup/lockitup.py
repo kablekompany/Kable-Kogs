@@ -566,7 +566,6 @@ class LockItUp(commands.Cog):
 
         e_list = []
         for page in pagify(msg, shorten_by=1000):
-
             embed = discord.Embed(
                 description="Channel List: {}\n{}".format(chan_count, page),
                 colour=await ctx.embed_color(),
@@ -603,7 +602,6 @@ class LockItUp(commands.Cog):
 
         e_list = []
         for page in pagify(msg, shorten_by=1000):
-
             embed = discord.Embed(
                 description="Channel List: {}\n{}".format(chan_count, page),
                 colour=await ctx.embed_color(),
@@ -654,7 +652,6 @@ class LockItUp(commands.Cog):
 
         e_list = []
         for page in pagify(msg, shorten_by=1000):
-
             embed = discord.Embed(
                 description="Channel List: {}\n{}".format(chan_count, page),
                 colour=await ctx.embed_color(),
@@ -700,7 +697,6 @@ class LockItUp(commands.Cog):
 
         e_list = []
         for page in pagify(msg, shorten_by=1000):
-
             embed = discord.Embed(
                 description="Channel List: {}\n{}".format(chan_count, page),
                 colour=await ctx.embed_color(),
