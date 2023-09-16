@@ -3,12 +3,13 @@ from typing import Union
 
 import discord
 from redbot.core import checks, commands
+from redbot.core.bot import Red
 
 from . import formats, time
 
 
 class FetchedUser(commands.Converter):
-    async def convert(self, ctx, argument):
+    async def convert(self, ctx: commands.Context, argument: str):
         if not argument.isdigit():
             raise commands.BadArgument("Not a valid user ID.")
         try:
@@ -22,8 +23,8 @@ class FetchedUser(commands.Converter):
 class AllUtils(commands.Cog):
     """Grab meta, make polls. Bitchin'"""
 
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, bot: Red) -> None:
+        self.bot: Red = bot
 
     @commands.group(name="get", cooldown_after_parsing=True)
     async def get_that(self, ctx: commands.Context):
@@ -32,14 +33,16 @@ class AllUtils(commands.Cog):
     @get_that.command(aliases=["av"])
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.guild_only()
-    async def avatar(self, ctx, *, user: Union[discord.Member, FetchedUser] = None):
+    async def avatar(
+        self, ctx: commands.Context, *, user: Union[discord.Member, FetchedUser] = None
+    ):
         """Shows a user's enlarged avatar (if possible).
 
         Works to fetch user if not in server (must provide UserID)
         """
         embed = discord.Embed()
         user = user or ctx.author
-        avatar = user.avatar_url_as(static_format="png")
+        avatar = user.display_avatar.with_static_format("png")
         embed.set_author(name=str(user), url=avatar)
         embed.set_image(url=avatar)
         embed.colour = await ctx.embed_colour()
@@ -47,7 +50,9 @@ class AllUtils(commands.Cog):
 
     @get_that.command(hidden=True, aliases=["ui"])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def userinfo(self, ctx, *, user: Union[discord.Member, FetchedUser] = None):
+    async def userinfo(
+        self, ctx: commands.Context, *, user: Union[discord.Member, FetchedUser] = None
+    ):
         """Shows info about a user.
 
         Must supply UserID
@@ -70,7 +75,9 @@ class AllUtils(commands.Cog):
         e.add_field(name="ID", value=user.id, inline=False)
         e.add_field(name="Servers", value=f"{shared} shared", inline=False)
         e.add_field(
-            name="Joined", value=format_date(getattr(user, "joined_at", None)), inline=False
+            name="Joined",
+            value=format_date(getattr(user, "joined_at", None)),
+            inline=False,
         )
         e.add_field(name="Created", value=format_date(user.created_at), inline=False)
 
@@ -97,7 +104,7 @@ class AllUtils(commands.Cog):
             e.colour = colour
 
         if user.avatar:
-            e.set_thumbnail(url=user.avatar_url)
+            e.set_thumbnail(url=user.avatar.url)
 
         if isinstance(user, discord.User):
             e.set_footer(text="This member is not in this server.")
@@ -107,13 +114,13 @@ class AllUtils(commands.Cog):
     @get_that.command(aliases=["guildinfo", "si"], usage="")
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.guild_only()
-    async def serverinfo(self, ctx, *, guild_id: int = None):
+    async def serverinfo(self, ctx: commands.Context, *, guild_id: int = None):
         """Shows info about the current server."""
 
         if guild_id is not None and await self.bot.is_owner(ctx.author):
             guild = self.bot.get_guild(guild_id)
             if guild is None:
-                return await ctx.send(f"Invalid Guild ID given.")
+                return await ctx.send("Invalid Guild ID given.")
         else:
             guild = ctx.guild
 
@@ -142,7 +149,7 @@ class AllUtils(commands.Cog):
         e.title = guild.name
         e.description = f"**ID**: {guild.id}\n**Owner**: {guild.owner}"
         if guild.icon:
-            e.set_thumbnail(url=guild.icon_url)
+            e.set_thumbnail(url=guild.icon.url)
 
         channel_info = []
         key_to_emoji = {
@@ -150,43 +157,46 @@ class AllUtils(commands.Cog):
             discord.VoiceChannel: "<:voice:777109848499290113>",
         }
         for key, total in totals.items():
-            secrets = secret[key]
             try:
                 emoji = key_to_emoji[key]
             except KeyError:
                 continue
 
-            if secrets:
+            if secrets := secret[key]:
                 channel_info.append(f"{emoji} {total} ({secrets} locked)")
             else:
                 channel_info.append(f"{emoji} {total}")
 
-        features = set(guild.features)
-        all_features = {
-            "PARTNERED": "Partnered",
-            "VERIFIED": "Verified",
-            "DISCOVERABLE": "Server Discovery",
-            "COMMUNITY": "Community Server",
-            "FEATURABLE": "Featured",
-            "WELCOME_SCREEN_ENABLED": "Welcome Screen",
-            "INVITE_SPLASH": "Invite Splash",
-            "VIP_REGIONS": "VIP Voice Servers",
-            "VANITY_URL": "Vanity Invite",
-            "COMMERCE": "Commerce",
-            "LURKABLE": "Lurkable",
-            "NEWS": "News Channels",
-            "ANIMATED_ICON": "Animated Icon",
-            "BANNER": "Banner",
+        excluded_features = {
+            # available to everyone since forum channels private beta
+            "THREE_DAY_THREAD_ARCHIVE",
+            "SEVEN_DAY_THREAD_ARCHIVE",
+            # rolled out to everyone already
+            "NEW_THREAD_PERMISSIONS",
+            "TEXT_IN_VOICE_ENABLED",
+            "THREADS_ENABLED",
+            # available to everyone sometime after forum channel release
+            "PRIVATE_THREADS",
         }
-
-        info = [
-            f"<:agree:749441222954844241>: {label}"
-            for feature, label in all_features.items()
-            if feature in features
+        custom_feature_names = {
+            "VANITY_URL": "Vanity URL",
+            "VIP_REGIONS": "VIP regions",
+        }
+        features = sorted(guild.features)
+        if "COMMUNITY" in features:
+            features.remove("NEWS")
+        feature_names = [
+            custom_feature_names.get(feature, " ".join(feature.split("_")).capitalize())
+            for feature in features
+            if feature not in excluded_features
         ]
-
-        if info:
-            e.add_field(name="Features", value="\n".join(info))
+        if guild.features:
+            e.add_field(
+                name="Features",
+                value="\n".join(
+                    f"<:agree:749441222954844241>: {feature}" for feature in feature_names
+                ),
+            )
 
         e.add_field(name="Channels", value="\n".join(channel_info))
 
@@ -206,7 +216,8 @@ class AllUtils(commands.Cog):
 
         e.add_field(name="Members", value=fmt, inline=False)
         e.add_field(
-            name="Roles", value=", ".join(roles) if len(roles) < 10 else f"{len(roles)} roles"
+            name="Roles",
+            value=", ".join(roles) if len(roles) < 10 else f"{len(roles)} roles",
         )
 
         emoji_stats = Counter()
@@ -230,10 +241,15 @@ class AllUtils(commands.Cog):
         e.set_footer(text="Created").timestamp = guild.created_at
         await ctx.send(embed=e)
 
-    async def say_permissions(self, ctx, member, channel):
+    async def say_permissions(
+        self,
+        ctx: commands.Context,
+        member: discord.Member,
+        channel: discord.TextChannel,
+    ):
         permissions = channel.permissions_for(member)
         e = discord.Embed(colour=member.colour)
-        avatar = member.avatar_url_as(static_format="png")
+        avatar = member.display_avatar.with_static_format("png")
         e.set_author(name=str(member), url=avatar)
         allowed, denied = [], []
         for name, value in permissions:
@@ -251,7 +267,10 @@ class AllUtils(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.guild_only()
     async def userperms(
-        self, ctx, member: discord.Member = None, channel: discord.TextChannel = None
+        self,
+        ctx: commands.Context,
+        member: discord.Member = None,
+        channel: discord.TextChannel = None,
     ):
         """Shows a member's permissions in a specific channel.
 
@@ -269,7 +288,7 @@ class AllUtils(commands.Cog):
     @commands.guild_only()
     @commands.cooldown(1, 5, commands.BucketType.user)
     @checks.admin_or_permissions(manage_roles=True)
-    async def botperms(self, ctx, *, channel: discord.TextChannel = None):
+    async def botperms(self, ctx: commands.Context, *, channel: discord.TextChannel = None):
         """Shows the bot's permissions in a specific channel.
 
         If no channel is given then it uses the current one.
@@ -282,9 +301,15 @@ class AllUtils(commands.Cog):
         member = ctx.guild.me
         await self.say_permissions(ctx, member, channel)
 
-    @commands.command(aliases=["dxp"])
     @commands.is_owner()
-    async def debugperms(self, ctx, guild_id: int, channel_id: int, author_id: int = None):
+    @commands.command(aliases=["dxp"])
+    async def debugperms(
+        self,
+        ctx: commands.Context,
+        guild_id: int,
+        channel_id: int,
+        author_id: int = None,
+    ):
         """Shows permission resolution for a channel and an optional author."""
 
         guild = self.bot.get_guild(guild_id)

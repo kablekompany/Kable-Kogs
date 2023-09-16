@@ -12,6 +12,7 @@ units = pdt.pdtLocales["en_US"].units
 units["minutes"].append("mins")
 units["seconds"].append("secs")
 
+
 # this can be faced with other cogs if any of the functions are needed
 class ShortTime:
     compiled = re.compile(
@@ -138,7 +139,7 @@ class UserFriendlyTime(commands.Converter):
             if argument.endswith("from now"):
                 argument = argument[:-8].strip()
 
-            if argument[0:2] == "me" and argument[0:6] in (
+            if argument[:2] == "me" and argument[:6] in (
                 "me to ",
                 "me in ",
                 "me at ",
@@ -238,13 +239,12 @@ def human_timedelta(dt, *, source=None, accuracy=3, brief=False, suffix=True):
 
     output = []
     for attr, brief_attr in attrs:
-        elem = getattr(delta, attr + "s")
+        elem = getattr(delta, f"{attr}s")
         if not elem:
             continue
 
         if attr == "day":
-            weeks = delta.weeks
-            if weeks:
+            if weeks := delta.weeks:
                 elem -= weeks * 7
                 if not brief:
                     output.append(format(plural(weeks), "week"))
