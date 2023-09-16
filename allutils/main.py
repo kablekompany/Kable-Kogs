@@ -2,8 +2,8 @@ from collections import Counter
 from typing import Union
 
 import discord
-from redbot.core.bot import Red
 from redbot.core import checks, commands
+from redbot.core.bot import Red
 
 from . import formats, time
 
@@ -17,9 +17,7 @@ class FetchedUser(commands.Converter):
         except discord.NotFound:
             raise commands.BadArgument("User not found.") from None
         except discord.HTTPException:
-            raise commands.BadArgument(
-                "An error occurred while fetching the user."
-            ) from None
+            raise commands.BadArgument("An error occurred while fetching the user.") from None
 
 
 class AllUtils(commands.Cog):
@@ -65,9 +63,7 @@ class AllUtils(commands.Cog):
             user = ctx.guild.get_member(user.id) or user
 
         e = discord.Embed()
-        roles = [
-            role.name.replace("@", "@\u200b") for role in getattr(user, "roles", [])
-        ]
+        roles = [role.name.replace("@", "@\u200b") for role in getattr(user, "roles", [])]
         shared = sum(g.get_member(user.id) is not None for g in self.bot.guilds)
         e.set_author(name=str(user))
 
@@ -198,20 +194,15 @@ class AllUtils(commands.Cog):
             e.add_field(
                 name="Features",
                 value="\n".join(
-                    f"<:agree:749441222954844241>: {feature}"
-                    for feature in feature_names
+                    f"<:agree:749441222954844241>: {feature}" for feature in feature_names
                 ),
             )
 
         e.add_field(name="Channels", value="\n".join(channel_info))
 
         if guild.premium_tier != 0:
-            boosts = (
-                f"Level {guild.premium_tier}\n{guild.premium_subscription_count} boosts"
-            )
-            last_boost = max(
-                guild.members, key=lambda m: m.premium_since or guild.created_at
-            )
+            boosts = f"Level {guild.premium_tier}\n{guild.premium_subscription_count} boosts"
+            last_boost = max(guild.members, key=lambda m: m.premium_since or guild.created_at)
             if last_boost.premium_since is not None:
                 boosts = f"{boosts}\nLast Boost: {last_boost} ({time.human_timedelta(last_boost.premium_since, accuracy=2)})"
             e.add_field(name="Boosts", value=boosts, inline=False)
@@ -297,9 +288,7 @@ class AllUtils(commands.Cog):
     @commands.guild_only()
     @commands.cooldown(1, 5, commands.BucketType.user)
     @checks.admin_or_permissions(manage_roles=True)
-    async def botperms(
-        self, ctx: commands.Context, *, channel: discord.TextChannel = None
-    ):
+    async def botperms(self, ctx: commands.Context, *, channel: discord.TextChannel = None):
         """Shows the bot's permissions in a specific channel.
 
         If no channel is given then it uses the current one.
