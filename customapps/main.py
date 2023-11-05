@@ -417,7 +417,9 @@ class CustomApps(Cog):
                 webhook = await channel.create_webhook(name=ctx.guild.me.name)
 
             await webhook.send(
-                embed=embed, username=ctx.guild.me.display_name, avatar_url=ctx.guild.me.display_avatar.url
+                embed=embed,
+                username=ctx.guild.me.display_name,
+                avatar_url=ctx.guild.me.display_avatar.url,
             )
         except Exception as e:
             log.info(f"{e} occurred in {ctx.author.name} | {ctx.author.id} application")
