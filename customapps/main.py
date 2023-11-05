@@ -200,7 +200,7 @@ class CustomApps(Cog):
             if age.content.lower() == "cancel":
                 return await ctx.author.send("Application has been canceled.")
             a = age.content
-            b = str(datetime.today())
+            b = str(datetime.now())
             c = b[:4]
             d = int(c)
             try:
@@ -358,7 +358,7 @@ class CustomApps(Cog):
         embed.title = f"Application for {position.content}"
         embed.add_field(
             name="Applicant Name:",
-            value=f"Mention: {ctx.author.mention}\nPreferred: " + name.content,
+            value=f"Mention: {ctx.author.mention}\nPreferred: {name.content}",
             inline=True,
         )
         embed.add_field(
