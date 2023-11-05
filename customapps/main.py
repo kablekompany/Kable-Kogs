@@ -350,7 +350,7 @@ class CustomApps(Cog):
         embed = discord.Embed(color=await ctx.embed_colour(), timestamp=datetime.utcnow())
         embed.set_author(
             name=f"Applicant: {ctx.author.name} | ID: {ctx.author.id}",
-            icon_url=ctx.author.avatar_url,
+            icon_url=ctx.author.display_avatar.url,
         )
         embed.set_footer(
             text=f"{ctx.author.name}#{ctx.author.discriminator} UserID: {ctx.author.id}"
@@ -417,7 +417,7 @@ class CustomApps(Cog):
                 webhook = await channel.create_webhook(name=ctx.guild.me.name)
 
             await webhook.send(
-                embed=embed, username=ctx.guild.me.display_name, avatar_url=ctx.guild.me.avatar_url
+                embed=embed, username=ctx.guild.me.display_name, avatar_url=ctx.guild.me.display_avatar.url
             )
         except Exception as e:
             log.info(f"{e} occurred in {ctx.author.name} | {ctx.author.id} application")
