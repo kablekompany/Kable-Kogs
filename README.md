@@ -3,6 +3,8 @@
 :warning: This repo is not an approved plugin-repo from [CogBoard](cogboard.red/ "Click me BRO!") at this time
 > *Install at your own risk, and you assume any liability*
 
+# THESE COGS ARE CURRENTLY OUT-OF-DATE AND MAY NOT WORK WITH RED'S CURRENT VERSIONING
+
 <!-- Let's throw a row of badges cause never enough of those LOL --->
 [![Contributors][contributors-shield]][contributors-url] [![Forks][forks-shield]][forks-url] [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url] [![MIT License][license-shield]][license-url]
 ![CodeQL](https://github.com/kablekompany/Kable-Kogs/workflows/CodeQL/badge.svg)
