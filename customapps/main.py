@@ -199,12 +199,10 @@ class CustomApps(Cog):
             if age.content.lower() == "cancel":
                 return await ctx.author.send("Application has been canceled.")
             a = age.content
-            b = str(datetime.today())
-            c = b[:4]
-            d = int(c)
+            b = datetime.date.today().year
             try:
                 e = int(a)
-                yearmath = d - e
+                yearmath = b - e
                 total_age = f"YOB: {a}\n{yearmath} years old"
             except Exception:
                 total_age = f"Recorded response of `{a}`. Could not calculate age."
