@@ -45,7 +45,7 @@ class LockItUp(commands.Cog):
         color1 = 0xF50A0A
         e = discord.Embed(
             color=discord.Color(color1),
-            title=f"Server Lockdown :lock:",
+            title="Server Lockdown :lock:",
             description=msg,
             timestamp=ctx.message.created_at,
         )
@@ -60,7 +60,7 @@ class LockItUp(commands.Cog):
                     await guild_channel.send(embed=e)
                     await asyncio.sleep(0.3)
                 except discord.Forbidden:
-                    self.log.info("Could not send message to {}".format(guild_channel.name))
+                    self.log.info(f"Could not send message to {guild_channel.name}")
                     await self.loggerhook(
                         guild,
                         error=f"Can't send messages in {guild_channel.mention} after lock down. Check bot perms.",
@@ -93,13 +93,11 @@ class LockItUp(commands.Cog):
                     await guild_channel.set_permissions(
                         role,
                         overwrite=overwrite,
-                        reason="Lockdown in effect. Requested by {} ({})".format(
-                            author.name, author.id
-                        ),
+                        reason=f"Lockdown in effect. Requested by {author.name} ({author.id})",
                     )
                     await asyncio.sleep(0.2)
                 except discord.Forbidden:
-                    self.log.info("Could not lockdown {}".format(guild_channel.name))
+                    self.log.info(f"Could not lockdown {guild_channel.name}")
                     await self.loggerhook(
                         guild,
                         error=f"Could not lockdown {guild_channel.name}. Check my permissions and make sure I can manage the channel",
@@ -141,13 +139,11 @@ class LockItUp(commands.Cog):
                     await guild_channel.set_permissions(
                         role,
                         overwrite=spec_overwrite,
-                        reason="Lockdown in effect. Requested by {} ({})".format(
-                            author.name, author.id
-                        ),
+                        reason=f"Lockdown in effect. Requested by {author.name} ({author.id})",
                     )
                     await asyncio.sleep(0.5)
                 except discord.Forbidden as er:
-                    self.log.info("In {}, could not lock {}".format(guild.id, guild_channel.name))
+                    self.log.info(f"In {guild.id}, could not lock {guild_channel.name}")
                     await self.loggerhook(
                         guild,
                         error=f"Error on lockdown for {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```",
@@ -237,7 +233,7 @@ class LockItUp(commands.Cog):
         color2 = 0x2FFFFF
         e = discord.Embed(
             color=discord.Color(color2),
-            title=f"Server Unlock :unlock:",
+            title="Server Unlock :unlock:",
             description=msg,
             timestamp=ctx.message.created_at,
         )
@@ -253,7 +249,7 @@ class LockItUp(commands.Cog):
                     await guild_channel.send(embed=e)
                     await asyncio.sleep(0.3)
                 except discord.Forbidden:
-                    self.log.info("Could not send message to {}".format(guild_channel.name))
+                    self.log.info(f"Could not send message to {guild_channel.name}")
                     await self.loggerhook(
                         guild,
                         error=f"Can't send messages in {guild_channel.mention} after lock down. Check bot perms.",
@@ -271,13 +267,11 @@ class LockItUp(commands.Cog):
                     await guild_channel.set_permissions(
                         role,
                         overwrite=overwrite,
-                        reason="Lockdown rescinded. Requested by {} ({})".format(
-                            author.name, author.id
-                        ),
+                        reason=f"Lockdown rescinded. Requested by {author.name} ({author.id})",
                     )
                     await asyncio.sleep(0.2)
                 except discord.Forbidden as er:
-                    self.log.info("Could not unlock {}".format(guild_channel.name))
+                    self.log.info(f"Could not unlock {guild_channel.name}")
                     await self.loggerhook(
                         guild,
                         error=f"Error on unlock for {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```",
@@ -302,15 +296,11 @@ class LockItUp(commands.Cog):
                     await guild_channel.set_permissions(
                         role,
                         overwrite=spec_overwrite,
-                        reason="Lockdown rescinded. Requested by {} ({})".format(
-                            author.name, author.id
-                        ),
+                        reason=f"Lockdown rescinded. Requested by {author.name} ({author.id})",
                     )
                     await asyncio.sleep(0.5)
                 except discord.Forbidden as er:
-                    self.log.info(
-                        "In {}, could not unlock {}".format(guild.id, guild_channel.name)
-                    )
+                    self.log.info(f"In {guild.id}, could not unlock {guild_channel.name}")
                     await self.loggerhook(
                         guild,
                         error=f"Error on unlock for {guild_channel.mention}\n```diff\n+ ERROR:\n- {er}\n```",
@@ -489,7 +479,7 @@ class LockItUp(commands.Cog):
             e = discord.Embed(
                 color=await ctx.embed_color(),
                 title="Lockdown Settings:",
-                description="Channels: {}\n{}".format(chan_count, page),
+                description=f"Channels: {chan_count}\n{page}",
             )
             e.add_field(name="Lock Message:", value=get_lock or "**None**", inline=False)
             e.add_field(
@@ -566,9 +556,8 @@ class LockItUp(commands.Cog):
 
         e_list = []
         for page in pagify(msg, shorten_by=1000):
-
             embed = discord.Embed(
-                description="Channel List: {}\n{}".format(chan_count, page),
+                description=f"Channel List: {chan_count}\n{page}",
                 colour=await ctx.embed_color(),
             )
             embed.set_author(name=guild.name, icon_url=guild.icon_url)
@@ -603,9 +592,8 @@ class LockItUp(commands.Cog):
 
         e_list = []
         for page in pagify(msg, shorten_by=1000):
-
             embed = discord.Embed(
-                description="Channel List: {}\n{}".format(chan_count, page),
+                description=f"Channel List: {chan_count}\n{page}",
                 colour=await ctx.embed_color(),
             )
             embed.set_author(name=guild.name, icon_url=guild.icon_url)
@@ -619,9 +607,7 @@ class LockItUp(commands.Cog):
                 await self.config.guild(guild).nondefault.set(value=True)
             else:
                 await ctx.send(
-                    "Make sure you add the role for this using `{}lds specrole <role>`".format(
-                        ctx.prefix
-                    )
+                    f"Make sure you add the role for this using `{ctx.prefix}lds specrole <role>`"
                 )
 
         await menu(ctx, e_list, DEFAULT_CONTROLS)
@@ -654,9 +640,8 @@ class LockItUp(commands.Cog):
 
         e_list = []
         for page in pagify(msg, shorten_by=1000):
-
             embed = discord.Embed(
-                description="Channel List: {}\n{}".format(chan_count, page),
+                description=f"Channel List: {chan_count}\n{page}",
                 colour=await ctx.embed_color(),
             )
             embed.set_author(name=guild.name, icon_url=guild.icon_url)
@@ -700,9 +685,8 @@ class LockItUp(commands.Cog):
 
         e_list = []
         for page in pagify(msg, shorten_by=1000):
-
             embed = discord.Embed(
-                description="Channel List: {}\n{}".format(chan_count, page),
+                description=f"Channel List: {chan_count}\n{page}",
                 colour=await ctx.embed_color(),
             )
             embed.set_author(name=guild.name, icon_url=guild.icon_url)
@@ -774,7 +758,7 @@ class LockItUp(commands.Cog):
                 vc_chans.append(chan.id)
                 await self.config.guild(guild).vc_channels.set(vc_chans)
 
-        await ctx.send(f"Added to the list")
+        await ctx.send("Added to the list")
 
     @lockdownset.command(name="setmusic")
     async def music_setter(
@@ -796,7 +780,7 @@ class LockItUp(commands.Cog):
                 music_chans.append(chan.id)
                 await self.config.guild(guild).music_channels.set(music_chans)
 
-        await ctx.send(f"Added to the list")
+        await ctx.send("Added to the list")
 
     @lockdownset.command(name="rmvc")
     async def vc_remove(
@@ -817,7 +801,7 @@ class LockItUp(commands.Cog):
             if chan in vc_chans:
                 vc_chans.remove(chan)
                 await self.config.guild(guild).vc_channels.set(vc_chans)
-        await ctx.send(f"Removed from the list")
+        await ctx.send("Removed from the list")
 
     @lockdownset.command(name="remusic")
     async def music_remove(
@@ -839,7 +823,7 @@ class LockItUp(commands.Cog):
                 music_chans.remove(chan)
                 await self.config.guild(guild).music_channels.set(music_chans)
 
-        await ctx.send(f"Removed from the list")
+        await ctx.send("Removed from the list")
 
     @lockdownset.command(name="notify")
     async def notify_channels(self, ctx: commands.Context, *, option: bool = True):
@@ -1051,7 +1035,7 @@ class LockItUp(commands.Cog):
         set_check = await self.config.guild(ctx.guild).vc_channels()
         if not set_check:
             return await ctx.send(
-                "You need to set the channels using `{}lds setvc <channels>`".format(ctx.prefix)
+                f"You need to set the channels using `{ctx.prefix}lds setvc <channels>`"
             )
         guild = ctx.guild
         author = ctx.author
@@ -1067,7 +1051,7 @@ class LockItUp(commands.Cog):
         set_check = await self.config.guild(ctx.guild).vc_channels()
         if not set_check:
             return await ctx.send(
-                "You need to set the channels using `{}lds setvc <channels>`".format(ctx.prefix)
+                f"You need to set the channels using `{ctx.prefix}lds setvc <channels>`"
             )
         guild = ctx.guild
         author = ctx.author
@@ -1096,9 +1080,7 @@ class LockItUp(commands.Cog):
         if channel.type == discord.ChannelType.text:
             if overwrite.send_messages is False:
                 return await ctx.send(
-                    "{} is already locked. To unlock, please use `{}unlockit {}`".format(
-                        channel.mention, ctx.prefix, channel.id
-                    )
+                    f"{channel.mention} is already locked. To unlock, please use `{ctx.prefix}unlockit {channel.id}`"
                 )
             if not bot_overwrite.send_messages:
                 bot_overwrite.update(send_messages=True)
@@ -1106,9 +1088,7 @@ class LockItUp(commands.Cog):
         elif channel.type == discord.ChannelType.voice:
             if overwrite.connect is False:
                 return await ctx.send(
-                    "{} is already locked. To unlock, please use `{}channelunlock {}`".format(
-                        channel.mention, ctx.prefix, channel.id
-                    )
+                    f"{channel.mention} is already locked. To unlock, please use `{ctx.prefix}channelunlock {channel.id}`"
                 )
             overwrite.update(connect=False)
         try:
@@ -1120,11 +1100,11 @@ class LockItUp(commands.Cog):
             await channel.set_permissions(
                 role,
                 overwrite=overwrite,
-                reason="Lockdown in effect. Requested by {} ({})".format(author.name, author.id),
+                reason=f"Lockdown in effect. Requested by {author.name} ({author.id})",
             )
         except discord.Forbidden:
             return await ctx.send("Error: Bot doesn't have perms to adjust that channel.")
-        await ctx.send("Done. Locked {}".format(channel.mention))
+        await ctx.send(f"Done. Locked {channel.mention}")
 
     @commands.command(name="unlockit", aliases=["ulockchan"])
     @checks.mod_or_permissions(manage_messages=True)
@@ -1147,17 +1127,13 @@ class LockItUp(commands.Cog):
         if channel.type == discord.ChannelType.text:
             if overwrite.send_messages is None:
                 return await ctx.send(
-                    "{} is already unlocked. To lock, please use `{}lockit {}`".format(
-                        channel.mention, ctx.prefix, channel.id
-                    )
+                    f"{channel.mention} is already unlocked. To lock, please use `{ctx.prefix}lockit {channel.id}`"
                 )
             overwrite.update(send_messages=None)
         elif channel.type == discord.ChannelType.voice:
             if overwrite.connect is None:
                 return await ctx.send(
-                    "{} is already unlocked. To lock, please use `{}unlockit {}`".format(
-                        channel.mention, ctx.prefix, channel.id
-                    )
+                    f"{channel.mention} is already unlocked. To lock, please use `{ctx.prefix}unlockit {channel.id}`"
                 )
             overwrite.update(connect=None)
 
@@ -1165,8 +1141,8 @@ class LockItUp(commands.Cog):
             await channel.set_permissions(
                 role,
                 overwrite=overwrite,
-                reason="Lockdown over. Requested by {} ({})".format(author.name, author.id),
+                reason=f"Lockdown over. Requested by {author.name} ({author.id})",
             )
         except discord.Forbidden:
             return await ctx.send("Error: Bot doesn't have perms to adjust that channel.")
-        await ctx.send("Unlocked {}".format(channel.mention))
+        await ctx.send(f"Unlocked {channel.mention}")

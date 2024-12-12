@@ -62,6 +62,7 @@ guild_defaults = {
 }  # for the sake of saving time for now. add agnostic before merge
 # TODO-
 
+
 # Originally from https://github.com/elijabesu/SauriCogs
 class CustomApps(Cog):
     """Customize Staff apps for your server"""
